@@ -1,7 +1,7 @@
 {
   "name": "modern-path2d",
   "type": "module",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "packageManager": "pnpm@9.9.0",
   "description": "More powerful Path2D",
   "author": "wxm",
