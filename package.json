@@ -3,7 +3,7 @@
   "type": "module",
   "version": "0.0.0",
   "packageManager": "pnpm@9.9.0",
-  "description": "Starter template for TypeScript library",
+  "description": "More powerful Path2D",
   "author": "wxm",
   "license": "MIT",
   "homepage": "https://github.com/qq15725/modern-path2d",
@@ -15,8 +15,8 @@
     "url": "https://github.com/qq15725/modern-path2d/issues"
   },
   "keywords": [
-    "starter",
-    "template",
+    "path2d",
+    "modern",
     "typescript"
   ],
   "sideEffects": false,
