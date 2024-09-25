@@ -5,10 +5,31 @@
   <title>Docs</title>
 </head>
 <body>
-<script type="module">
-  import { one } from '../src'
 
-  console.log(one)
+<canvas id="canvas" width="500" height="500" />
+
+<script type="module">
+  import { Path2D } from '../src'
+
+  const canvas = document.getElementById("canvas");
+  const ctx = canvas.getContext("2d");
+
+  let path1 = new Path2D();
+  path1.rect(10, 10, 100, 100);
+
+  // let path2 = new Path2D(path1);
+  // path2.moveTo(220, 60);
+  // path2.arc(170, 60, 50, 0, 2 * Math.PI);
+
+  path1.draw(ctx);
+  ctx.stroke();
+
+  // path2.draw(ctx);
+  // ctx.stroke();
+
+  // let p = new Path2D("M10 10 h 80 v 80 h -80 Z");
+  // path1.draw(ctx);
+  // ctx.fill(p);
 </script>
 </body>
 </html>
