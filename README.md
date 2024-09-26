@@ -1,4 +1,4 @@
-<h1 align="center">modern-path2d</h1>
+<h1 align="center">[WIP] modern-path2d</h1>
 
 <p align="center">
   <a href="https://unpkg.com/modern-path2d">
@@ -38,5 +38,5 @@ path.arc(60, 65, 5, 0, Math.PI * 2, true)
 path.moveTo(95, 65)
 path.arc(90, 65, 5, 0, Math.PI * 2, true)
 
-path.strokeTo(document.getElementById('canvas1').getContext('2d'))
+path.strokeTo(document.getElementById('canvas').getContext('2d'))
 ```

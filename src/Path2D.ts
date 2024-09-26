@@ -53,15 +53,7 @@ export class Path2D {
   drawTo(ctx: CanvasRenderingContext2D): void {
     this.paths.forEach((path) => {
       path.curves.forEach((curve) => {
-        // curve.drawTo(ctx)
-        curve.getPoints(40).forEach((point, i) => {
-          if (i === 0) {
-            ctx.moveTo(point.x, point.y)
-          }
-          else {
-            ctx.lineTo(point.x, point.y)
-          }
-        })
+        curve.drawTo(ctx)
       })
     })
   }

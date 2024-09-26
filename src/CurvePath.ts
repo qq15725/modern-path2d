@@ -24,7 +24,7 @@ export class CurvePath extends Curve {
     }
   }
 
-  add(curve: Curve): this {
+  addCurve(curve: Curve): this {
     this.curves.push(curve)
     return this
   }
@@ -54,7 +54,7 @@ export class CurvePath extends Curve {
     return output
   }
 
-  getLength(): number {
+  override getLength(): number {
     const lengths = this.getCurveLengths()
     return lengths[lengths.length - 1]
   }

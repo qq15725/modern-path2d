@@ -20,16 +20,16 @@ export abstract class Curve {
 
   getPoints(divisions = 5): Point2D[] {
     const points: Point2D[] = []
-    for (let d = 0; d <= divisions; d++) {
-      points.push(this.getPoint(d / divisions))
+    for (let i = 0; i <= divisions; i++) {
+      points.push(this.getPoint(i / divisions))
     }
     return points
   }
 
   getSpacedPoints(divisions = 5): Point2D[] {
     const points: Point2D[] = []
-    for (let d = 0; d <= divisions; d++) {
-      points.push(this.getPointAt(d / divisions))
+    for (let i = 0; i <= divisions; i++) {
+      points.push(this.getPointAt(i / divisions))
     }
     return points
   }
@@ -53,8 +53,8 @@ export abstract class Curve {
     let last = this.getPoint(0)
     let sum = 0
     cache.push(0)
-    for (let p = 1; p <= divisions; p++) {
-      current = this.getPoint(p / divisions)
+    for (let i = 1; i <= divisions; i++) {
+      current = this.getPoint(i / divisions)
       sum += current.distanceTo(last)
       cache.push(sum)
       last = current
