@@ -1,3 +1,4 @@
+import type { PathCommand } from '../types'
 import { Curve } from '../Curve'
 import { Point2D } from '../Point2D'
 import { catmullRom } from '../utils'
@@ -25,6 +26,15 @@ export class SplineCurve extends Curve {
       catmullRom(weight, p0.y, p1.y, p2.y, p3.y),
     )
     return output
+  }
+
+  override toPathCommands(): PathCommand[] {
+    // TODO
+    return []
+  }
+
+  override drawTo(_ctx: CanvasRenderingContext2D): void {
+    // TODO
   }
 
   override copy(source: SplineCurve): this {

@@ -1,3 +1,4 @@
+import type { PathCommand } from './types'
 import { Curve } from './Curve'
 import {
   CubicBezierCurve,
@@ -95,8 +96,8 @@ export class CurvePath extends Curve {
     for (let i = 0, curves = this.curves; i < curves.length; i++) {
       const curve = curves[i]
       const pts = curve.getPoints(curve.getDivisions(divisions))
-      for (let j = 0; j < pts.length; j++) {
-        const point = pts[j]
+      for (let i = 0; i < pts.length; i++) {
+        const point = pts[i]
         if (last && last.equals(point))
           continue
         points.push(point)
@@ -202,6 +203,14 @@ export class CurvePath extends Curve {
     const lastPoint = curve.getPoint(1)
     this.currentPoint.copy(lastPoint)
     return this
+  }
+
+  override toPathCommands(): PathCommand[] {
+    return this.curves.flatMap(curve => curve.toPathCommands())
+  }
+
+  override drawTo(ctx: CanvasRenderingContext2D): void {
+    this.curves.forEach(curve => curve.drawTo(ctx))
   }
 
   copy(source: CurvePath): this {

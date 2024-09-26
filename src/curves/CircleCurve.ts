@@ -1,3 +1,4 @@
+import type { PathCommand } from '../types'
 import { Curve } from '../Curve'
 import { Point2D } from '../Point2D'
 
@@ -32,5 +33,14 @@ export class CircleCurve extends Curve {
     const { start, end } = this
     const t = index * (end - start) + start - 0.5 * Math.PI
     return new Point2D(Math.cos(t), Math.sin(t))
+  }
+
+  override toPathCommands(): PathCommand[] {
+    // TODO
+    return []
+  }
+
+  override drawTo(_ctx: CanvasRenderingContext2D): void {
+    // TODO
   }
 }

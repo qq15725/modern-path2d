@@ -1,14 +1,17 @@
 import type { PathCommand } from './types'
 import { Point2D } from './Point2D'
 
-export class Curve {
+export abstract class Curve {
   arcLengthDivisions = 200
   protected _cacheArcLengths?: number[]
   protected _needsUpdate = false
 
-  getPoint(t: number, output = new Point2D()): Point2D {
-    console.warn('getPoint not implemented', t)
-    return output
+  abstract getPoint(t: number, output?: Point2D): Point2D
+  abstract toPathCommands(): PathCommand[]
+  abstract drawTo(ctx: CanvasRenderingContext2D): void
+
+  getDivisions(divisions: number): number {
+    return divisions
   }
 
   getPointAt(u: number, output = new Point2D()): Point2D {
@@ -21,10 +24,6 @@ export class Curve {
       points.push(this.getPoint(d / divisions))
     }
     return points
-  }
-
-  getDivisions(divisions: number): number {
-    return divisions
   }
 
   getSpacedPoints(divisions = 5): Point2D[] {
@@ -121,10 +120,6 @@ export class Curve {
 
   getTangentAt(u: number, output = new Point2D()): Point2D {
     return this.getTangent(this.getUtoTmapping(u), output)
-  }
-
-  toPathCommands(): PathCommand[] {
-    return []
   }
 
   clone(): this {

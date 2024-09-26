@@ -1,9 +1,10 @@
+import type { PathCommand } from '../types'
 import { Curve } from '../Curve'
 import { Point2D } from '../Point2D'
 import { LineCurve } from './LineCurve'
 
 export class PloygonCurve extends Curve {
-  lineCurves: LineCurve[] = []
+  curves: LineCurve[] = []
   points: Point2D[] = []
   declare currentLine: LineCurve
   declare pointK: any
@@ -24,7 +25,7 @@ export class PloygonCurve extends Curve {
       this.points.push(point)
     }
     for (let i = 0; i < this.num; i++) {
-      this.lineCurves.push(new LineCurve(this.points[i], this.points[(i + 1) % this.num]))
+      this.curves.push(new LineCurve(this.points[i], this.points[(i + 1) % this.num]))
     }
   }
 
@@ -43,7 +44,7 @@ export class PloygonCurve extends Curve {
     const v = pos * this.num
     const index = Math.floor(v)
     this.pointK = v - index
-    this.currentLine = this.lineCurves[index]
+    this.currentLine = this.curves[index]
     return this.currentLine
   }
 
@@ -54,5 +55,13 @@ export class PloygonCurve extends Curve {
   getNormal(value: number): Point2D {
     const line = this.getCurrentLine(value)
     return new Point2D(line.v2.y - line.v1.y, -(line.v2.x - line.v1.x)).normalize()
+  }
+
+  override toPathCommands(): PathCommand[] {
+    return this.curves.flatMap(curve => curve.toPathCommands())
+  }
+
+  override drawTo(ctx: CanvasRenderingContext2D): void {
+    this.curves.forEach(curve => curve.drawTo(ctx))
   }
 }

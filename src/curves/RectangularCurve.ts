@@ -7,17 +7,33 @@ export class RectangularCurve extends Curve {
   curves: LineCurve[] = []
   pointT = 0
 
+  get x(): number {
+    return this.center.x - this.rx
+  }
+
+  get y(): number {
+    return this.center.y - this.rx / this.aspectRatio
+  }
+
+  get width(): number {
+    return this.rx * 2
+  }
+
+  get height(): number {
+    return (this.rx / this.aspectRatio) * 2
+  }
+
   constructor(
     public center: Point2D,
-    public width: number,
+    public rx: number,
     public aspectRatio = 1,
     public start = 0,
     public end = 1,
   ) {
     super()
     const { x, y } = this.center
-    const offsetX = this.width
-    const offsetY = this.width / this.aspectRatio
+    const offsetX = this.rx
+    const offsetY = this.rx / this.aspectRatio
     const points: Point2D[] = [
       new Point2D(x - offsetX, y - offsetY),
       new Point2D(x + offsetX, y - offsetY),
@@ -72,5 +88,9 @@ export class RectangularCurve extends Curve {
 
   override toPathCommands(): PathCommand[] {
     return this.curves.flatMap(curve => curve.toPathCommands())
+  }
+
+  override drawTo(ctx: CanvasRenderingContext2D): void {
+    this.curves.forEach(curve => curve.drawTo(ctx))
   }
 }

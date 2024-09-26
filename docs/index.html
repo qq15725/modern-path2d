@@ -18,11 +18,13 @@
   path1.rect(10, 10, 100, 100);
 
   // let path2 = new Path2D(path1);
-  // path2.moveTo(220, 60);
-  // path2.arc(170, 60, 50, 0, 2 * Math.PI);
+  path1.moveTo(220, 60);
+  path1.arc(170, 60, 50, 0, 2 * Math.PI);
 
-  path1.draw(ctx);
+  path1.drawTo(ctx);
   ctx.stroke();
+
+  console.log(path1.toPathCommands())
 
   // path2.draw(ctx);
   // ctx.stroke();

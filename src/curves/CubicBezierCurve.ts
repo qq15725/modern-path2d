@@ -1,3 +1,4 @@
+import type { PathCommand } from '../types'
 import { Curve } from '../Curve'
 import { Point2D } from '../Point2D'
 import { cubicBezier } from '../utils'
@@ -19,6 +20,17 @@ export class CubicBezierCurve extends Curve {
       cubicBezier(t, v0.y, v1.y, v2.y, v3.y),
     )
     return output
+  }
+
+  override toPathCommands(): PathCommand[] {
+    // TODO
+    return []
+  }
+
+  override drawTo(ctx: CanvasRenderingContext2D): void {
+    const { v0, v1, v2, v3 } = this
+    ctx.moveTo(v0.x, v0.y)
+    ctx.bezierCurveTo(v1.x, v1.y, v2.x, v2.y, v3.x, v3.y)
   }
 
   override copy(source: CubicBezierCurve): this {

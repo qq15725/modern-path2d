@@ -1,3 +1,4 @@
+import type { PathCommand } from '../types'
 import { Curve } from '../Curve'
 import { Point2D } from '../Point2D'
 import { CircleCurve } from './CircleCurve'
@@ -75,5 +76,13 @@ export class HeartCurve extends Curve {
   getNormal(value: number): Point2D {
     const line = this.getCurrentLine(value) as any
     return new Point2D(line.v2.y - line.v1.y, -(line.v2.x - line.v1.x)).normalize()
+  }
+
+  override toPathCommands(): PathCommand[] {
+    return this.curves.flatMap(curve => curve.toPathCommands())
+  }
+
+  override drawTo(ctx: CanvasRenderingContext2D): void {
+    this.curves.forEach(curve => curve.drawTo(ctx))
   }
 }

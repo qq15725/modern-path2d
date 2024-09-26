@@ -1,4 +1,5 @@
 import type { Point2D } from './Point2D'
+import type { PathCommand } from './types'
 import { CurvePath } from './CurvePath'
 
 export class Path2D {
@@ -42,41 +43,15 @@ export class Path2D {
     return this
   }
 
-  draw(ctx: CanvasRenderingContext2D, offset: { x: number, y: number } = { x: 0, y: 0 }): void {
+  toPathCommands(): PathCommand[] {
+    return this.paths.flatMap(path => path.curves.flatMap(curve => curve.toPathCommands()))
+  }
+
+  drawTo(ctx: CanvasRenderingContext2D): void {
     ctx.beginPath()
     this.paths.forEach((path) => {
       path.curves.forEach((curve) => {
-        curve.toPathCommands().forEach((command) => {
-          switch (command.type) {
-            case 'M':
-              ctx.moveTo(command.x + offset.x, command.y + offset.y)
-              break
-            case 'L':
-              ctx.lineTo(command.x + offset.x, command.y + offset.y)
-              break
-            case 'C':
-              ctx.bezierCurveTo(
-                command.x1 + offset.x,
-                command.y1 + offset.y,
-                command.x2 + offset.x,
-                command.y2 + offset.y,
-                command.x + offset.x,
-                command.y + offset.y,
-              )
-              break
-            case 'Q':
-              ctx.quadraticCurveTo(
-                command.x1 + offset.x,
-                command.y1 + offset.y,
-                command.x + offset.x,
-                command.y + offset.y,
-              )
-              break
-            case 'Z':
-              ctx.closePath()
-              break
-          }
-        })
+        curve.drawTo(ctx)
       })
     })
   }
