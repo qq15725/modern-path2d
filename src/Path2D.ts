@@ -2,12 +2,15 @@ import type { Point2D } from './Point2D'
 import type { PathCommand } from './types'
 import { CurvePath } from './CurvePath'
 
+/**
+ * @see https://developer.mozilla.org/zh-CN/docs/Web/API/Path2D
+ */
 export class Path2D {
   currentPath = new CurvePath()
   paths: CurvePath[] = [this.currentPath]
 
   arc(x: number, y: number, radius: number, startAngle: number, endAngle: number, counterclockwise?: boolean): this {
-    this.currentPath.arc(x, y, radius, startAngle, endAngle, counterclockwise)
+    this.currentPath.absarc(x, y, radius, startAngle, endAngle, !counterclockwise)
     return this
   }
 
@@ -48,11 +51,28 @@ export class Path2D {
   }
 
   drawTo(ctx: CanvasRenderingContext2D): void {
-    ctx.beginPath()
     this.paths.forEach((path) => {
       path.curves.forEach((curve) => {
-        curve.drawTo(ctx)
+        // curve.drawTo(ctx)
+        curve.getPoints(40).forEach((point, i) => {
+          if (i === 0) {
+            ctx.moveTo(point.x, point.y)
+          }
+          else {
+            ctx.lineTo(point.x, point.y)
+          }
+        })
       })
     })
+  }
+
+  strokeTo(ctx: CanvasRenderingContext2D): void {
+    this.drawTo(ctx)
+    ctx.stroke()
+  }
+
+  fillTo(ctx: CanvasRenderingContext2D): void {
+    this.drawTo(ctx)
+    ctx.fill()
   }
 }

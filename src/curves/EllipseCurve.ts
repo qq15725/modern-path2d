@@ -24,7 +24,6 @@ export class EllipseCurve extends Curve {
     const twoPi = Math.PI * 2
     let deltaAngle = this.endAngle - this.startAngle
     const samePoints = Math.abs(deltaAngle) < Number.EPSILON
-    // ensures that deltaAngle is 0 .. 2 PI
     while (deltaAngle < 0) deltaAngle += twoPi
     while (deltaAngle > twoPi) deltaAngle -= twoPi
     if (deltaAngle < Number.EPSILON) {
@@ -72,6 +71,10 @@ export class EllipseCurve extends Curve {
   }
 
   override drawTo(ctx: CanvasRenderingContext2D): void {
+    const { x, y, rx, ry, startAngle } = this
+    const startX = x + rx * Math.cos(startAngle)
+    const startY = y + ry * Math.sin(startAngle)
+    ctx.moveTo(startX, startY)
     ctx.arc(
       this.x,
       this.y,

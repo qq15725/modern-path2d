@@ -175,8 +175,8 @@ export class CurvePath extends Curve {
   }
 
   arc(x: number, y: number, radius: number, startAngle: number, endAngle: number, clockwise = false): this {
-    const { x: _x, y: _y } = this.currentPoint
-    this.absarc(x + _x, y + _y, radius, startAngle, endAngle, clockwise)
+    const point = this.currentPoint
+    this.absarc(x + point.x, y + point.y, radius, startAngle, endAngle, clockwise)
     return this
   }
 
@@ -186,8 +186,8 @@ export class CurvePath extends Curve {
   }
 
   ellipse(x: number, y: number, xRadius: number, yRadius: number, startAngle: number, endAngle: number, clockwise = false, rotation = 0): this {
-    const { x: _x, y: _y } = this.currentPoint
-    this.absellipse(x + _x, y + _y, xRadius, yRadius, startAngle, endAngle, clockwise, rotation)
+    const point = this.currentPoint
+    this.absellipse(x + point.x, y + point.y, xRadius, yRadius, startAngle, endAngle, clockwise, rotation)
     return this
   }
 
@@ -200,8 +200,7 @@ export class CurvePath extends Curve {
       }
     }
     this.curves.push(curve)
-    const lastPoint = curve.getPoint(1)
-    this.currentPoint.copy(lastPoint)
+    this.currentPoint.copy(curve.getPoint(1))
     return this
   }
 
