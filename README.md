@@ -18,4 +18,25 @@
   </a>
 </p>
 
-WIP
+## 📦 Install
+
+```sh
+npm i modern-path2d
+```
+
+## 🦄 Usage
+
+```ts
+import { Path2D } from 'modern-path2d'
+
+const path = new Path2D()
+path.arc(75, 75, 50, 0, Math.PI * 2, true)
+path.moveTo(110, 75)
+path.arc(75, 75, 35, 0, Math.PI, false)
+path.moveTo(65, 65)
+path.arc(60, 65, 5, 0, Math.PI * 2, true)
+path.moveTo(95, 65)
+path.arc(90, 65, 5, 0, Math.PI * 2, true)
+
+path.strokeTo(document.getElementById('canvas1').getContext('2d'))
+```

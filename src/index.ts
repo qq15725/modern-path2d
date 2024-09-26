@@ -1,2 +1,7 @@
+export * from './Curve'
+export * from './CurvePath'
 export * from './curves'
 export * from './Path2D'
+export * from './Point2D'
+export * from './types'
+export * from './utils'
