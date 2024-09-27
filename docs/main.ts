@@ -1,6 +1,5 @@
 import { Path2D } from '../src'
 
-const svg1 = document.getElementById('svg1') as SVGElement
 const ctx1 = (document.getElementById('canvas1') as HTMLCanvasElement).getContext('2d')!
 const ctx2 = (document.getElementById('canvas2') as HTMLCanvasElement).getContext('2d')!
 
@@ -34,6 +33,7 @@ ctx2.stroke(path2)
 
 path1.strokeTo(ctx1)
 
-;(svg1.querySelector('path') as SVGPathElement).setAttribute('d', path1.getPathData())
+;(document.querySelector('svg path') as SVGPathElement).setAttribute('d', path1.getPathData())
+;(document.querySelector('img') as HTMLImageElement).setAttribute('src', path1.getSvgDataUri())
 
 console.warn(path1.getBoundingBox())

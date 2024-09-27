@@ -71,6 +71,15 @@ export class Path2D {
     }
   }
 
+  getSvgString(): string {
+    const { x, y, width, height } = this.getBoundingBox()
+    return `<svg viewBox="${x} ${y} ${width} ${height}" xmlns="http://www.w3.org/2000/svg"><path fill="none" stroke="currentColor" d="${this.getPathData()}"></path></svg>`
+  }
+
+  getSvgDataUri(): string {
+    return `data:image/svg+xml;base64,${btoa(this.getSvgString())}`
+  }
+
   drawTo(ctx: CanvasRenderingContext2D): void {
     this.paths.forEach((path) => {
       path.curves.forEach((curve) => {
