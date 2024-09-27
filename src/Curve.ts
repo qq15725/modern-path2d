@@ -7,8 +7,12 @@ export abstract class Curve {
   protected _needsUpdate = false
 
   abstract getPoint(t: number, output?: Point2D): Point2D
-  abstract toPathCommands(): PathCommand[]
+  abstract getPathCommands(): PathCommand[]
   abstract drawTo(ctx: CanvasRenderingContext2D): void
+
+  getMinMax(min = Point2D.MAX, max = Point2D.MIN): { min: Point2D, max: Point2D } {
+    return { min, max }
+  }
 
   getDivisions(divisions: number): number {
     return divisions
@@ -120,6 +124,27 @@ export abstract class Curve {
 
   getTangentAt(u: number, output = new Point2D()): Point2D {
     return this.getTangent(this.getUtoTmapping(u), output)
+  }
+
+  getPathData(): string {
+    return this.getPathCommands().map((cmd) => {
+      switch (cmd.type) {
+        case 'M':
+          return `M ${cmd.x} ${cmd.y}`
+        case 'L':
+          return `L ${cmd.x} ${cmd.y}`
+        case 'C':
+          return `C ${cmd.x1} ${cmd.y1} ${cmd.x2} ${cmd.y2} ${cmd.x} ${cmd.y}`
+        case 'Q':
+          return `Q ${cmd.x1} ${cmd.y1} ${cmd.x} ${cmd.y}`
+        case 'A':
+          return `A ${cmd.rx} ${cmd.ry} ${cmd.xAxisRotation} ${cmd.largeArcFlag} ${cmd.sweepFlag} ${cmd.x} ${cmd.y}`
+        case 'Z':
+          return 'Z'
+        default:
+          return ''
+      }
+    }).join(' ')
   }
 
   clone(): this {

@@ -204,8 +204,13 @@ export class CurvePath extends Curve {
     return this
   }
 
-  override toPathCommands(): PathCommand[] {
-    return this.curves.flatMap(curve => curve.toPathCommands())
+  override getPathCommands(): PathCommand[] {
+    return this.curves.flatMap(curve => curve.getPathCommands())
+  }
+
+  override getMinMax(min = Point2D.MAX, max = Point2D.MIN): { min: Point2D, max: Point2D } {
+    this.curves.forEach(curve => curve.getMinMax(min, max))
+    return { min, max }
   }
 
   override drawTo(ctx: CanvasRenderingContext2D): void {

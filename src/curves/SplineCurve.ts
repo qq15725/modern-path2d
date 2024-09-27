@@ -4,7 +4,9 @@ import { Point2D } from '../Point2D'
 import { catmullRom } from '../utils'
 
 export class SplineCurve extends Curve {
-  constructor(public points: Point2D[] = []) {
+  constructor(
+    public points: Point2D[] = [],
+  ) {
     super()
   }
 
@@ -28,7 +30,7 @@ export class SplineCurve extends Curve {
     return output
   }
 
-  override toPathCommands(): PathCommand[] {
+  override getPathCommands(): PathCommand[] {
     // TODO
     return []
   }
@@ -40,9 +42,8 @@ export class SplineCurve extends Curve {
   override copy(source: SplineCurve): this {
     super.copy(source)
     this.points = []
-    for (let i = 0, l = source.points.length; i < l; i++) {
-      const point = source.points[i]
-      this.points.push(point.clone())
+    for (let i = 0, len = source.points.length; i < len; i++) {
+      this.points.push(source.points[i].clone())
     }
     return this
   }

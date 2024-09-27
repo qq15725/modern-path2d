@@ -78,8 +78,8 @@ export class HeartCurve extends Curve {
     return new Point2D(line.v2.y - line.v1.y, -(line.v2.x - line.v1.x)).normalize()
   }
 
-  override toPathCommands(): PathCommand[] {
-    return this.curves.flatMap(curve => curve.toPathCommands())
+  override getPathCommands(): PathCommand[] {
+    return this.curves.flatMap(curve => curve.getPathCommands())
   }
 
   override drawTo(ctx: CanvasRenderingContext2D): void {

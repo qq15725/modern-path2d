@@ -29,6 +29,9 @@ const path2 = new window.Path2D()
   path.quadraticCurveTo(125, 25, 75, 25)
 })
 
+ctx2.stroke(path2)
+
 path1.strokeTo(ctx1)
 
-ctx2.stroke(path2)
+console.warn(path1.getPathData())
+console.warn(path1.getBoundingBox())

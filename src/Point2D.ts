@@ -1,4 +1,12 @@
 export class Point2D {
+  static get MAX(): Point2D {
+    return new Point2D(Infinity, Infinity)
+  }
+
+  static get MIN(): Point2D {
+    return new Point2D(-Infinity, -Infinity)
+  }
+
   constructor(
     public x = 0,
     public y = 0,

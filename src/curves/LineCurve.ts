@@ -37,11 +37,21 @@ export class LineCurve extends Curve {
     return this.getTangent(u, output)
   }
 
-  override toPathCommands(): PathCommand[] {
+  override getPathCommands(): PathCommand[] {
+    const { v1, v2 } = this
     return [
-      { type: 'M', x: this.v1.x, y: this.v1.y },
-      { type: 'L', x: this.v2.x, y: this.v2.y },
+      { type: 'M', x: v1.x, y: v1.y },
+      { type: 'L', x: v2.x, y: v2.y },
     ]
+  }
+
+  override getMinMax(min = Point2D.MAX, max = Point2D.MIN): { min: Point2D, max: Point2D } {
+    const { v1, v2 } = this
+    min.x = Math.min(min.x, v1.x, v2.x)
+    min.y = Math.min(min.y, v1.y, v2.y)
+    max.x = Math.max(max.x, v1.x, v2.x)
+    max.y = Math.max(max.y, v1.y, v2.y)
+    return { min, max }
   }
 
   override drawTo(ctx: CanvasRenderingContext2D): void {

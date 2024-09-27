@@ -1,6 +1,6 @@
-import type { Point2D } from './Point2D'
 import type { PathCommand } from './types'
 import { CurvePath } from './CurvePath'
+import { Point2D } from './Point2D'
 
 /**
  * @see https://developer.mozilla.org/zh-CN/docs/Web/API/Path2D
@@ -46,8 +46,29 @@ export class Path2D {
     return this
   }
 
-  toPathCommands(): PathCommand[] {
-    return this.paths.flatMap(path => path.curves.flatMap(curve => curve.toPathCommands()))
+  getMinMax(min = new Point2D(), max = new Point2D()): { min: Point2D, max: Point2D } {
+    this.paths.forEach(path => path.curves.forEach(curve => curve.getMinMax(min, max)))
+    return { min, max }
+  }
+
+  getPathCommands(): PathCommand[] {
+    return this.paths.flatMap(path => path.curves.flatMap(curve => curve.getPathCommands()))
+  }
+
+  getPathData(): string {
+    return this.paths.map(path => path.getPathData()).join(' ')
+  }
+
+  getBoundingBox(): { x: number, y: number, width: number, height: number } {
+    const min = Point2D.MAX
+    const max = Point2D.MIN
+    this.paths.forEach(path => path.getMinMax(min, max))
+    return {
+      x: min.x,
+      y: min.y,
+      width: max.x - min.x,
+      height: max.y - min.y,
+    }
   }
 
   drawTo(ctx: CanvasRenderingContext2D): void {

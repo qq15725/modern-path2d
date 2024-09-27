@@ -57,8 +57,13 @@ export class PloygonCurve extends Curve {
     return new Point2D(line.v2.y - line.v1.y, -(line.v2.x - line.v1.x)).normalize()
   }
 
-  override toPathCommands(): PathCommand[] {
-    return this.curves.flatMap(curve => curve.toPathCommands())
+  override getPathCommands(): PathCommand[] {
+    return this.curves.flatMap(curve => curve.getPathCommands())
+  }
+
+  override getMinMax(min = Point2D.MAX, max = Point2D.MIN): { min: Point2D, max: Point2D } {
+    this.curves.forEach(curve => curve.getMinMax(min, max))
+    return { min, max }
   }
 
   override drawTo(ctx: CanvasRenderingContext2D): void {

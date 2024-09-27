@@ -56,7 +56,7 @@ export class EllipseCurve extends Curve {
     return output.set(_x, _y)
   }
 
-  override toPathCommands(): PathCommand[] {
+  override getPathCommands(): PathCommand[] {
     const { x, y, rx, ry, startAngle, endAngle, clockwise } = this
     const startX = x + rx * Math.cos(startAngle)
     const startY = y + ry * Math.sin(startAngle)
