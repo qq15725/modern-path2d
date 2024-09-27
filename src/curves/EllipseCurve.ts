@@ -58,16 +58,29 @@ export class EllipseCurve extends Curve {
 
   override getPathCommands(): PathCommand[] {
     const { x, y, rx, ry, startAngle, endAngle, clockwise } = this
+    const anticlockwise = !clockwise
     const startX = x + rx * Math.cos(startAngle)
     const startY = y + ry * Math.sin(startAngle)
     const endX = x + rx * Math.cos(endAngle)
     const endY = y + ry * Math.sin(endAngle)
-    const largeArcFlag = (endAngle - startAngle) % (2 * Math.PI) > Math.PI ? 1 : 0
-    const sweepFlag = clockwise ? 0 : 1
-    return [
-      { type: 'M', x: startX, y: startY },
-      { type: 'A', rx, ry, xAxisRotation: 0, largeArcFlag, sweepFlag, x: endX, y: endY },
-    ]
+    const angleDiff = Math.abs(startAngle - endAngle)
+    const largeArcFlag = angleDiff > Math.PI ? 1 : 0
+    const sweepFlag = anticlockwise ? 0 : 1
+    const midX = x + rx * Math.cos(startAngle + (endAngle - startAngle) / 2)
+    const midY = y + ry * Math.sin(startAngle + (endAngle - startAngle) / 2)
+    if (angleDiff >= 2 * Math.PI) {
+      return [
+        { type: 'M', x: startX, y: startY },
+        { type: 'A', rx, ry, xAxisRotation: 0, largeArcFlag: 1, sweepFlag, x: midX, y: midY },
+        { type: 'A', rx, ry, xAxisRotation: 0, largeArcFlag: 1, sweepFlag, x: startX, y: startY },
+      ]
+    }
+    else {
+      return [
+        { type: 'M', x: startX, y: startY },
+        { type: 'A', rx, ry, xAxisRotation: 0, largeArcFlag, sweepFlag, x: endX, y: endY },
+      ]
+    }
   }
 
   override drawTo(ctx: CanvasRenderingContext2D): void {
