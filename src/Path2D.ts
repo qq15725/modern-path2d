@@ -9,18 +9,13 @@ export class Path2D {
   currentPath = new CurvePath()
   paths: CurvePath[] = [this.currentPath]
 
-  arc(x: number, y: number, radius: number, startAngle: number, endAngle: number, counterclockwise?: boolean): this {
-    this.currentPath.absarc(x, y, radius, startAngle, endAngle, !counterclockwise)
+  addPath(path: Path2D): this {
+    this.paths.push(...path.paths.map(v => v.clone()))
     return this
   }
 
-  bezierCurveTo(cp1x: number, cp1y: number, cp2x: number, cp2y: number, x: number, y: number): this {
-    this.currentPath.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y)
-    return this
-  }
-
-  lineTo(x: number, y: number): this {
-    this.currentPath.lineTo(x, y)
+  closePath(): this {
+    this.currentPath.closePath()
     return this
   }
 
@@ -31,8 +26,60 @@ export class Path2D {
     return this
   }
 
+  lineTo(x: number, y: number): this {
+    this.currentPath.lineTo(x, y)
+    return this
+  }
+
+  bezierCurveTo(cp1x: number, cp1y: number, cp2x: number, cp2y: number, x: number, y: number): this {
+    this.currentPath.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y)
+    return this
+  }
+
   quadraticCurveTo(cpx: number, cpy: number, x: number, y: number): this {
     this.currentPath.quadraticCurveTo(cpx, cpy, x, y)
+    return this
+  }
+
+  arc(x: number, y: number, radius: number, startAngle: number, endAngle: number, counterclockwise?: boolean): this {
+    this.currentPath.absarc(x, y, radius, startAngle, endAngle, !counterclockwise)
+    return this
+  }
+
+  arcTo(x1: number, y1: number, x2: number, y2: number, radius: number): this {
+    const point = this.currentPath.currentPoint
+    const currentX = point.x
+    const currentY = point.y
+    const dx1 = x1 - currentX
+    const dy1 = y1 - currentY
+    const dx2 = x2 - x1
+    const dy2 = y2 - y1
+    const len1 = Math.sqrt(dx1 * dx1 + dy1 * dy1)
+    const len2 = Math.sqrt(dx2 * dx2 + dy2 * dy2)
+    if (len1 < radius || len2 < radius) {
+      this.lineTo(x2, y2)
+      return this
+    }
+    const unitV1 = { x: dx1 / len1, y: dy1 / len1 }
+    const unitV2 = { x: dx2 / len2, y: dy2 / len2 }
+    const centerX = x1 - unitV1.y * radius
+    const centerY = y1 + unitV1.x * radius
+    const startAngle = Math.atan2(unitV1.y, unitV1.x)
+    const endAngle = Math.atan2(unitV2.y, unitV2.x)
+    let angleDiff = endAngle - startAngle
+    if (angleDiff > Math.PI) {
+      angleDiff -= 2 * Math.PI
+    }
+    else if (angleDiff < -Math.PI) {
+      angleDiff += 2 * Math.PI
+    }
+    this.arc(centerX, centerY, radius, startAngle, startAngle + angleDiff, false)
+    this.lineTo(x2, y2)
+    return this
+  }
+
+  ellipse(x: number, y: number, radiusX: number, radiusY: number, rotation: number, startAngle: number, endAngle: number, counterclockwise: number): this {
+    this.currentPath.absellipse(x, y, radiusX, radiusY, startAngle, endAngle, !counterclockwise, rotation)
     return this
   }
 
