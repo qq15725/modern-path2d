@@ -1,3 +1,19 @@
+## [0.0.3](https://github.com/qq15725/modern-path2d/compare/v0.0.2...v0.0.3) (2024-09-30)
+
+
+### Bug Fixes
+
+* EllipseCurve path commands ([d47008b](https://github.com/qq15725/modern-path2d/commit/d47008b8b10500822c9b5ba442c0c7d80a316246))
+
+
+### Features
+
+* add arcTo、ellipse methods ([1c572d4](https://github.com/qq15725/modern-path2d/commit/1c572d43a465c5b6931eb99d067291ef2584a4e2))
+* add getBoundingBox、getPathData、getPathCommands methods ([407fc9e](https://github.com/qq15725/modern-path2d/commit/407fc9ee39f1cd695c41c03f51f05c64c9fdc4d7))
+* add getSvgDataUri method ([f3c5cde](https://github.com/qq15725/modern-path2d/commit/f3c5cde4cc86d16ce747d8939ada6c66c4a6f2ba))
+
+
+
 ## [0.0.2](https://github.com/qq15725/modern-path2d/compare/v0.0.1...v0.0.2) (2024-09-26)
 
 
