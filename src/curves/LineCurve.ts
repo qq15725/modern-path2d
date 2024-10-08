@@ -37,7 +37,7 @@ export class LineCurve extends Curve {
     return this.getTangent(u, output)
   }
 
-  override getPathCommands(): PathCommand[] {
+  override getCommands(): PathCommand[] {
     const { v1, v2 } = this
     return [
       { type: 'M', x: v1.x, y: v1.y },

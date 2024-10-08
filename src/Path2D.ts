@@ -98,12 +98,12 @@ export class Path2D {
     return { min, max }
   }
 
-  getPathCommands(): PathCommand[] {
-    return this.paths.flatMap(path => path.curves.flatMap(curve => curve.getPathCommands()))
+  getCommands(): PathCommand[] {
+    return this.paths.flatMap(path => path.curves.flatMap(curve => curve.getCommands()))
   }
 
-  getPathData(): string {
-    return this.paths.map(path => path.getPathData()).join(' ')
+  getData(): string {
+    return this.paths.map(path => path.getData()).join(' ')
   }
 
   getBoundingBox(): { x: number, y: number, width: number, height: number } {
@@ -120,7 +120,7 @@ export class Path2D {
 
   getSvgString(): string {
     const { x, y, width, height } = this.getBoundingBox()
-    return `<svg viewBox="${x} ${y} ${width} ${height}" xmlns="http://www.w3.org/2000/svg"><path fill="none" stroke="currentColor" d="${this.getPathData()}"></path></svg>`
+    return `<svg viewBox="${x} ${y} ${width} ${height}" xmlns="http://www.w3.org/2000/svg"><path fill="none" stroke="currentColor" d="${this.getData()}"></path></svg>`
   }
 
   getSvgDataUri(): string {

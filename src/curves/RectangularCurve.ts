@@ -86,8 +86,8 @@ export class RectangularCurve extends Curve {
     return new Point2D(v2.y - v1.y, -(v2.x - v1.x)).normalize()
   }
 
-  override getPathCommands(): PathCommand[] {
-    return this.curves.flatMap(curve => curve.getPathCommands())
+  override getCommands(): PathCommand[] {
+    return this.curves.flatMap(curve => curve.getCommands())
   }
 
   override getMinMax(min = Point2D.MAX, max = Point2D.MIN): { min: Point2D, max: Point2D } {

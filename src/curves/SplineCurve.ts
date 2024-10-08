@@ -30,7 +30,7 @@ export class SplineCurve extends Curve {
     return output
   }
 
-  override getPathCommands(): PathCommand[] {
+  override getCommands(): PathCommand[] {
     // TODO
     return []
   }

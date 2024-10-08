@@ -7,7 +7,7 @@ export abstract class Curve {
   protected _needsUpdate = false
 
   abstract getPoint(t: number, output?: Point2D): Point2D
-  abstract getPathCommands(): PathCommand[]
+  abstract getCommands(): PathCommand[]
   abstract drawTo(ctx: CanvasRenderingContext2D): void
 
   getMinMax(min = Point2D.MAX, max = Point2D.MIN): { min: Point2D, max: Point2D } {
@@ -126,8 +126,8 @@ export abstract class Curve {
     return this.getTangent(this.getUtoTmapping(u), output)
   }
 
-  getPathData(): string {
-    return this.getPathCommands().map((cmd) => {
+  getData(): string {
+    return this.getCommands().map((cmd) => {
       switch (cmd.type) {
         case 'M':
           return `M ${cmd.x} ${cmd.y}`

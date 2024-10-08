@@ -40,7 +40,7 @@ ctx2.stroke(path2)
 
 path1.strokeTo(ctx1)
 
-;(document.querySelector('svg path') as SVGPathElement).setAttribute('d', path1.getPathData())
+;(document.querySelector('svg path') as SVGPathElement).setAttribute('d', path1.getData())
 ;(document.querySelector('img') as HTMLImageElement).setAttribute('src', path1.getSvgDataUri())
 
 console.warn(path1.getBoundingBox())

@@ -31,7 +31,7 @@ export class CubicBezierCurve extends Curve {
     return { min, max }
   }
 
-  override getPathCommands(): PathCommand[] {
+  override getCommands(): PathCommand[] {
     const { v0, v1, v2, v3 } = this
     return [
       { type: 'M', x: v0.x, y: v0.y },

@@ -21,7 +21,7 @@ export class QuadraticBezierCurve extends Curve {
     return output
   }
 
-  override getPathCommands(): PathCommand[] {
+  override getCommands(): PathCommand[] {
     const { v0, v1, v2 } = this
     return [
       { type: 'M', x: v0.x, y: v0.y },

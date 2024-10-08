@@ -36,7 +36,7 @@ export class CircleCurve extends Curve {
     return new Point2D(Math.cos(_t), Math.sin(_t))
   }
 
-  override getPathCommands(): PathCommand[] {
+  override getCommands(): PathCommand[] {
     // TODO
     return []
   }
