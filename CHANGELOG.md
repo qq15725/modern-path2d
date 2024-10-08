@@ -1,3 +1,12 @@
+## [0.0.4](https://github.com/qq15725/modern-path2d/compare/v0.0.3...v0.0.4) (2024-10-08)
+
+
+### Features
+
+* rename getPathCommands to getCommands ([4e0f03a](https://github.com/qq15725/modern-path2d/commit/4e0f03a7e75df082eb42f41fe5fd2b8b053ddd7b))
+
+
+
 ## [0.0.3](https://github.com/qq15725/modern-path2d/compare/v0.0.2...v0.0.3) (2024-09-30)
 
 
