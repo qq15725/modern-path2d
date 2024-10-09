@@ -9,8 +9,55 @@ export class Path2D {
   currentPath = new CurvePath()
   paths: CurvePath[] = [this.currentPath]
 
+  constructor(path?: Path2D | PathCommand[] | string) {
+    if (path) {
+      if (path instanceof Path2D) {
+        this.addPath(path)
+      }
+      else if (Array.isArray(path)) {
+        this.addCommands(path)
+      }
+      else {
+        this.addData(path)
+      }
+    }
+  }
+
   addPath(path: Path2D): this {
     this.paths.push(...path.paths.map(v => v.clone()))
+    return this
+  }
+
+  addCommands(commands: PathCommand[]): this {
+    for (let i = 0, len = commands.length; i < len; i++) {
+      const cmd = commands[i]
+      switch (cmd.type) {
+        case 'M':
+          this.moveTo(cmd.x, cmd.y)
+          break
+        case 'L':
+          this.lineTo(cmd.x, cmd.y)
+          break
+        case 'C':
+          this.bezierCurveTo(cmd.x2, cmd.y2, cmd.x1, cmd.y1, cmd.x, cmd.y)
+          break
+        case 'Q':
+          this.quadraticCurveTo(cmd.x1, cmd.y1, cmd.x, cmd.y)
+          break
+        case 'A':
+          // TODO
+          // this.arc(cmd.rx, cmd.ry, cmd.xAxisRotation, cmd.largeArcFlag, cmd.sweepFlag, cmd.x, cmd.y)
+          break
+        case 'Z':
+          this.closePath()
+          break
+      }
+    }
+    return this
+  }
+
+  addData(data: string): this {
+    console.error('TODO', data)
     return this
   }
 
@@ -78,7 +125,7 @@ export class Path2D {
     return this
   }
 
-  ellipse(x: number, y: number, radiusX: number, radiusY: number, rotation: number, startAngle: number, endAngle: number, counterclockwise: number): this {
+  ellipse(x: number, y: number, radiusX: number, radiusY: number, rotation: number, startAngle: number, endAngle: number, counterclockwise?: boolean): this {
     this.currentPath.absellipse(x, y, radiusX, radiusY, startAngle, endAngle, !counterclockwise, rotation)
     return this
   }
