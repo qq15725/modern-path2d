@@ -1,3 +1,12 @@
+## [0.0.5](https://github.com/qq15725/modern-path2d/compare/v0.0.4...v0.0.5) (2024-10-09)
+
+
+### Features
+
+* support create Path2D by commands ([1971e98](https://github.com/qq15725/modern-path2d/commit/1971e9876cb27f28770c6c66938583ff25dd5f2f))
+
+
+
 ## [0.0.4](https://github.com/qq15725/modern-path2d/compare/v0.0.3...v0.0.4) (2024-10-08)
 
 
