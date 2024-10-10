@@ -22,9 +22,9 @@
 
 - Compatible Web Path2D
 
-- Animation
+- Path animation
 
-- Transform
+- Path transform
 
 - Parse svg to Path2D
 
