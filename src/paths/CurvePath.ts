@@ -1,14 +1,6 @@
-import type { PathCommand } from './types'
-import { Curve } from './Curve'
-import {
-  CubicBezierCurve,
-  EllipseCurve,
-  LineCurve,
-  QuadraticBezierCurve,
-  RectangularCurve,
-  SplineCurve,
-} from './curves'
-import { Point2D } from './Point2D'
+import type { PathCommand } from '../svg'
+import { CubicBezierCurve, Curve, EllipseCurve, LineCurve, QuadraticBezierCurve, RectangularCurve, SplineCurve } from '../curves'
+import { Point2D } from '../math'
 
 export class CurvePath extends Curve {
   curves: Curve[] = []

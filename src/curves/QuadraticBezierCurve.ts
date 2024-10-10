@@ -1,7 +1,8 @@
-import type { PathCommand } from '../types'
-import { Curve } from '../Curve'
-import { Point2D } from '../Point2D'
+import type { Matrix3 } from '../math'
+import type { PathCommand } from '../svg'
+import { Point2D } from '../math'
 import { quadraticBezier } from '../utils'
+import { Curve } from './Curve'
 
 export class QuadraticBezierCurve extends Curve {
   constructor(
@@ -40,6 +41,13 @@ export class QuadraticBezierCurve extends Curve {
     max.x = Math.max(max.x, v0.x, v2.x, x1, x2)
     max.y = Math.max(max.y, v0.y, v2.y, y1, y2)
     return { min, max }
+  }
+
+  override transform(matrix: Matrix3): this {
+    matrix.applyToPoint(this.v0)
+    matrix.applyToPoint(this.v1)
+    matrix.applyToPoint(this.v2)
+    return this
   }
 
   override drawTo(ctx: CanvasRenderingContext2D): void {

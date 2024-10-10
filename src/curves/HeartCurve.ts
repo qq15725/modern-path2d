@@ -1,7 +1,7 @@
-import type { PathCommand } from '../types'
-import { Curve } from '../Curve'
-import { Point2D } from '../Point2D'
+import type { PathCommand } from '../svg'
+import { Point2D } from '../math'
 import { CircleCurve } from './CircleCurve'
+import { Curve } from './Curve'
 import { LineCurve } from './LineCurve'
 
 export class HeartCurve extends Curve {

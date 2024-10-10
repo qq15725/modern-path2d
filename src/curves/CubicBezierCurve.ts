@@ -1,7 +1,7 @@
-import type { PathCommand } from '../types'
-import { Curve } from '../Curve'
-import { Point2D } from '../Point2D'
+import type { PathCommand } from '../svg'
+import { type Matrix3, Point2D } from '../math'
 import { cubicBezier } from '../utils'
+import { Curve } from './Curve'
 
 export class CubicBezierCurve extends Curve {
   constructor(
@@ -29,6 +29,14 @@ export class CubicBezierCurve extends Curve {
     max.x = Math.max(max.x, v0.x, v1.x, v2.x, v3.x)
     max.y = Math.max(max.y, v0.y, v1.y, v2.y, v3.y)
     return { min, max }
+  }
+
+  override transform(matrix: Matrix3): this {
+    matrix.applyToPoint(this.v0)
+    matrix.applyToPoint(this.v1)
+    matrix.applyToPoint(this.v2)
+    matrix.applyToPoint(this.v3)
+    return this
   }
 
   override getCommands(): PathCommand[] {

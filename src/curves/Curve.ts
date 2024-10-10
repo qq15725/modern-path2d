@@ -1,5 +1,6 @@
-import type { PathCommand } from './types'
-import { Point2D } from './Point2D'
+import type { Matrix3 } from '../math'
+import type { PathCommand } from '../svg'
+import { Point2D } from '../math'
 
 export abstract class Curve {
   arcLengthDivisions = 200
@@ -12,6 +13,11 @@ export abstract class Curve {
 
   getMinMax(min = Point2D.MAX, max = Point2D.MIN): { min: Point2D, max: Point2D } {
     return { min, max }
+  }
+
+  transform(matrix: Matrix3): this {
+    console.warn(matrix)
+    return this
   }
 
   getDivisions(divisions: number): number {

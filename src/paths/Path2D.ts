@@ -1,6 +1,9 @@
-import type { PathCommand } from './types'
+import type { Curve } from '../curves'
+import type { Matrix3 } from '../math'
+import type { PathCommand } from '../svg'
+import { Point2D } from '../math'
+import { addCommandsToPath, dataToCommands } from '../svg'
 import { CurvePath } from './CurvePath'
-import { Point2D } from './Point2D'
 
 /**
  * @see https://developer.mozilla.org/zh-CN/docs/Web/API/Path2D
@@ -23,41 +26,23 @@ export class Path2D {
     }
   }
 
-  addPath(path: Path2D): this {
-    this.paths.push(...path.paths.map(v => v.clone()))
-    return this
-  }
-
-  addCommands(commands: PathCommand[]): this {
-    for (let i = 0, len = commands.length; i < len; i++) {
-      const cmd = commands[i]
-      switch (cmd.type) {
-        case 'M':
-          this.moveTo(cmd.x, cmd.y)
-          break
-        case 'L':
-          this.lineTo(cmd.x, cmd.y)
-          break
-        case 'C':
-          this.bezierCurveTo(cmd.x2, cmd.y2, cmd.x1, cmd.y1, cmd.x, cmd.y)
-          break
-        case 'Q':
-          this.quadraticCurveTo(cmd.x1, cmd.y1, cmd.x, cmd.y)
-          break
-        case 'A':
-          // TODO
-          // this.arc(cmd.rx, cmd.ry, cmd.xAxisRotation, cmd.largeArcFlag, cmd.sweepFlag, cmd.x, cmd.y)
-          break
-        case 'Z':
-          this.closePath()
-          break
-      }
+  addPath(path: Path2D | CurvePath): this {
+    if (path instanceof Path2D) {
+      this.paths.push(...path.paths.map(v => v.clone()))
+    }
+    else {
+      this.paths.push(path)
     }
     return this
   }
 
+  addCommands(commands: PathCommand[]): this {
+    addCommandsToPath(this, commands)
+    return this
+  }
+
   addData(data: string): this {
-    console.error('TODO', data)
+    this.addCommands(dataToCommands(data))
     return this
   }
 
@@ -140,8 +125,18 @@ export class Path2D {
     return this
   }
 
+  forEachCurve(cb: (curve: Curve) => void): this {
+    this.paths.forEach(path => path.curves.forEach(curve => cb(curve)))
+    return this
+  }
+
+  transform(matrix: Matrix3): this {
+    this.forEachCurve(curve => curve.transform(matrix))
+    return this
+  }
+
   getMinMax(min = new Point2D(), max = new Point2D()): { min: Point2D, max: Point2D } {
-    this.paths.forEach(path => path.curves.forEach(curve => curve.getMinMax(min, max)))
+    this.forEachCurve(curve => curve.getMinMax(min, max))
     return { min, max }
   }
 
@@ -154,9 +149,7 @@ export class Path2D {
   }
 
   getBoundingBox(): { x: number, y: number, width: number, height: number } {
-    const min = Point2D.MAX
-    const max = Point2D.MIN
-    this.paths.forEach(path => path.getMinMax(min, max))
+    const { min, max } = this.getMinMax()
     return {
       x: min.x,
       y: min.y,
@@ -175,10 +168,8 @@ export class Path2D {
   }
 
   drawTo(ctx: CanvasRenderingContext2D): void {
-    this.paths.forEach((path) => {
-      path.curves.forEach((curve) => {
-        curve.drawTo(ctx)
-      })
+    this.forEachCurve((curve) => {
+      curve.drawTo(ctx)
     })
   }
 

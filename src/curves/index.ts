@@ -1,5 +1,6 @@
 export * from './CircleCurve'
 export * from './CubicBezierCurve'
+export * from './Curve'
 export * from './EllipseCurve'
 export * from './HeartCurve'
 export * from './LineCurve'

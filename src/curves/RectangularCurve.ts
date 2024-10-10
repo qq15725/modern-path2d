@@ -1,6 +1,6 @@
-import type { PathCommand } from '../types'
-import { Curve } from '../Curve'
-import { Point2D } from '../Point2D'
+import type { PathCommand } from '../svg'
+import { Point2D } from '../math'
+import { Curve } from './Curve'
 import { LineCurve } from './LineCurve'
 
 export class RectangularCurve extends Curve {
