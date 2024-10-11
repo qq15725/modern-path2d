@@ -1,7 +1,7 @@
 import type { Curve } from '../curves'
 import type { Matrix3 } from '../math'
 import type { PathCommand } from '../svg'
-import { Point2D } from '../math'
+import { BoundingBox, Point2D } from '../math'
 import { addPathCommandsToPath2D, pathDataToPathCommands } from '../svg'
 import { CurvePath } from './CurvePath'
 
@@ -141,18 +141,14 @@ export class Path2D<T = any> {
     return { min, max }
   }
 
-  getBoundingBox(): { x: number, y: number, left: number, top: number, right: number, bottom: number, width: number, height: number } {
+  getBoundingBox(): BoundingBox {
     const { min, max } = this.getMinMax()
-    return {
-      x: min.x,
-      y: min.y,
-      left: min.x,
-      top: min.y,
-      right: max.x,
-      bottom: max.y,
-      width: max.x - min.x,
-      height: max.y - min.y,
-    }
+    return new BoundingBox(
+      min.x,
+      min.y,
+      max.x - min.x,
+      max.y - min.y,
+    )
   }
 
   getCommands(): PathCommand[] {
