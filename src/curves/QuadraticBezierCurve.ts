@@ -22,12 +22,11 @@ export class QuadraticBezierCurve extends Curve {
     return output
   }
 
-  override getCommands(): PathCommand[] {
-    const { v0, v1, v2 } = this
-    return [
-      { type: 'M', x: v0.x, y: v0.y },
-      { type: 'Q', x1: v1.x, y1: v1.y, x: v2.x, y: v2.y },
-    ]
+  override transform(matrix: Matrix3): this {
+    this.v0.applyMatrix3(matrix)
+    this.v1.applyMatrix3(matrix)
+    this.v2.applyMatrix3(matrix)
+    return this
   }
 
   override getMinMax(min = Point2D.MAX, max = Point2D.MIN): { min: Point2D, max: Point2D } {
@@ -43,11 +42,12 @@ export class QuadraticBezierCurve extends Curve {
     return { min, max }
   }
 
-  override transform(matrix: Matrix3): this {
-    this.v0.applyMatrix3(matrix)
-    this.v1.applyMatrix3(matrix)
-    this.v2.applyMatrix3(matrix)
-    return this
+  override getCommands(): PathCommand[] {
+    const { v0, v1, v2 } = this
+    return [
+      { type: 'M', x: v0.x, y: v0.y },
+      { type: 'Q', x1: v1.x, y1: v1.y, x: v2.x, y: v2.y },
+    ]
   }
 
   override drawTo(ctx: CanvasRenderingContext2D): this {

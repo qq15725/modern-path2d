@@ -11,10 +11,6 @@ export class LineCurve extends Curve {
     super()
   }
 
-  override getDivisions(): number {
-    return 1
-  }
-
   override getPoint(t: number, output = new Point2D()): Point2D {
     if (t === 1) {
       output.copy(this.v2)
@@ -38,12 +34,14 @@ export class LineCurve extends Curve {
     return this.getTangent(u, output)
   }
 
-  override getCommands(): PathCommand[] {
-    const { v1, v2 } = this
-    return [
-      { type: 'M', x: v1.x, y: v1.y },
-      { type: 'L', x: v2.x, y: v2.y },
-    ]
+  override transform(matrix: Matrix3): this {
+    this.v1.applyMatrix3(matrix)
+    this.v2.applyMatrix3(matrix)
+    return this
+  }
+
+  override getDivisions(): number {
+    return 1
   }
 
   override getMinMax(min = Point2D.MAX, max = Point2D.MIN): { min: Point2D, max: Point2D } {
@@ -55,10 +53,12 @@ export class LineCurve extends Curve {
     return { min, max }
   }
 
-  override transform(matrix: Matrix3): this {
-    this.v1.applyMatrix3(matrix)
-    this.v2.applyMatrix3(matrix)
-    return this
+  override getCommands(): PathCommand[] {
+    const { v1, v2 } = this
+    return [
+      { type: 'M', x: v1.x, y: v1.y },
+      { type: 'L', x: v2.x, y: v2.y },
+    ]
   }
 
   override drawTo(ctx: CanvasRenderingContext2D): this {

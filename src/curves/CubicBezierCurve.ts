@@ -22,6 +22,14 @@ export class CubicBezierCurve extends Curve {
     return output
   }
 
+  override transform(matrix: Matrix3): this {
+    this.v0.applyMatrix3(matrix)
+    this.v1.applyMatrix3(matrix)
+    this.v2.applyMatrix3(matrix)
+    this.v3.applyMatrix3(matrix)
+    return this
+  }
+
   override getMinMax(min = Point2D.MAX, max = Point2D.MIN): { min: Point2D, max: Point2D } {
     const { v0, v1, v2, v3 } = this
     min.x = Math.min(min.x, v0.x, v1.x, v2.x, v3.x)
@@ -29,14 +37,6 @@ export class CubicBezierCurve extends Curve {
     max.x = Math.max(max.x, v0.x, v1.x, v2.x, v3.x)
     max.y = Math.max(max.y, v0.y, v1.y, v2.y, v3.y)
     return { min, max }
-  }
-
-  override transform(matrix: Matrix3): this {
-    this.v0.applyMatrix3(matrix)
-    this.v1.applyMatrix3(matrix)
-    this.v2.applyMatrix3(matrix)
-    this.v3.applyMatrix3(matrix)
-    return this
   }
 
   override getCommands(): PathCommand[] {

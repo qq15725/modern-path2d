@@ -141,22 +141,26 @@ export class Path2D<T = any> {
     return { min, max }
   }
 
+  getBoundingBox(): { x: number, y: number, left: number, top: number, right: number, bottom: number, width: number, height: number } {
+    const { min, max } = this.getMinMax()
+    return {
+      x: min.x,
+      y: min.y,
+      left: min.x,
+      top: min.y,
+      right: max.x,
+      bottom: max.y,
+      width: max.x - min.x,
+      height: max.y - min.y,
+    }
+  }
+
   getCommands(): PathCommand[] {
     return this.paths.flatMap(path => path.curves.flatMap(curve => curve.getCommands()))
   }
 
   getData(): string {
     return this.paths.map(path => path.getData()).join(' ')
-  }
-
-  getBoundingBox(): { x: number, y: number, width: number, height: number } {
-    const { min, max } = this.getMinMax()
-    return {
-      x: min.x,
-      y: min.y,
-      width: max.x - min.x,
-      height: max.y - min.y,
-    }
   }
 
   getSvgString(): string {
@@ -182,5 +186,16 @@ export class Path2D<T = any> {
   fillTo(ctx: CanvasRenderingContext2D): void {
     this.drawTo(ctx)
     ctx.fill()
+  }
+
+  copy(source: Path2D): this {
+    source.currentPath = this.currentPath.clone()
+    source.paths = this.paths.map(path => path.clone())
+    source.userData = this.userData
+    return this
+  }
+
+  clone(): Path2D {
+    return new Path2D().copy(this)
   }
 }

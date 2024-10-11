@@ -213,9 +213,8 @@ export class CurvePath extends Curve {
   copy(source: CurvePath): this {
     super.copy(source)
     this.curves = []
-    for (let i = 0, l = source.curves.length; i < l; i++) {
-      const curve = source.curves[i]
-      this.curves.push(curve.clone())
+    for (let i = 0, len = source.curves.length; i < len; i++) {
+      this.curves.push(source.curves[i].clone())
     }
     this.autoClose = source.autoClose
     this.currentPoint.copy(source.currentPoint)

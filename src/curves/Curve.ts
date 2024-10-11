@@ -149,12 +149,12 @@ export abstract class Curve {
     return this
   }
 
-  clone(): this {
-    return new (this.constructor as any)().copy(this)
-  }
-
   copy(source: Curve): this {
     this.arcLengthDivisions = source.arcLengthDivisions
     return this
+  }
+
+  clone(): this {
+    return new (this.constructor as any)().copy(this)
   }
 }

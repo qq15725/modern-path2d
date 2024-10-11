@@ -21,10 +21,6 @@ export class EllipseCurve extends Curve {
     super()
   }
 
-  override getDivisions(divisions: number = 12): number {
-    return divisions * 2
-  }
-
   override getPoint(t: number, output = new Point2D()): Point2D {
     const twoPi = Math.PI * 2
     let deltaAngle = this.endAngle - this.startAngle
@@ -59,6 +55,10 @@ export class EllipseCurve extends Curve {
       _y = tx * sin + ty * cos + this.y
     }
     return output.set(_x, _y)
+  }
+
+  override getDivisions(divisions: number = 12): number {
+    return divisions * 2
   }
 
   override getCommands(): PathCommand[] {
