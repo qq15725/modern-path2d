@@ -1,3 +1,12 @@
+## [0.1.1](https://github.com/qq15725/modern-path2d/compare/v0.1.0...v0.1.1) (2024-10-11)
+
+
+### Features
+
+* add clone method ([63403c5](https://github.com/qq15725/modern-path2d/commit/63403c5dc4a8c4c56c074f142fe71a41623ab68c))
+
+
+
 # [0.1.0](https://github.com/qq15725/modern-path2d/compare/v0.0.5...v0.1.0) (2024-10-11)
 
 
