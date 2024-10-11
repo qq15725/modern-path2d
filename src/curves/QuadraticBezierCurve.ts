@@ -45,8 +45,8 @@ export class QuadraticBezierCurve extends Curve {
 
   override transform(matrix: Matrix3): this {
     this.v0.applyMatrix3(matrix)
-    this.v0.applyMatrix3(matrix)
-    this.v0.applyMatrix3(matrix)
+    this.v1.applyMatrix3(matrix)
+    this.v2.applyMatrix3(matrix)
     return this
   }
 
