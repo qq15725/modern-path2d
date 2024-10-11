@@ -1,3 +1,12 @@
+## [0.1.2](https://github.com/qq15725/modern-path2d/compare/v0.1.1...v0.1.2) (2024-10-11)
+
+
+### Features
+
+* BoundingBox ([0b25430](https://github.com/qq15725/modern-path2d/commit/0b2543071713aa187efc283ea887969726378946))
+
+
+
 ## [0.1.1](https://github.com/qq15725/modern-path2d/compare/v0.1.0...v0.1.1) (2024-10-11)
 
 
