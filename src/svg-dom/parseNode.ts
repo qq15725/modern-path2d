@@ -11,9 +11,11 @@ import { parsePolylineNode } from './parsePolylineNode'
 import { parseRectNode } from './parseRectNode'
 import { parseStyle } from './parseStyle'
 
-export function parseNode(node: SVGElement, style: Record<string, any>): Path2D[] {
-  const paths: Path2D[] = []
-
+export function parseNode(
+  node: SVGElement,
+  style: Record<string, any>,
+  paths: Path2D[] = [],
+): Path2D[] {
   if (node.nodeType !== 1)
     return paths
 
@@ -69,7 +71,7 @@ export function parseNode(node: SVGElement, style: Record<string, any>): Path2D[
       const usedNodeId = href.substring(1)
       const usedNode = (node.viewportElement as any)?.getElementById(usedNodeId)
       if (usedNode) {
-        parseNode(usedNode, style)
+        parseNode(usedNode, style, paths)
       }
       else {
         console.warn(`'use node' references non-existent node id: ${usedNodeId}`)
@@ -90,7 +92,7 @@ export function parseNode(node: SVGElement, style: Record<string, any>): Path2D[
     // }
     path.transform(currentTransform)
     paths.push(path)
-    // path.userData = { node, style }
+    path.userData = { node, style }
   }
 
   const childNodes = node.childNodes
@@ -98,7 +100,7 @@ export function parseNode(node: SVGElement, style: Record<string, any>): Path2D[
     const node = childNodes[i]
     if (isDefsNode && node.nodeName !== 'style' && node.nodeName !== 'defs')
       continue
-    parseNode(node as SVGElement, style)
+    parseNode(node as SVGElement, style, paths)
   }
 
   if (transform) {

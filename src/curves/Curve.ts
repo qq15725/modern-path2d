@@ -1,6 +1,7 @@
 import type { Matrix3 } from '../math'
 import type { PathCommand } from '../svg'
 import { Point2D } from '../math'
+import { pathCommandsToPathData } from '../svg'
 
 export abstract class Curve {
   arcLengthDivisions = 200
@@ -8,21 +9,6 @@ export abstract class Curve {
   protected _needsUpdate = false
 
   abstract getPoint(t: number, output?: Point2D): Point2D
-  abstract getCommands(): PathCommand[]
-  abstract drawTo(ctx: CanvasRenderingContext2D): void
-
-  getMinMax(min = Point2D.MAX, max = Point2D.MIN): { min: Point2D, max: Point2D } {
-    return { min, max }
-  }
-
-  transform(matrix: Matrix3): this {
-    console.warn(matrix)
-    return this
-  }
-
-  getDivisions(divisions: number): number {
-    return divisions
-  }
 
   getPointAt(u: number, output = new Point2D()): Point2D {
     return this.getPoint(this.getUtoTmapping(u), output)
@@ -132,25 +118,35 @@ export abstract class Curve {
     return this.getTangent(this.getUtoTmapping(u), output)
   }
 
+  /** overrideable */
+  // eslint-disable-next-line unused-imports/no-unused-vars
+  transform(matrix: Matrix3): this {
+    return this
+  }
+
+  /** overrideable */
+  getDivisions(divisions: number): number {
+    return divisions
+  }
+
+  /** overrideable */
+  getMinMax(min = Point2D.MAX, max = Point2D.MIN): { min: Point2D, max: Point2D } {
+    return { min, max }
+  }
+
+  /** overrideable */
+  getCommands(): PathCommand[] {
+    return []
+  }
+
   getData(): string {
-    return this.getCommands().map((cmd) => {
-      switch (cmd.type) {
-        case 'M':
-          return `M ${cmd.x} ${cmd.y}`
-        case 'L':
-          return `L ${cmd.x} ${cmd.y}`
-        case 'C':
-          return `C ${cmd.x1} ${cmd.y1} ${cmd.x2} ${cmd.y2} ${cmd.x} ${cmd.y}`
-        case 'Q':
-          return `Q ${cmd.x1} ${cmd.y1} ${cmd.x} ${cmd.y}`
-        case 'A':
-          return `A ${cmd.rx} ${cmd.ry} ${cmd.xAxisRotation} ${cmd.largeArcFlag} ${cmd.sweepFlag} ${cmd.x} ${cmd.y}`
-        case 'Z':
-          return 'Z'
-        default:
-          return ''
-      }
-    }).join(' ')
+    return pathCommandsToPathData(this.getCommands())
+  }
+
+  /** overrideable */
+  // eslint-disable-next-line unused-imports/no-unused-vars
+  drawTo(ctx: CanvasRenderingContext2D): this {
+    return this
   }
 
   clone(): this {

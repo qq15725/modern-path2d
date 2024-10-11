@@ -177,14 +177,14 @@ export class CurvePath extends Curve {
     return this
   }
 
-  ellipse(x: number, y: number, xRadius: number, yRadius: number, startAngle: number, endAngle: number, clockwise = false, rotation = 0): this {
+  ellipse(x: number, y: number, radiusX: number, radiusY: number, startAngle: number, endAngle: number, clockwise = false, rotation = 0): this {
     const point = this.currentPoint
-    this.absellipse(x + point.x, y + point.y, xRadius, yRadius, startAngle, endAngle, clockwise, rotation)
+    this.absellipse(x + point.x, y + point.y, radiusX, radiusY, startAngle, endAngle, clockwise, rotation)
     return this
   }
 
-  absellipse(x: number, y: number, xRadius: number, yRadius: number, startAngle: number, endAngle: number, clockwise = false, rotation = 0): this {
-    const curve = new EllipseCurve(x, y, xRadius, yRadius, startAngle, endAngle, clockwise, rotation)
+  absellipse(x: number, y: number, radiusX: number, radiusY: number, startAngle: number, endAngle: number, clockwise = false, rotation = 0): this {
+    const curve = new EllipseCurve(x, y, radiusX, radiusY, startAngle, endAngle, clockwise, rotation)
     if (this.curves.length > 0) {
       const firstPoint = curve.getPoint(0)
       if (!firstPoint.equals(this.currentPoint)) {
@@ -205,8 +205,9 @@ export class CurvePath extends Curve {
     return { min, max }
   }
 
-  override drawTo(ctx: CanvasRenderingContext2D): void {
+  override drawTo(ctx: CanvasRenderingContext2D): this {
     this.curves.forEach(curve => curve.drawTo(ctx))
+    return this
   }
 
   copy(source: CurvePath): this {

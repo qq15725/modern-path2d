@@ -32,10 +32,10 @@ export class CubicBezierCurve extends Curve {
   }
 
   override transform(matrix: Matrix3): this {
-    matrix.applyToPoint(this.v0)
-    matrix.applyToPoint(this.v1)
-    matrix.applyToPoint(this.v2)
-    matrix.applyToPoint(this.v3)
+    this.v0.applyMatrix3(matrix)
+    this.v1.applyMatrix3(matrix)
+    this.v2.applyMatrix3(matrix)
+    this.v3.applyMatrix3(matrix)
     return this
   }
 
@@ -47,10 +47,11 @@ export class CubicBezierCurve extends Curve {
     ]
   }
 
-  override drawTo(ctx: CanvasRenderingContext2D): void {
+  override drawTo(ctx: CanvasRenderingContext2D): this {
     const { v0, v1, v2, v3 } = this
     ctx.moveTo(v0.x, v0.y)
     ctx.bezierCurveTo(v1.x, v1.y, v2.x, v2.y, v3.x, v3.y)
+    return this
   }
 
   override copy(source: CubicBezierCurve): this {

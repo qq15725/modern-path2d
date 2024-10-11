@@ -2,15 +2,16 @@ import type { Curve } from '../curves'
 import type { Matrix3 } from '../math'
 import type { PathCommand } from '../svg'
 import { Point2D } from '../math'
-import { addCommandsToPath, dataToCommands } from '../svg'
+import { addPathCommandsToPath2D, pathDataToPathCommands } from '../svg'
 import { CurvePath } from './CurvePath'
 
 /**
  * @see https://developer.mozilla.org/zh-CN/docs/Web/API/Path2D
  */
-export class Path2D {
+export class Path2D<T = any> {
   currentPath = new CurvePath()
   paths: CurvePath[] = [this.currentPath]
+  userData?: T
 
   constructor(path?: Path2D | PathCommand[] | string) {
     if (path) {
@@ -33,16 +34,6 @@ export class Path2D {
     else {
       this.paths.push(path)
     }
-    return this
-  }
-
-  addCommands(commands: PathCommand[]): this {
-    addCommandsToPath(this, commands)
-    return this
-  }
-
-  addData(data: string): this {
-    this.addCommands(dataToCommands(data))
     return this
   }
 
@@ -117,6 +108,16 @@ export class Path2D {
 
   rect(x: number, y: number, w: number, h: number): this {
     this.currentPath.rect(x, y, w, h)
+    return this
+  }
+
+  addCommands(commands: PathCommand[]): this {
+    addPathCommandsToPath2D(commands, this)
+    return this
+  }
+
+  addData(data: string): this {
+    this.addCommands(pathDataToPathCommands(data))
     return this
   }
 

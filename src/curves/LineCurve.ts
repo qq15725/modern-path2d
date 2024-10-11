@@ -56,15 +56,16 @@ export class LineCurve extends Curve {
   }
 
   override transform(matrix: Matrix3): this {
-    matrix.applyToPoint(this.v1)
-    matrix.applyToPoint(this.v2)
+    this.v1.applyMatrix3(matrix)
+    this.v2.applyMatrix3(matrix)
     return this
   }
 
-  override drawTo(ctx: CanvasRenderingContext2D): void {
+  override drawTo(ctx: CanvasRenderingContext2D): this {
     const { v1, v2 } = this
     ctx.moveTo(v1.x, v1.y)
     ctx.lineTo(v2.x, v2.y)
+    return this
   }
 
   override copy(source: LineCurve): this {

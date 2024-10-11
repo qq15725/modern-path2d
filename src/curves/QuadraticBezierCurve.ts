@@ -44,16 +44,17 @@ export class QuadraticBezierCurve extends Curve {
   }
 
   override transform(matrix: Matrix3): this {
-    matrix.applyToPoint(this.v0)
-    matrix.applyToPoint(this.v1)
-    matrix.applyToPoint(this.v2)
+    this.v0.applyMatrix3(matrix)
+    this.v0.applyMatrix3(matrix)
+    this.v0.applyMatrix3(matrix)
     return this
   }
 
-  override drawTo(ctx: CanvasRenderingContext2D): void {
+  override drawTo(ctx: CanvasRenderingContext2D): this {
     const { v0, v1, v2 } = this
     ctx.moveTo(v0.x, v0.y)
     ctx.quadraticCurveTo(v1.x, v1.y, v2.x, v2.y)
+    return this
   }
 
   override copy(source: QuadraticBezierCurve): this {

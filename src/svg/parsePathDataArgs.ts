@@ -12,11 +12,7 @@ const RE = {
 /**
  * from https://github.com/ppvg/svg-numbers (MIT License)
  */
-export function parseFloats(input: any, flags?: number[], stride = 0): number[] {
-  if (typeof input !== 'string') {
-    throw new TypeError(`Invalid input: ${typeof input}`)
-  }
-
+export function parsePathDataArgs(input: string, flags?: number[], stride = 0): number[] {
   // States
   const SEP = 0
   const INT = 1

@@ -1,3 +1,5 @@
+import type { Matrix3 } from './Matrix3'
+
 export class Point2D {
   static get MAX(): Point2D {
     return new Point2D(Infinity, Infinity)
@@ -74,6 +76,16 @@ export class Point2D {
 
   equals(point: Point2D): boolean {
     return this.x === point.x && this.y === point.y
+  }
+
+  applyMatrix3(matrix3: Matrix3): this {
+    const [a, c, tx, b, d, ty] = matrix3.elements
+    const { x, y } = this
+    this.set(
+      (a * x) + (c * y) + tx,
+      (b * x) + (d * y) + ty,
+    )
+    return this
   }
 
   copy(point: Point2D): this {

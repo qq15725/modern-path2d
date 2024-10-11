@@ -1,5 +1,3 @@
 export * from './curves'
 export * from './paths'
-export * from './svg'
 export * from './svg-dom/parseSvg'
-export * from './utils'

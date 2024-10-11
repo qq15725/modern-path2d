@@ -1,5 +1,5 @@
 import { Matrix3 } from '../math'
-import { parseFloats } from '../svg'
+import { parsePathDataArgs } from '../svg'
 import { parseFloatWithUnits } from './parseFloatWithUnits'
 
 const tempTransform0 = new Matrix3()
@@ -41,7 +41,7 @@ function parseNodeTransform(node: SVGElement): Matrix3 {
       const closeParPos = transformText.length
       if (openParPos > 0 && openParPos < closeParPos) {
         const transformType = transformText.slice(0, openParPos)
-        const array = parseFloats(transformText.slice(openParPos + 1))
+        const array = parsePathDataArgs(transformText.slice(openParPos + 1))
         currentTransform.identity()
         switch (transformType) {
           case 'translate':

@@ -1,4 +1,3 @@
-import type { PathCommand } from '../svg'
 import { Point2D } from '../math'
 import { Curve } from './Curve'
 
@@ -10,14 +9,6 @@ export class CircleCurve extends Curve {
     public end = Math.PI * 2,
   ) {
     super()
-  }
-
-  override getMinMax(min = Point2D.MAX, max = Point2D.MIN): { min: Point2D, max: Point2D } {
-    min.x = Math.min(min.x, this.center.x - this.radius)
-    min.y = Math.min(min.y, this.center.y - this.radius)
-    max.x = Math.max(max.x, this.center.x + this.radius)
-    max.y = Math.max(max.y, this.center.y + this.radius)
-    return { min, max }
   }
 
   override getPoint(t: number): Point2D {
@@ -36,12 +27,11 @@ export class CircleCurve extends Curve {
     return new Point2D(Math.cos(_t), Math.sin(_t))
   }
 
-  override getCommands(): PathCommand[] {
-    // TODO
-    return []
-  }
-
-  override drawTo(_ctx: CanvasRenderingContext2D): void {
-    // TODO
+  override getMinMax(min = Point2D.MAX, max = Point2D.MIN): { min: Point2D, max: Point2D } {
+    min.x = Math.min(min.x, this.center.x - this.radius)
+    min.y = Math.min(min.y, this.center.y - this.radius)
+    max.x = Math.max(max.x, this.center.x + this.radius)
+    max.y = Math.max(max.y, this.center.y + this.radius)
+    return { min, max }
   }
 }

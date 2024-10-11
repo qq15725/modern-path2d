@@ -82,7 +82,8 @@ export class HeartCurve extends Curve {
     return this.curves.flatMap(curve => curve.getCommands())
   }
 
-  override drawTo(ctx: CanvasRenderingContext2D): void {
+  override drawTo(ctx: CanvasRenderingContext2D): this {
     this.curves.forEach(curve => curve.drawTo(ctx))
+    return this
   }
 }

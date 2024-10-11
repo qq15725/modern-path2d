@@ -1,5 +1,3 @@
-import type { Point2D } from './Point2D'
-
 export class Matrix3 {
   elements: number[] = []
 
@@ -199,16 +197,6 @@ export class Matrix3 {
       0,
       0,
       1,
-    )
-    return this
-  }
-
-  applyToPoint(point: Point2D): this {
-    const [a, c, tx, b, d, ty] = this.elements
-    const { x, y } = point
-    point.set(
-      (a * x) + (c * y) + tx,
-      (b * x) + (d * y) + ty,
     )
     return this
   }

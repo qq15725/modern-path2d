@@ -10,7 +10,7 @@ function getReflection(a: number, b: number): number {
 /**
  * @link http://www.w3.org/TR/SVG11/implnote.html#PathElementImplementationNotes
  */
-export function addCommandsToPath(path: Path2D, commands: PathCommand[]): void {
+export function addPathCommandsToPath2D(commands: PathCommand[], path: Path2D): void {
   const point = new Point2D()
   const control = new Point2D()
   const firstPoint = new Point2D()
@@ -222,7 +222,7 @@ export function addCommandsToPath(path: Path2D, commands: PathCommand[]): void {
         path,
         command.rx,
         command.ry,
-        command.xAxisRotation,
+        command.angle,
         command.largeArcFlag,
         command.sweepFlag,
         start,

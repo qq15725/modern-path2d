@@ -1,9 +1,9 @@
 import type { PathCommand } from './types'
-import { parseFloats } from './parseFloats'
+import { parsePathDataArgs } from './parsePathDataArgs'
 
 const RE = /[a-df-z][^a-df-z]*/gi
 
-export function dataToCommands(d: string): PathCommand[] {
+export function pathDataToPathCommands(d: string): PathCommand[] {
   const commands: PathCommand[] = []
   const matched = d.match(RE)
   if (!matched) {
@@ -17,7 +17,7 @@ export function dataToCommands(d: string): PathCommand[] {
     switch (type) {
       case 'm':
       case 'M':
-        args = parseFloats(data)
+        args = parsePathDataArgs(data)
         for (let i = 0, len = args.length; i < len; i += 2) {
           if (i === 0) {
             commands.push({ type, x: args[i], y: args[i + 1] })
@@ -29,28 +29,28 @@ export function dataToCommands(d: string): PathCommand[] {
         break
       case 'h':
       case 'H':
-        args = parseFloats(data)
+        args = parsePathDataArgs(data)
         for (let i = 0, len = args.length; i < len; i++) {
           commands.push({ type, x: args[i] })
         }
         break
       case 'v':
       case 'V':
-        args = parseFloats(data)
+        args = parsePathDataArgs(data)
         for (let i = 0, len = args.length; i < len; i++) {
           commands.push({ type, y: args[i] })
         }
         break
       case 'l':
       case 'L':
-        args = parseFloats(data)
+        args = parsePathDataArgs(data)
         for (let i = 0, len = args.length; i < len; i += 2) {
           commands.push({ type, x: args[i], y: args[i + 1] })
         }
         break
       case 'c':
       case 'C':
-        args = parseFloats(data)
+        args = parsePathDataArgs(data)
         for (let i = 0, len = args.length; i < len; i += 6) {
           commands.push({
             type,
@@ -65,7 +65,7 @@ export function dataToCommands(d: string): PathCommand[] {
         break
       case 's':
       case 'S':
-        args = parseFloats(data)
+        args = parsePathDataArgs(data)
         for (let i = 0, len = args.length; i < len; i += 4) {
           commands.push({
             type,
@@ -78,7 +78,7 @@ export function dataToCommands(d: string): PathCommand[] {
         break
       case 'q':
       case 'Q':
-        args = parseFloats(data)
+        args = parsePathDataArgs(data)
         for (let i = 0, len = args.length; i < len; i += 4) {
           commands.push({
             type,
@@ -91,7 +91,7 @@ export function dataToCommands(d: string): PathCommand[] {
         break
       case 't':
       case 'T':
-        args = parseFloats(data)
+        args = parsePathDataArgs(data)
         for (let i = 0, len = args.length; i < len; i += 2) {
           commands.push({
             type,
@@ -102,13 +102,13 @@ export function dataToCommands(d: string): PathCommand[] {
         break
       case 'a':
       case 'A':
-        args = parseFloats(data, [3, 4], 7)
+        args = parsePathDataArgs(data, [3, 4], 7)
         for (let i = 0, len = args.length; i < len; i += 7) {
           commands.push({
             type,
             rx: args[i],
             ry: args[i + 1],
-            xAxisRotation: args[i + 2],
+            angle: args[i + 2],
             largeArcFlag: args[i + 3],
             sweepFlag: args[i + 4],
             x: args[i + 5],

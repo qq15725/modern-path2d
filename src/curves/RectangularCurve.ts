@@ -95,7 +95,8 @@ export class RectangularCurve extends Curve {
     return { min, max }
   }
 
-  override drawTo(ctx: CanvasRenderingContext2D): void {
+  override drawTo(ctx: CanvasRenderingContext2D): this {
     this.curves.forEach(curve => curve.drawTo(ctx))
+    return this
   }
 }
