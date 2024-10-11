@@ -1,6 +1,6 @@
 import { Point2D } from '../math'
-import { catmullRom } from '../utils'
 import { Curve } from './Curve'
+import { catmullRom } from './utils'
 
 export class SplineCurve extends Curve {
   constructor(

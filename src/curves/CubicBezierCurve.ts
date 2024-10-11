@@ -1,7 +1,7 @@
 import type { PathCommand } from '../svg'
 import { type Matrix3, Point2D } from '../math'
-import { cubicBezier } from '../utils'
 import { Curve } from './Curve'
+import { cubicBezier } from './utils'
 
 export class CubicBezierCurve extends Curve {
   constructor(

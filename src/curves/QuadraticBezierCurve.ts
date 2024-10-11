@@ -1,8 +1,8 @@
 import type { Matrix3 } from '../math'
 import type { PathCommand } from '../svg'
 import { Point2D } from '../math'
-import { quadraticBezier } from '../utils'
 import { Curve } from './Curve'
+import { quadraticBezier } from './utils'
 
 export class QuadraticBezierCurve extends Curve {
   constructor(
