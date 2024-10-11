@@ -48,11 +48,13 @@ export function parseStyle(node: SVGElement, style: Record<string, any>, stylesh
   addStyle('fill-rule', 'fillRule')
   addStyle('opacity', 'opacity', clamp)
   addStyle('stroke', 'stroke')
+  addStyle('stroke-dashoffset', 'strokeDashoffset')
+  addStyle('stroke-dasharray', 'strokeDasharray')
+  addStyle('stroke-linecap', 'strokeLineCap')
+  addStyle('stroke-linejoin', 'strokeLineJoin')
+  addStyle('stroke-miterlimit', 'strokeMiterLimit', positive)
   addStyle('stroke-opacity', 'strokeOpacity', clamp)
   addStyle('stroke-width', 'strokeWidth', positive)
-  addStyle('stroke-linejoin', 'strokeLineJoin')
-  addStyle('stroke-linecap', 'strokeLineCap')
-  addStyle('stroke-miterlimit', 'strokeMiterLimit', positive)
   addStyle('visibility', 'visibility')
 
   return style
