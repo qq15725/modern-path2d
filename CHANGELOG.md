@@ -1,3 +1,19 @@
+# [0.1.0](https://github.com/qq15725/modern-path2d/compare/v0.0.5...v0.1.0) (2024-10-11)
+
+
+### Bug Fixes
+
+* QuadraticBezierCurve transform ([d784f9d](https://github.com/qq15725/modern-path2d/commit/d784f9d685dbd2bccf4557ef3aac8bbade6ea869))
+
+
+### Features
+
+* add parseSvg method ([86d5f33](https://github.com/qq15725/modern-path2d/commit/86d5f3398d563d37ab2a8460e1e50b6b4ce13dd6))
+* parse svg strokeDashoffset ([9f8bcd6](https://github.com/qq15725/modern-path2d/commit/9f8bcd65c15e487028397debaa63eb6b94159c85))
+* parseSvg ([4108f99](https://github.com/qq15725/modern-path2d/commit/4108f994c5def25853eb90b09ffa8d6ac2226af5))
+
+
+
 ## [0.0.5](https://github.com/qq15725/modern-path2d/compare/v0.0.4...v0.0.5) (2024-10-09)
 
 
