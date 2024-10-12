@@ -29,16 +29,17 @@ async function main(): Promise<void> {
     path.quadraticCurveTo(125, 100, 125, 62.5)
     path.quadraticCurveTo(125, 25, 75, 25)
 
+    // ellipse
+    path.ellipse(100, 100, 50, 75, Math.PI / 4, 0, 2 * Math.PI)
+
     // arcTo
     path.moveTo(200, 20)
     path.arcTo(200, 130, 50, 20, 40)
-
-    // ellipse
-    path.ellipse(100, 100, 50, 75, Math.PI / 4, 0, 2 * Math.PI)
   })
 
   path1.strokeTo(ctx1)
   ctx2.stroke(path2)
+  console.warn(path1)
 
   const paths = parseSvg(`<svg xmlns="http://www.w3.org/2000/svg" width="72" height="72" viewBox="0 0 72 72" fill="none">
 <path d="M19.9277 47.3589H53.0078" stroke="#71E35B" stroke-width="5" stroke-linecap="round" stroke-dasharray="0.1 8"/>
@@ -46,14 +47,18 @@ async function main(): Promise<void> {
   console.warn(paths)
   paths.forEach(path => path1.addPath(path))
 
-  const pathCommands = JSON.parse(await fetch('/char.json').then(rep => rep.text()))
-  console.warn(pathCommands)
-  path1.addCommands(pathCommands)
-
   ;(document.querySelector('svg path') as SVGPathElement).setAttribute('d', path1.getData())
   ;(document.querySelector('img') as HTMLImageElement).setAttribute('src', path1.getSvgDataUri())
 
   console.warn(path1.getBoundingBox())
+
+  document.body.append(
+    new Path2D(JSON.parse(await fetch('/ni.json').then(rep => rep.text()))).toCanvas(),
+  )
+
+  document.body.append(
+    new Path2D(JSON.parse(await fetch('/lian.json').then(rep => rep.text()))).toCanvas(),
+  )
 }
 
 main()

@@ -51,8 +51,7 @@ export class QuadraticBezierCurve extends Curve {
   }
 
   override drawTo(ctx: CanvasRenderingContext2D): this {
-    const { v0, v1, v2 } = this
-    ctx.moveTo(v0.x, v0.y)
+    const { v1, v2 } = this
     ctx.quadraticCurveTo(v1.x, v1.y, v2.x, v2.y)
     return this
   }

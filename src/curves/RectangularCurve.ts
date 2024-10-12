@@ -7,21 +7,10 @@ export class RectangularCurve extends Curve {
   curves: LineCurve[] = []
   pointT = 0
 
-  get x(): number {
-    return this.center.x - this.rx
-  }
-
-  get y(): number {
-    return this.center.y - this.rx / this.aspectRatio
-  }
-
-  get width(): number {
-    return this.rx * 2
-  }
-
-  get height(): number {
-    return (this.rx / this.aspectRatio) * 2
-  }
+  get x(): number { return this.center.x - this.rx }
+  get y(): number { return this.center.y - this.rx / this.aspectRatio }
+  get width(): number { return this.rx * 2 }
+  get height(): number { return (this.rx / this.aspectRatio) * 2 }
 
   constructor(
     public center: Point2D,

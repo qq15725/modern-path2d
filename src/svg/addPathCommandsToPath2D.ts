@@ -22,9 +22,7 @@ export function addPathCommandsToPath2D(commands: PathCommand[], path: Path2D): 
       doSetFirstPoint = true
       isFirstPoint = false
     }
-    if (
-      command.type === 'm' || command.type === 'M'
-    ) {
+    if (command.type === 'm' || command.type === 'M') {
       if (command.type === 'm') {
         point.x += command.x
         point.y += command.y
@@ -36,12 +34,9 @@ export function addPathCommandsToPath2D(commands: PathCommand[], path: Path2D): 
       control.x = point.x
       control.y = point.y
       path.moveTo(point.x, point.y)
-      if (i === 0)
-        firstPoint.copy(point)
+      firstPoint.copy(point)
     }
-    else if (
-      command.type === 'h' || command.type === 'H'
-    ) {
+    else if (command.type === 'h' || command.type === 'H') {
       if (command.type === 'h') {
         point.x += command.x
       }
@@ -240,7 +235,7 @@ export function addPathCommandsToPath2D(commands: PathCommand[], path: Path2D): 
       }
     }
     else {
-      console.warn(command)
+      console.warn('Unsupported commands', command)
     }
     doSetFirstPoint = false
   }

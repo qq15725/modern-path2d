@@ -124,8 +124,12 @@ export class CurvePath extends Curve {
   }
 
   lineTo(x: number, y: number): this {
-    const curve = new LineCurve(this.currentPoint.clone(), new Point2D(x, y))
-    this.curves.push(curve)
+    this.curves.push(
+      new LineCurve(
+        this.currentPoint.clone(),
+        new Point2D(x, y),
+      ),
+    )
     this.currentPoint.set(x, y)
     return this
   }
@@ -206,7 +210,14 @@ export class CurvePath extends Curve {
   }
 
   override drawTo(ctx: CanvasRenderingContext2D): this {
+    const point = this.curves[0]?.getPoint(0)
+    if (point) {
+      ctx.moveTo(point.x, point.y)
+    }
     this.curves.forEach(curve => curve.drawTo(ctx))
+    if (this.autoClose) {
+      ctx.closePath()
+    }
     return this
   }
 

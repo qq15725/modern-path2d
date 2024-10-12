@@ -43,9 +43,16 @@ export class Path2D<T = any> {
   }
 
   moveTo(x: number, y: number): this {
-    this.currentPath = new CurvePath()
-    this.paths.push(this.currentPath)
-    this.currentPath.moveTo(x, y)
+    const { currentPoint, curves } = this.currentPath
+    if (currentPoint.x !== x || currentPoint.y !== y) {
+      if (curves.length) {
+        this.currentPath = new CurvePath().moveTo(x, y)
+        this.paths.push(this.currentPath)
+      }
+      else {
+        this.currentPath.moveTo(x, y)
+      }
+    }
     return this
   }
 
@@ -136,7 +143,7 @@ export class Path2D<T = any> {
     return this
   }
 
-  getMinMax(min = new Point2D(), max = new Point2D()): { min: Point2D, max: Point2D } {
+  getMinMax(min = Point2D.MAX, max = Point2D.MIN): { min: Point2D, max: Point2D } {
     this.forEachCurve(curve => curve.getMinMax(min, max))
     return { min, max }
   }
@@ -169,8 +176,8 @@ export class Path2D<T = any> {
   }
 
   drawTo(ctx: CanvasRenderingContext2D): void {
-    this.forEachCurve((curve) => {
-      curve.drawTo(ctx)
+    this.paths.forEach((path) => {
+      path.drawTo(ctx)
     })
   }
 
@@ -189,6 +196,24 @@ export class Path2D<T = any> {
     source.paths = this.paths.map(path => path.clone())
     source.userData = this.userData
     return this
+  }
+
+  toCanvas(fill = true): HTMLCanvasElement {
+    const canvas = document.createElement('canvas')
+    const { left, top, width, height } = this.getBoundingBox()
+    canvas.width = width
+    canvas.height = height
+    const ctx = canvas.getContext('2d')
+    if (ctx) {
+      ctx.translate(-left, -top)
+      if (fill) {
+        this.fillTo(ctx)
+      }
+      else {
+        this.strokeTo(ctx)
+      }
+    }
+    return canvas
   }
 
   clone(): Path2D {

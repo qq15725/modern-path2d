@@ -62,8 +62,7 @@ export class LineCurve extends Curve {
   }
 
   override drawTo(ctx: CanvasRenderingContext2D): this {
-    const { v1, v2 } = this
-    ctx.moveTo(v1.x, v1.y)
+    const { v2 } = this
     ctx.lineTo(v2.x, v2.y)
     return this
   }
