@@ -1,3 +1,12 @@
+## [0.1.3](https://github.com/qq15725/modern-path2d/compare/v0.1.2...v0.1.3) (2024-10-12)
+
+
+### Bug Fixes
+
+* fillTo ([afb1f94](https://github.com/qq15725/modern-path2d/commit/afb1f94cc5f7e2c752a84c46db97c02634691650))
+
+
+
 ## [0.1.2](https://github.com/qq15725/modern-path2d/compare/v0.1.1...v0.1.2) (2024-10-11)
 
 
