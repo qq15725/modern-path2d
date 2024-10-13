@@ -221,7 +221,7 @@ export class CurvePath extends Curve {
     return this
   }
 
-  copy(source: CurvePath): this {
+  override copy(source: CurvePath): this {
     super.copy(source)
     this.curves = []
     for (let i = 0, len = source.curves.length; i < len; i++) {

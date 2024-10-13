@@ -192,9 +192,9 @@ export class Path2D<T = any> {
   }
 
   copy(source: Path2D): this {
-    source.currentPath = this.currentPath.clone()
-    source.paths = this.paths.map(path => path.clone())
-    source.userData = this.userData
+    this.currentPath = source.currentPath.clone()
+    this.paths = source.paths.map(path => path.clone())
+    this.userData = source.userData
     return this
   }
 
@@ -216,7 +216,7 @@ export class Path2D<T = any> {
     return canvas
   }
 
-  clone(): Path2D {
-    return new Path2D().copy(this)
+  clone(): this {
+    return new (this.constructor as any)().copy(this)
   }
 }
