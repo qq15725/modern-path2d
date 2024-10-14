@@ -4,11 +4,9 @@ import { parseNode } from './parseNode'
 const dataUri = 'data:image/svg+xml;'
 const base64DataUri = `${dataUri}base64,`
 const utf8DataUri = `${dataUri}charset=utf8,`
-
-export function parseSvg(svg: string | SVGElement): Path2D[] {
-  let node
-  let xml
+export function parseSvgToDom(svg: string | SVGElement): SVGElement {
   if (typeof svg === 'string') {
+    let xml
     if (svg.startsWith(base64DataUri)) {
       svg = svg.substring(base64DataUri.length, svg.length)
       xml = atob(svg)
@@ -20,12 +18,18 @@ export function parseSvg(svg: string | SVGElement): Path2D[] {
     else {
       xml = svg
     }
-    node = new DOMParser().parseFromString(xml, 'image/svg+xml').documentElement as unknown as SVGElement
+    return new DOMParser().parseFromString(
+      xml,
+      'image/svg+xml',
+    ).documentElement as unknown as SVGElement
   }
   else {
-    node = svg
+    return svg
   }
-  return parseNode(node, {
+}
+
+export function parseSvg(svg: string | SVGElement): Path2D[] {
+  return parseNode(parseSvgToDom(svg), {
     fill: '#000',
     fillOpacity: 1,
     strokeOpacity: 1,

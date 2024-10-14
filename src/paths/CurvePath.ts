@@ -96,7 +96,11 @@ export class CurvePath extends Curve {
         last = point
       }
     }
-    if (this.autoClose && points.length > 1 && !points[points.length - 1].equals(points[0])) {
+    if (
+      this.autoClose
+      && points.length > 1
+      && !points[points.length - 1].equals(points[0])
+    ) {
       points.push(points[0])
     }
     return points

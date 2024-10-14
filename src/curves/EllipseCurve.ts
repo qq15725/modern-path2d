@@ -62,37 +62,35 @@ export class EllipseCurve extends Curve {
   }
 
   override getCommands(): PathCommand[] {
-    const { x, y, radiusX, radiusY, startAngle, endAngle, clockwise } = this
-    const anticlockwise = !clockwise
-    const startX = x + radiusX * Math.cos(startAngle)
-    const startY = y + radiusY * Math.sin(startAngle)
-    const endX = x + radiusX * Math.cos(endAngle)
-    const endY = y + radiusY * Math.sin(endAngle)
+    const { x: cx, y: cy, radiusX: rx, radiusY: ry, startAngle, endAngle, clockwise, rotation } = this
+    const startX = cx + rx * Math.cos(startAngle) * Math.cos(rotation) - ry * Math.sin(startAngle) * Math.sin(rotation)
+    const startY = cy + rx * Math.cos(startAngle) * Math.sin(rotation) + ry * Math.sin(startAngle) * Math.cos(rotation)
     const angleDiff = Math.abs(startAngle - endAngle)
     const largeArcFlag = angleDiff > Math.PI ? 1 : 0
-    const sweepFlag = anticlockwise ? 0 : 1
-    const midX = x + radiusX * Math.cos(startAngle + (endAngle - startAngle) / 2)
-    const midY = y + radiusY * Math.sin(startAngle + (endAngle - startAngle) / 2)
+    const sweepFlag = clockwise ? 1 : 0
+    const angle = rotation * 180 / Math.PI
     if (angleDiff >= 2 * Math.PI) {
+      const midAngle = startAngle + Math.PI
+      const midX = cx + rx * Math.cos(midAngle) * Math.cos(rotation) - ry * Math.sin(midAngle) * Math.sin(rotation)
+      const midY = cy + rx * Math.cos(midAngle) * Math.sin(rotation) + ry * Math.sin(midAngle) * Math.cos(rotation)
       return [
         { type: 'M', x: startX, y: startY },
-        { type: 'A', rx: radiusX, ry: radiusY, angle: 0, largeArcFlag: 1, sweepFlag, x: midX, y: midY },
-        { type: 'A', rx: radiusX, ry: radiusY, angle: 0, largeArcFlag: 1, sweepFlag, x: startX, y: startY },
+        { type: 'A', rx, ry, angle, largeArcFlag: 0, sweepFlag, x: midX, y: midY },
+        { type: 'A', rx, ry, angle, largeArcFlag: 0, sweepFlag, x: startX, y: startY },
       ]
     }
     else {
+      const endX = cx + rx * Math.cos(endAngle) * Math.cos(rotation) - ry * Math.sin(endAngle) * Math.sin(rotation)
+      const endY = cy + rx * Math.cos(endAngle) * Math.sin(rotation) + ry * Math.sin(endAngle) * Math.cos(rotation)
       return [
         { type: 'M', x: startX, y: startY },
-        { type: 'A', rx: radiusX, ry: radiusY, angle: 0, largeArcFlag, sweepFlag, x: endX, y: endY },
+        { type: 'A', rx, ry, angle, largeArcFlag, sweepFlag, x: endX, y: endY },
       ]
     }
   }
 
   override drawTo(ctx: CanvasRenderingContext2D): this {
     const { x, y, radiusX, radiusY, rotation, startAngle, endAngle, clockwise } = this
-    const startX = x + radiusX * Math.cos(startAngle)
-    const startY = y + radiusY * Math.sin(startAngle)
-    ctx.moveTo(startX, startY)
     ctx.ellipse(
       x,
       y,
@@ -118,6 +116,25 @@ export class EllipseCurve extends Curve {
       transfEllipseNoSkew(this, matrix)
     }
     return this
+  }
+
+  override getMinMax(min: Point2D = Point2D.MAX, max: Point2D = Point2D.MIN): { min: Point2D, max: Point2D } {
+    const { x: cx, y: cy, radiusX: rx, radiusY: ry, rotation: theta } = this
+    const cosTheta = Math.cos(theta)
+    const sinTheta = Math.sin(theta)
+    const halfWidth = Math.sqrt(
+      rx * rx * cosTheta * cosTheta
+      + ry * ry * sinTheta * sinTheta,
+    )
+    const halfHeight = Math.sqrt(
+      rx * rx * sinTheta * sinTheta
+      + ry * ry * cosTheta * cosTheta,
+    )
+    min.x = Math.min(min.x, cx - halfWidth)
+    min.y = Math.min(min.y, cy - halfHeight)
+    max.x = Math.max(max.x, cx + halfWidth)
+    max.y = Math.max(max.y, cy + halfHeight)
+    return { min, max }
   }
 
   override copy(source: EllipseCurve): this {

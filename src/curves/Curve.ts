@@ -1,6 +1,6 @@
 import type { Matrix3 } from '../math'
 import type { PathCommand } from '../svg'
-import { Point2D } from '../math'
+import { BoundingBox, Point2D } from '../math'
 import { pathCommandsToPathData } from '../svg'
 
 export abstract class Curve {
@@ -131,7 +131,18 @@ export abstract class Curve {
 
   /** overrideable */
   getMinMax(min = Point2D.MAX, max = Point2D.MIN): { min: Point2D, max: Point2D } {
+    this.getPoints().forEach((point) => {
+      min.x = Math.min(min.x, point.x)
+      min.y = Math.min(min.y, point.y)
+      max.x = Math.max(max.x, point.x)
+      max.y = Math.max(max.y, point.y)
+    })
     return { min, max }
+  }
+
+  getBoundingBox(): BoundingBox {
+    const { min, max } = this.getMinMax()
+    return new BoundingBox(min.x, min.y, max.x - min.x, max.y - min.y)
   }
 
   /** overrideable */
