@@ -1,3 +1,12 @@
+## [0.1.6](https://github.com/qq15725/modern-path2d/compare/v0.1.5...v0.1.6) (2024-10-14)
+
+
+### Features
+
+* parseSvg supports base64 dataURI and utf8 dataURI ([013354d](https://github.com/qq15725/modern-path2d/commit/013354d167f6327c8ba92dab344e9850f133a480))
+
+
+
 ## [0.1.5](https://github.com/qq15725/modern-path2d/compare/v0.1.4...v0.1.5) (2024-10-14)
 
 
