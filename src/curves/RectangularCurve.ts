@@ -1,5 +1,5 @@
 import type { PathCommand } from '../svg'
-import { Point2D } from '../math'
+import { type Matrix3, Point2D } from '../math'
 import { Curve } from './Curve'
 import { LineCurve } from './LineCurve'
 
@@ -30,7 +30,7 @@ export class RectangularCurve extends Curve {
       new Point2D(x - offsetX, y + offsetY),
     ]
     for (let i = 0; i < 4; i++) {
-      this.curves.push(new LineCurve(points[i], points[(i + 1) % 4]))
+      this.curves.push(new LineCurve(points[i].clone(), points[(i + 1) % 4].clone()))
     }
   }
 
@@ -75,13 +75,18 @@ export class RectangularCurve extends Curve {
     return new Point2D(v2.y - v1.y, -(v2.x - v1.x)).normalize()
   }
 
-  override getCommands(): PathCommand[] {
-    return this.curves.flatMap(curve => curve.getCommands())
+  override transform(matrix: Matrix3): this {
+    this.curves.forEach(curve => curve.transform(matrix))
+    return this
   }
 
   override getMinMax(min = Point2D.MAX, max = Point2D.MIN): { min: Point2D, max: Point2D } {
     this.curves.forEach(curve => curve.getMinMax(min, max))
     return { min, max }
+  }
+
+  override getCommands(): PathCommand[] {
+    return this.curves.flatMap(curve => curve.getCommands())
   }
 
   override drawTo(ctx: CanvasRenderingContext2D): this {

@@ -78,13 +78,12 @@ export class Point2D {
     return this.x === point.x && this.y === point.y
   }
 
-  applyMatrix3(matrix3: Matrix3): this {
-    const [a, c, tx, b, d, ty] = matrix3.elements
-    const { x, y } = this
-    this.set(
-      (a * x) + (c * y) + tx,
-      (b * x) + (d * y) + ty,
-    )
+  applyMatrix3(m: Matrix3): this {
+    const x = this.x
+    const y = this.y
+    const e = m.elements
+    this.x = e[0] * x + e[3] * y + e[6]
+    this.y = e[1] * x + e[4] * y + e[7]
     return this
   }
 

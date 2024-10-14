@@ -1,3 +1,4 @@
+import type { Matrix3 } from '../math'
 import type { PathCommand } from '../svg'
 import { Point2D } from '../math'
 import { CircleCurve } from './CircleCurve'
@@ -76,6 +77,16 @@ export class HeartCurve extends Curve {
   getNormal(value: number): Point2D {
     const line = this.getCurrentLine(value) as any
     return new Point2D(line.v2.y - line.v1.y, -(line.v2.x - line.v1.x)).normalize()
+  }
+
+  override transform(matrix: Matrix3): this {
+    this.curves.forEach(curve => curve.transform(matrix))
+    return this
+  }
+
+  override getMinMax(min = Point2D.MAX, max = Point2D.MIN): { min: Point2D, max: Point2D } {
+    this.curves.forEach(curve => curve.getMinMax(min, max))
+    return { min, max }
   }
 
   override getCommands(): PathCommand[] {
