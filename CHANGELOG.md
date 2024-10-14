@@ -1,3 +1,12 @@
+## [0.1.7](https://github.com/qq15725/modern-path2d/compare/v0.1.6...v0.1.7) (2024-10-14)
+
+
+### Bug Fixes
+
+* getMinMax ([e90661d](https://github.com/qq15725/modern-path2d/commit/e90661d5007d19f6d0a4de68be6027bcb3629ff9))
+
+
+
 ## [0.1.6](https://github.com/qq15725/modern-path2d/compare/v0.1.5...v0.1.6) (2024-10-14)
 
 
