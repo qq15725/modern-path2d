@@ -1,3 +1,12 @@
+## [0.1.5](https://github.com/qq15725/modern-path2d/compare/v0.1.4...v0.1.5) (2024-10-14)
+
+
+### Bug Fixes
+
+* transform ([16b5daa](https://github.com/qq15725/modern-path2d/commit/16b5daa92338514a41e7b16b17bda151ed226c90))
+
+
+
 ## [0.1.4](https://github.com/qq15725/modern-path2d/compare/v0.1.3...v0.1.4) (2024-10-13)
 
 
