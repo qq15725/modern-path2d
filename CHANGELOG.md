@@ -1,3 +1,12 @@
+## [0.1.10](https://github.com/qq15725/modern-path2d/compare/v0.1.9...v0.1.10) (2024-10-16)
+
+
+### Features
+
+* opz CurvePath ([d788f54](https://github.com/qq15725/modern-path2d/commit/d788f54b6875db26518395b22620998b1fd54c68))
+
+
+
 ## [0.1.9](https://github.com/qq15725/modern-path2d/compare/v0.1.8...v0.1.9) (2024-10-16)
 
 
