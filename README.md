@@ -1,4 +1,4 @@
-<h1 align="center">[WIP] modern-path2d</h1>
+<h1 align="center">modern-path2d</h1>
 
 <p align="center">
   <a href="https://unpkg.com/modern-path2d">
