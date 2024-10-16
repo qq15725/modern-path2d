@@ -1,6 +1,6 @@
 import type { Matrix3 } from '../math'
 import type { PathCommand } from '../svg'
-import { BoundingBox, Point2D } from '../math'
+import { BoundingBox, Vector2 } from '../math'
 import { pathCommandsToPathData } from '../svg'
 
 export abstract class Curve {
@@ -8,22 +8,22 @@ export abstract class Curve {
   protected _cacheArcLengths?: number[]
   protected _needsUpdate = false
 
-  abstract getPoint(t: number, output?: Point2D): Point2D
+  abstract getPoint(t: number, output?: Vector2): Vector2
 
-  getPointAt(u: number, output = new Point2D()): Point2D {
+  getPointAt(u: number, output = new Vector2()): Vector2 {
     return this.getPoint(this.getUtoTmapping(u), output)
   }
 
-  getPoints(divisions = 5): Point2D[] {
-    const points: Point2D[] = []
+  getPoints(divisions = 5): Vector2[] {
+    const points: Vector2[] = []
     for (let i = 0; i <= divisions; i++) {
       points.push(this.getPoint(i / divisions))
     }
     return points
   }
 
-  getSpacedPoints(divisions = 5): Point2D[] {
-    const points: Point2D[] = []
+  getSpacedPoints(divisions = 5): Vector2[] {
+    const points: Vector2[] = []
     for (let i = 0; i <= divisions; i++) {
       points.push(this.getPointAt(i / divisions))
     }
@@ -103,34 +103,33 @@ export abstract class Curve {
     return (i + segmentFraction) / (il - 1)
   }
 
-  getTangent(t: number, output = new Point2D()): Point2D {
+  getTangent(t: number, output = new Vector2()): Vector2 {
     const delta = 0.0001
-    let t1 = t - delta
-    let t2 = t + delta
-    if (t1 < 0)
-      t1 = 0
-    if (t2 > 1)
-      t2 = 1
-    return output.copy(this.getPoint(t2)).sub(this.getPoint(t1)).normalize()
+    const t1 = Math.max(0, t - delta)
+    const t2 = Math.min(1, t + delta)
+    return output.copy(this.getPoint(t2).sub(this.getPoint(t1)).normalize())
   }
 
-  getTangentAt(u: number, output = new Point2D()): Point2D {
+  getTangentAt(u: number, output?: Vector2): Vector2 {
     return this.getTangent(this.getUtoTmapping(u), output)
   }
 
   /** overrideable */
   // eslint-disable-next-line unused-imports/no-unused-vars
-  transform(matrix: Matrix3): this {
+  transformPoint(cb: (point: Vector2) => void): this {
     return this
   }
 
-  /** overrideable */
+  transform(matrix: Matrix3): this {
+    this.transformPoint(point => point.applyMatrix3(matrix))
+    return this
+  }
+
   getDivisions(divisions: number): number {
     return divisions
   }
 
-  /** overrideable */
-  getMinMax(min = Point2D.MAX, max = Point2D.MIN): { min: Point2D, max: Point2D } {
+  getMinMax(min = Vector2.MAX, max = Vector2.MIN): { min: Vector2, max: Vector2 } {
     this.getPoints().forEach((point) => {
       min.x = Math.min(min.x, point.x)
       min.y = Math.min(min.y, point.y)
@@ -145,9 +144,15 @@ export abstract class Curve {
     return new BoundingBox(min.x, min.y, max.x - min.x, max.y - min.y)
   }
 
-  /** overrideable */
   getCommands(): PathCommand[] {
-    return []
+    return this.getPoints().map((point, i) => {
+      if (i === 0) {
+        return { type: 'M', x: point.x, y: point.y }
+      }
+      else {
+        return { type: 'L', x: point.x, y: point.y }
+      }
+    })
   }
 
   getData(): string {

@@ -1,16 +1,15 @@
 import type { PathCommand } from '../svg'
-import { Matrix3, Point2D } from '../math'
+import { Matrix3, Vector2 } from '../math'
 import { Curve } from './Curve'
 
 const tempTransform0 = new Matrix3()
 const tempTransform1 = new Matrix3()
 const tempTransform2 = new Matrix3()
-const tempV2 = new Point2D()
+const tempV2 = new Vector2()
 
 export class EllipseCurve extends Curve {
   constructor(
-    public x = 0,
-    public y = 0,
+    public center = new Vector2(),
     public radiusX = 1,
     public radiusY = 1,
     public startAngle = 0,
@@ -21,7 +20,7 @@ export class EllipseCurve extends Curve {
     super()
   }
 
-  override getPoint(t: number, output = new Point2D()): Point2D {
+  override getPoint(t: number, output = new Vector2()): Vector2 {
     const twoPi = Math.PI * 2
     let deltaAngle = this.endAngle - this.startAngle
     const samePoints = Math.abs(deltaAngle) < Number.EPSILON
@@ -44,15 +43,15 @@ export class EllipseCurve extends Curve {
       }
     }
     const angle = this.startAngle + t * deltaAngle
-    let _x = this.x + this.radiusX * Math.cos(angle)
-    let _y = this.y + this.radiusY * Math.sin(angle)
+    let _x = this.center.x + this.radiusX * Math.cos(angle)
+    let _y = this.center.y + this.radiusY * Math.sin(angle)
     if (this.rotation !== 0) {
       const cos = Math.cos(this.rotation)
       const sin = Math.sin(this.rotation)
-      const tx = _x - this.x
-      const ty = _y - this.y
-      _x = tx * cos - ty * sin + this.x
-      _y = tx * sin + ty * cos + this.y
+      const tx = _x - this.center.x
+      const ty = _y - this.center.y
+      _x = tx * cos - ty * sin + this.center.x
+      _y = tx * sin + ty * cos + this.center.y
     }
     return output.set(_x, _y)
   }
@@ -62,7 +61,8 @@ export class EllipseCurve extends Curve {
   }
 
   override getCommands(): PathCommand[] {
-    const { x: cx, y: cy, radiusX: rx, radiusY: ry, startAngle, endAngle, clockwise, rotation } = this
+    const { center, radiusX: rx, radiusY: ry, startAngle, endAngle, clockwise, rotation } = this
+    const { x: cx, y: cy } = center
     const startX = cx + rx * Math.cos(startAngle) * Math.cos(rotation) - ry * Math.sin(startAngle) * Math.sin(rotation)
     const startY = cy + rx * Math.cos(startAngle) * Math.sin(rotation) + ry * Math.sin(startAngle) * Math.cos(rotation)
     const angleDiff = Math.abs(startAngle - endAngle)
@@ -90,10 +90,10 @@ export class EllipseCurve extends Curve {
   }
 
   override drawTo(ctx: CanvasRenderingContext2D): this {
-    const { x, y, radiusX, radiusY, rotation, startAngle, endAngle, clockwise } = this
+    const { center, radiusX, radiusY, rotation, startAngle, endAngle, clockwise } = this
     ctx.ellipse(
-      x,
-      y,
+      center.x,
+      center.y,
       radiusX,
       radiusY,
       rotation,
@@ -105,10 +105,10 @@ export class EllipseCurve extends Curve {
   }
 
   override transform(matrix: Matrix3): this {
-    tempV2.set(this.x, this.y)
+    tempV2.set(this.center.x, this.center.y)
     tempV2.applyMatrix3(matrix)
-    this.x = tempV2.x
-    this.y = tempV2.y
+    this.center.x = tempV2.x
+    this.center.y = tempV2.y
     if (isTransformSkewed(matrix)) {
       transfEllipseGeneric(this, matrix)
     }
@@ -118,8 +118,14 @@ export class EllipseCurve extends Curve {
     return this
   }
 
-  override getMinMax(min: Point2D = Point2D.MAX, max: Point2D = Point2D.MIN): { min: Point2D, max: Point2D } {
-    const { x: cx, y: cy, radiusX: rx, radiusY: ry, rotation: theta } = this
+  override transformPoint(cb: (point: Vector2) => void): this {
+    cb(this.center)
+    return this
+  }
+
+  override getMinMax(min: Vector2 = Vector2.MAX, max: Vector2 = Vector2.MIN): { min: Vector2, max: Vector2 } {
+    const { center, radiusX: rx, radiusY: ry, rotation: theta } = this
+    const { x: cx, y: cy } = center
     const cosTheta = Math.cos(theta)
     const sinTheta = Math.sin(theta)
     const halfWidth = Math.sqrt(
@@ -139,8 +145,8 @@ export class EllipseCurve extends Curve {
 
   override copy(source: EllipseCurve): this {
     super.copy(source)
-    this.x = source.x
-    this.y = source.y
+    this.center.x = source.center.x
+    this.center.y = source.center.y
     this.radiusX = source.radiusX
     this.radiusY = source.radiusY
     this.startAngle = source.startAngle
@@ -158,8 +164,8 @@ function transfEllipseGeneric(curve: EllipseCurve, m: Matrix3): void {
   const b = curve.radiusY
   const cosTheta = Math.cos(curve.rotation)
   const sinTheta = Math.sin(curve.rotation)
-  const v1 = new Point2D(a * cosTheta, a * sinTheta)
-  const v2 = new Point2D(-b * sinTheta, b * cosTheta)
+  const v1 = new Vector2(a * cosTheta, a * sinTheta)
+  const v2 = new Vector2(-b * sinTheta, b * cosTheta)
   const f1 = v1.applyMatrix3(m)
   const f2 = v2.applyMatrix3(m)
   const mF = tempTransform0.set(
@@ -218,7 +224,7 @@ function transfEllipseGeneric(curve: EllipseCurve, m: Matrix3): void {
     )
     const mDRF = mDsqrt.multiply(mRT).multiply(mF)
     const transformAngle = (phi: number): number => {
-      const { x: cosR, y: sinR } = new Point2D(Math.cos(phi), Math.sin(phi)).applyMatrix3(mDRF)
+      const { x: cosR, y: sinR } = new Vector2(Math.cos(phi), Math.sin(phi)).applyMatrix3(mDRF)
       return Math.atan2(sinR, cosR)
     }
     curve.startAngle = transformAngle(curve.startAngle)

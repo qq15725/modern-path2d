@@ -1,66 +1,65 @@
-import type { Matrix3 } from '../math'
 import type { PathCommand } from '../svg'
-import { Point2D } from '../math'
+import { Vector2 } from '../math'
 import { Curve } from './Curve'
 import { quadraticBezier } from './utils'
 
 export class QuadraticBezierCurve extends Curve {
   constructor(
-    public v0 = new Point2D(),
-    public v1 = new Point2D(),
-    public v2 = new Point2D(),
+    public start = new Vector2(),
+    public control = new Vector2(),
+    public end = new Vector2(),
   ) {
     super()
   }
 
-  override getPoint(t: number, output = new Point2D()): Point2D {
-    const { v0, v1, v2 } = this
+  override getPoint(t: number, output = new Vector2()): Vector2 {
+    const { start, control, end } = this
     output.set(
-      quadraticBezier(t, v0.x, v1.x, v2.x),
-      quadraticBezier(t, v0.y, v1.y, v2.y),
+      quadraticBezier(t, start.x, control.x, end.x),
+      quadraticBezier(t, start.y, control.y, end.y),
     )
     return output
   }
 
-  override transform(matrix: Matrix3): this {
-    this.v0.applyMatrix3(matrix)
-    this.v1.applyMatrix3(matrix)
-    this.v2.applyMatrix3(matrix)
+  override transformPoint(cb: (point: Vector2) => void): this {
+    cb(this.start)
+    cb(this.control)
+    cb(this.end)
     return this
   }
 
-  override getMinMax(min = Point2D.MAX, max = Point2D.MIN): { min: Point2D, max: Point2D } {
-    const { v0, v1, v2 } = this
-    const x1 = 0.5 * (v0.x + v1.x)
-    const y1 = 0.5 * (v0.y + v1.y)
-    const x2 = 0.5 * (v0.x + v2.x)
-    const y2 = 0.5 * (v0.y + v2.y)
-    min.x = Math.min(min.x, v0.x, v2.x, x1, x2)
-    min.y = Math.min(min.y, v0.y, v2.y, y1, y2)
-    max.x = Math.max(max.x, v0.x, v2.x, x1, x2)
-    max.y = Math.max(max.y, v0.y, v2.y, y1, y2)
+  override getMinMax(min = Vector2.MAX, max = Vector2.MIN): { min: Vector2, max: Vector2 } {
+    const { start, control, end } = this
+    const x1 = 0.5 * (start.x + control.x)
+    const y1 = 0.5 * (start.y + control.y)
+    const x2 = 0.5 * (start.x + end.x)
+    const y2 = 0.5 * (start.y + end.y)
+    min.x = Math.min(min.x, start.x, end.x, x1, x2)
+    min.y = Math.min(min.y, start.y, end.y, y1, y2)
+    max.x = Math.max(max.x, start.x, end.x, x1, x2)
+    max.y = Math.max(max.y, start.y, end.y, y1, y2)
     return { min, max }
   }
 
   override getCommands(): PathCommand[] {
-    const { v0, v1, v2 } = this
+    const { start, control, end } = this
     return [
-      { type: 'M', x: v0.x, y: v0.y },
-      { type: 'Q', x1: v1.x, y1: v1.y, x: v2.x, y: v2.y },
+      { type: 'M', x: start.x, y: start.y },
+      { type: 'Q', x1: control.x, y1: control.y, x: end.x, y: end.y },
     ]
   }
 
   override drawTo(ctx: CanvasRenderingContext2D): this {
-    const { v1, v2 } = this
-    ctx.quadraticCurveTo(v1.x, v1.y, v2.x, v2.y)
+    const { control, end } = this
+    ctx.quadraticCurveTo(control.x, control.y, end.x, end.y)
     return this
   }
 
   override copy(source: QuadraticBezierCurve): this {
     super.copy(source)
-    this.v0.copy(source.v0)
-    this.v1.copy(source.v1)
-    this.v2.copy(source.v2)
+    this.start.copy(source.start)
+    this.control.copy(source.control)
+    this.end.copy(source.end)
     return this
   }
 }

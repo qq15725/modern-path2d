@@ -1,10 +1,10 @@
-import { Point2D } from '../math'
+import { Vector2 } from '../math'
 import { Curve } from './Curve'
 import { catmullRom } from './utils'
 
 export class SplineCurve extends Curve {
   constructor(
-    public points: Point2D[] = [],
+    public points: Vector2[] = [],
   ) {
     super()
   }
@@ -13,7 +13,7 @@ export class SplineCurve extends Curve {
     return divisions * this.points.length
   }
 
-  override getPoint(t: number, output = new Point2D()): Point2D {
+  override getPoint(t: number, output = new Vector2()): Vector2 {
     const { points } = this
     const p = (points.length - 1) * t
     const _p = Math.floor(p)
@@ -27,6 +27,11 @@ export class SplineCurve extends Curve {
       catmullRom(weight, p0.y, p1.y, p2.y, p3.y),
     )
     return output
+  }
+
+  override transformPoint(cb: (point: Vector2) => void): this {
+    this.points.forEach(point => cb(point))
+    return this
   }
 
   override copy(source: SplineCurve): this {

@@ -1,64 +1,64 @@
 import type { PathCommand } from '../svg'
-import { type Matrix3, Point2D } from '../math'
+import { Vector2 } from '../math'
 import { Curve } from './Curve'
 import { cubicBezier } from './utils'
 
 export class CubicBezierCurve extends Curve {
   constructor(
-    public v0 = new Point2D(),
-    public v1 = new Point2D(),
-    public v2 = new Point2D(),
-    public v3 = new Point2D(),
+    public start = new Vector2(),
+    public startControl = new Vector2(),
+    public endControl = new Vector2(),
+    public end = new Vector2(),
   ) {
     super()
   }
 
-  override getPoint(t: number, output = new Point2D()): Point2D {
-    const { v0, v1, v2, v3 } = this
+  override getPoint(t: number, output = new Vector2()): Vector2 {
+    const { start, startControl, endControl, end } = this
     output.set(
-      cubicBezier(t, v0.x, v1.x, v2.x, v3.x),
-      cubicBezier(t, v0.y, v1.y, v2.y, v3.y),
+      cubicBezier(t, start.x, startControl.x, endControl.x, end.x),
+      cubicBezier(t, start.y, startControl.y, endControl.y, end.y),
     )
     return output
   }
 
-  override transform(matrix: Matrix3): this {
-    this.v0.applyMatrix3(matrix)
-    this.v1.applyMatrix3(matrix)
-    this.v2.applyMatrix3(matrix)
-    this.v3.applyMatrix3(matrix)
+  override transformPoint(cb: (point: Vector2) => void): this {
+    cb(this.start)
+    cb(this.startControl)
+    cb(this.endControl)
+    cb(this.end)
     return this
   }
 
-  override getMinMax(min = Point2D.MAX, max = Point2D.MIN): { min: Point2D, max: Point2D } {
-    const { v0, v1, v2, v3 } = this
-    min.x = Math.min(min.x, v0.x, v1.x, v2.x, v3.x)
-    min.y = Math.min(min.y, v0.y, v1.y, v2.y, v3.y)
-    max.x = Math.max(max.x, v0.x, v1.x, v2.x, v3.x)
-    max.y = Math.max(max.y, v0.y, v1.y, v2.y, v3.y)
+  override getMinMax(min = Vector2.MAX, max = Vector2.MIN): { min: Vector2, max: Vector2 } {
+    const { start, startControl, endControl, end } = this
+    min.x = Math.min(min.x, start.x, startControl.x, endControl.x, end.x)
+    min.y = Math.min(min.y, start.y, startControl.y, endControl.y, end.y)
+    max.x = Math.max(max.x, start.x, startControl.x, endControl.x, end.x)
+    max.y = Math.max(max.y, start.y, startControl.y, endControl.y, end.y)
     return { min, max }
   }
 
   override getCommands(): PathCommand[] {
-    const { v0, v1, v2, v3 } = this
+    const { start, startControl, endControl, end } = this
     return [
-      { type: 'M', x: v0.x, y: v0.y },
-      { type: 'C', x1: v1.x, y1: v1.y, x2: v2.x, y2: v2.y, x: v3.x, y: v3.y },
+      { type: 'M', x: start.x, y: start.y },
+      { type: 'C', x1: startControl.x, y1: startControl.y, x2: endControl.x, y2: endControl.y, x: end.x, y: end.y },
     ]
   }
 
   override drawTo(ctx: CanvasRenderingContext2D): this {
-    const { v1, v2, v3 } = this
-    ctx.bezierCurveTo(v1.x, v1.y, v2.x, v2.y, v3.x, v3.y)
+    const { startControl, endControl, end } = this
+    ctx.bezierCurveTo(startControl.x, startControl.y, endControl.x, endControl.y, end.x, end.y)
     return this
   }
 
   override copy(source: CubicBezierCurve): this {
     super.copy(source)
-    this.v0.copy(source.v0)
-    this.v1.copy(source.v1)
-    this.v2.copy(source.v2)
-    this.v3.copy(source.v3)
+    this.start.copy(source.start)
+    this.startControl.copy(source.startControl)
+    this.endControl.copy(source.endControl)
+    this.end.copy(source.end)
     return this
   }
 }

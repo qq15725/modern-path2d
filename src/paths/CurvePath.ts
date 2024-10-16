@@ -1,15 +1,15 @@
 import type { PathCommand } from '../svg'
 import { CubicBezierCurve, Curve, EllipseCurve, LineCurve, QuadraticBezierCurve, RectangularCurve, SplineCurve } from '../curves'
-import { Point2D } from '../math'
+import { Vector2 } from '../math'
 
 export class CurvePath extends Curve {
   curves: Curve[] = []
-  currentPoint = new Point2D()
+  currentPoint = new Vector2()
   autoClose = false
 
   protected _cacheLengths: number[] = []
 
-  constructor(points?: Point2D[]) {
+  constructor(points?: Vector2[]) {
     super()
     if (points) {
       this.setFromPoints(points)
@@ -30,7 +30,7 @@ export class CurvePath extends Curve {
     return this
   }
 
-  override getPoint(position: number, output = new Point2D()): Point2D {
+  override getPoint(position: number, output = new Vector2()): Vector2 {
     const d = position * this.getLength()
     const curveLengths = this.getCurveLengths()
     let i = 0
@@ -71,8 +71,8 @@ export class CurvePath extends Curve {
     return lengths
   }
 
-  override getSpacedPoints(divisions = 40): Point2D[] {
-    const points: Point2D[] = []
+  override getSpacedPoints(divisions = 40): Vector2[] {
+    const points: Vector2[] = []
     for (let i = 0; i <= divisions; i++) {
       points.push(this.getPoint(i / divisions))
     }
@@ -82,15 +82,15 @@ export class CurvePath extends Curve {
     return points
   }
 
-  override getPoints(divisions = 12): Point2D[] {
-    const points: Point2D[] = []
+  override getPoints(divisions = 12): Vector2[] {
+    const points: Vector2[] = []
     let last
     for (let i = 0, curves = this.curves; i < curves.length; i++) {
       const curve = curves[i]
-      const pts = curve.getPoints(curve.getDivisions(divisions))
-      for (let i = 0; i < pts.length; i++) {
-        const point = pts[i]
-        if (last && last.equals(point))
+      const curvePoints = curve.getPoints(curve.getDivisions(divisions))
+      for (let i = 0; i < curvePoints.length; i++) {
+        const point = curvePoints[i]
+        if (last?.equals(point))
           continue
         points.push(point)
         last = point
@@ -106,7 +106,7 @@ export class CurvePath extends Curve {
     return points
   }
 
-  setFromPoints(points: Point2D[]): this {
+  setFromPoints(points: Vector2[]): this {
     this.moveTo(points[0].x, points[0].y)
     for (let i = 1, l = points.length; i < l; i++) {
       this.lineTo(points[i].x, points[i].y)
@@ -118,9 +118,9 @@ export class CurvePath extends Curve {
     this.curves.push(
       new CubicBezierCurve(
         this.currentPoint.clone(),
-        new Point2D(cp1x, cp1y),
-        new Point2D(cp2x, cp2y),
-        new Point2D(x, y),
+        new Vector2(cp1x, cp1y),
+        new Vector2(cp2x, cp2y),
+        new Vector2(x, y),
       ),
     )
     this.currentPoint.set(x, y)
@@ -131,7 +131,7 @@ export class CurvePath extends Curve {
     this.curves.push(
       new LineCurve(
         this.currentPoint.clone(),
-        new Point2D(x, y),
+        new Vector2(x, y),
       ),
     )
     this.currentPoint.set(x, y)
@@ -147,8 +147,8 @@ export class CurvePath extends Curve {
     this.curves.push(
       new QuadraticBezierCurve(
         this.currentPoint.clone(),
-        new Point2D(cpx, cpy),
-        new Point2D(x, y),
+        new Vector2(cpx, cpy),
+        new Vector2(x, y),
       ),
     )
     this.currentPoint.set(x, y)
@@ -158,7 +158,7 @@ export class CurvePath extends Curve {
   rect(x: number, y: number, w: number, h: number): this {
     this.curves.push(
       new RectangularCurve(
-        new Point2D(x + w / 2, y + h / 2),
+        new Vector2(x + w / 2, y + h / 2),
         w / 2,
         w / h,
       ),
@@ -167,7 +167,7 @@ export class CurvePath extends Curve {
     return this
   }
 
-  splineThru(points: Point2D[]): this {
+  splineThru(points: Vector2[]): this {
     const npts = [this.currentPoint.clone()].concat(points)
     this.curves.push(new SplineCurve(npts))
     this.currentPoint.copy(points[points.length - 1])
@@ -192,11 +192,19 @@ export class CurvePath extends Curve {
   }
 
   absellipse(x: number, y: number, radiusX: number, radiusY: number, startAngle: number, endAngle: number, clockwise = false, rotation = 0): this {
-    const curve = new EllipseCurve(x, y, radiusX, radiusY, startAngle, endAngle, clockwise, rotation)
+    const curve = new EllipseCurve(
+      new Vector2(x, y),
+      radiusX,
+      radiusY,
+      startAngle,
+      endAngle,
+      clockwise,
+      rotation,
+    )
     if (this.curves.length > 0) {
-      const firstPoint = curve.getPoint(0)
-      if (!firstPoint.equals(this.currentPoint)) {
-        this.lineTo(firstPoint.x, firstPoint.y)
+      const first = curve.getPoint(0)
+      if (!first.equals(this.currentPoint)) {
+        this.lineTo(first.x, first.y)
       }
     }
     this.curves.push(curve)
@@ -208,7 +216,7 @@ export class CurvePath extends Curve {
     return this.curves.flatMap(curve => curve.getCommands())
   }
 
-  override getMinMax(min = Point2D.MAX, max = Point2D.MIN): { min: Point2D, max: Point2D } {
+  override getMinMax(min = Vector2.MAX, max = Vector2.MIN): { min: Vector2, max: Vector2 } {
     this.curves.forEach(curve => curve.getMinMax(min, max))
     return { min, max }
   }

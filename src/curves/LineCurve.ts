@@ -1,42 +1,49 @@
-import type { Matrix3 } from '../math'
 import type { PathCommand } from '../svg'
-import { Point2D } from '../math'
+import { Vector2 } from '../math'
 import { Curve } from './Curve'
 
 export class LineCurve extends Curve {
   constructor(
-    public v1 = new Point2D(),
-    public v2 = new Point2D(),
+    public start = new Vector2(),
+    public end = new Vector2(),
   ) {
     super()
   }
 
-  override getPoint(t: number, output = new Point2D()): Point2D {
+  override getPoint(t: number, output = new Vector2()): Vector2 {
     if (t === 1) {
-      output.copy(this.v2)
+      output.copy(this.end)
     }
     else {
-      output.copy(this.v2).sub(this.v1)
-      output.multiplyScalar(t).add(this.v1)
+      output
+        .copy(this.end)
+        .sub(this.start)
+        .multiplyScalar(t)
+        .add(this.start)
     }
     return output
   }
 
-  override getPointAt(u: number, output = new Point2D()): Point2D {
+  override getPointAt(u: number, output = new Vector2()): Vector2 {
     return this.getPoint(u, output)
   }
 
-  override getTangent(t: number, output = new Point2D()): Point2D {
-    return output.subVectors(this.v2, this.v1).normalize()
+  override getTangent(_t: number, output = new Vector2()): Vector2 {
+    return output.subVectors(this.end, this.start).normalize()
   }
 
-  override getTangentAt(u: number, output = new Point2D()): Point2D {
+  override getTangentAt(u: number, output = new Vector2()): Vector2 {
     return this.getTangent(u, output)
   }
 
-  override transform(matrix: Matrix3): this {
-    this.v1.applyMatrix3(matrix)
-    this.v2.applyMatrix3(matrix)
+  getNormal(t: number, output = new Vector2()): Vector2 {
+    const { x, y } = this.getPoint(t).sub(this.start)
+    return output.set(y, -x).normalize()
+  }
+
+  override transformPoint(cb: (point: Vector2) => void): this {
+    cb(this.start)
+    cb(this.end)
     return this
   }
 
@@ -44,33 +51,33 @@ export class LineCurve extends Curve {
     return 1
   }
 
-  override getMinMax(min = Point2D.MAX, max = Point2D.MIN): { min: Point2D, max: Point2D } {
-    const { v1, v2 } = this
-    min.x = Math.min(min.x, v1.x, v2.x)
-    min.y = Math.min(min.y, v1.y, v2.y)
-    max.x = Math.max(max.x, v1.x, v2.x)
-    max.y = Math.max(max.y, v1.y, v2.y)
+  override getMinMax(min = Vector2.MAX, max = Vector2.MIN): { min: Vector2, max: Vector2 } {
+    const { start, end } = this
+    min.x = Math.min(min.x, start.x, end.x)
+    min.y = Math.min(min.y, start.y, end.y)
+    max.x = Math.max(max.x, start.x, end.x)
+    max.y = Math.max(max.y, start.y, end.y)
     return { min, max }
   }
 
   override getCommands(): PathCommand[] {
-    const { v1, v2 } = this
+    const { start, end } = this
     return [
-      { type: 'M', x: v1.x, y: v1.y },
-      { type: 'L', x: v2.x, y: v2.y },
+      { type: 'M', x: start.x, y: start.y },
+      { type: 'L', x: end.x, y: end.y },
     ]
   }
 
   override drawTo(ctx: CanvasRenderingContext2D): this {
-    const { v2 } = this
-    ctx.lineTo(v2.x, v2.y)
+    const { end } = this
+    ctx.lineTo(end.x, end.y)
     return this
   }
 
   override copy(source: LineCurve): this {
     super.copy(source)
-    this.v1.copy(source.v1)
-    this.v2.copy(source.v2)
+    this.start.copy(source.start)
+    this.end.copy(source.end)
     return this
   }
 }

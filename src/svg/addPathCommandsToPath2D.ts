@@ -1,6 +1,6 @@
 import type { Path2D } from '../paths'
 import type { PathCommand } from './types'
-import { Point2D } from '../math'
+import { Vector2 } from '../math'
 import { parseArcCommand } from './parseArcCommand'
 
 function getReflection(a: number, b: number): number {
@@ -11,9 +11,9 @@ function getReflection(a: number, b: number): number {
  * @link http://www.w3.org/TR/SVG11/implnote.html#PathElementImplementationNotes
  */
 export function addPathCommandsToPath2D(commands: PathCommand[], path: Path2D): void {
-  const point = new Point2D()
-  const control = new Point2D()
-  const firstPoint = new Point2D()
+  const point = new Vector2()
+  const control = new Vector2()
+  const firstPoint = new Vector2()
   let isFirstPoint = true
   let doSetFirstPoint = false
   for (let i = 0, l = commands.length; i < l; i++) {

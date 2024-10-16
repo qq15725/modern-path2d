@@ -1,90 +1,93 @@
-import type { Matrix3 } from '../math'
 import type { PathCommand } from '../svg'
-import { Point2D } from '../math'
+import { Vector2 } from '../math'
 import { CircleCurve } from './CircleCurve'
 import { Curve } from './Curve'
 import { LineCurve } from './LineCurve'
 
 export class HeartCurve extends Curve {
-  curves: Curve[]
-  pointT = 0
+  declare curves: (CircleCurve | LineCurve)[]
+  curveT = 0
 
   constructor(
-    public center: Point2D,
+    public center: Vector2,
     public size: number,
     public start = 0,
     public end = 1,
   ) {
     super()
+    this.update()
+  }
+
+  update(): this {
     const { x, y } = this.center
-    const A = new Point2D(x + 0.5 * this.size, y - 0.5 * this.size)
-    const t = new Point2D(x - 0.5 * this.size, y - 0.5 * this.size)
-    const i = new Point2D(x, y + 0.5 * this.size)
+    const A = new Vector2(x + 0.5 * this.size, y - 0.5 * this.size)
+    const t = new Vector2(x - 0.5 * this.size, y - 0.5 * this.size)
+    const i = new Vector2(x, y + 0.5 * this.size)
     const curve1 = new CircleCurve(A, Math.SQRT1_2 * this.size, -0.25 * Math.PI, 0.75 * Math.PI)
     const curve5 = new CircleCurve(t, Math.SQRT1_2 * this.size, -0.75 * Math.PI, 0.25 * Math.PI)
     const curve3 = new CircleCurve(i, 0.5 * Math.SQRT1_2 * this.size, 0.75 * Math.PI, 1.25 * Math.PI)
-    const e = new Point2D(x, y + this.size)
-    const l = new Point2D(x + this.size, y)
-    const c = new Point2D().lerpVectors(l, e, 0.75)
-    const h = new Point2D(x - this.size, y)
-    const a = new Point2D().lerpVectors(h, e, 0.75)
+    const e = new Vector2(x, y + this.size)
+    const l = new Vector2(x + this.size, y)
+    const c = new Vector2().lerpVectors(l, e, 0.75)
+    const h = new Vector2(x - this.size, y)
+    const a = new Vector2().lerpVectors(h, e, 0.75)
     const curve2 = new LineCurve(l, c)
     const curve4 = new LineCurve(a, h)
     this.curves = [curve1, curve2, curve3, curve4, curve5]
+    return this
   }
 
-  override getPoint(value: number): Point2D {
-    return this.getCurrentLine(value).getPoint(this.pointT)
+  override getPoint(t: number): Vector2 {
+    return this.getCurve(t).getPoint(this.curveT)
   }
 
-  override getPointAt(value: number): Point2D {
-    return this.getPoint(value)
+  override getPointAt(t: number): Vector2 {
+    return this.getPoint(t)
   }
 
-  getCurrentLine(value: number): Curve {
-    let val = (value * (this.end - this.start) + this.start) % 1
+  getCurve(t: number): CircleCurve | LineCurve {
+    let val = (t * (this.end - this.start) + this.start) % 1
     val < 0 && (val += 1)
     val *= (9 * Math.PI) / 8 + 1.5
     let index
-    const t = 0.5 * Math.PI
-    if (val < t) {
+    const PI_1_2 = 0.5 * Math.PI
+    if (val < PI_1_2) {
       index = 0
-      this.pointT = val / t
+      this.curveT = val / PI_1_2
     }
-    else if (val < t + 0.75) {
+    else if (val < PI_1_2 + 0.75) {
       index = 1
-      this.pointT = (val - t) / 0.75
+      this.curveT = (val - PI_1_2) / 0.75
     }
     else if (val < (5 * Math.PI) / 8 + 0.75) {
       index = 2
-      this.pointT = (val - t - 0.75) / (Math.PI / 8)
+      this.curveT = (val - PI_1_2 - 0.75) / (Math.PI / 8)
     }
     else if (val < (5 * Math.PI) / 8 + 1.5) {
       index = 3
-      this.pointT = (val - (5 * Math.PI) / 8 - 0.75) / 0.75
+      this.curveT = (val - (5 * Math.PI) / 8 - 0.75) / 0.75
     }
     else {
       index = 4
-      this.pointT = (val - (5 * Math.PI) / 8 - 1.5) / t
+      this.curveT = (val - (5 * Math.PI) / 8 - 1.5) / PI_1_2
     }
     return this.curves[index]
   }
 
-  override getTangent(value: number): Point2D {
-    return this.getCurrentLine(value).getTangent(this.pointT).normalize()
+  override getTangent(t: number): Vector2 {
+    return this.getCurve(t).getTangent(this.curveT)
   }
 
-  getNormal(value: number): Point2D {
-    const line = this.getCurrentLine(value) as any
-    return new Point2D(line.v2.y - line.v1.y, -(line.v2.x - line.v1.x)).normalize()
+  getNormal(t: number): Vector2 {
+    return this.getCurve(t).getNormal(this.curveT)
   }
 
-  override transform(matrix: Matrix3): this {
-    this.curves.forEach(curve => curve.transform(matrix))
+  override transformPoint(cb: (point: Vector2) => void): this {
+    this.curves.forEach(curve => curve.transformPoint(cb))
     return this
   }
 
-  override getMinMax(min = Point2D.MAX, max = Point2D.MIN): { min: Point2D, max: Point2D } {
+  override getMinMax(min = Vector2.MAX, max = Vector2.MIN): { min: Vector2, max: Vector2 } {
     this.curves.forEach(curve => curve.getMinMax(min, max))
     return { min, max }
   }

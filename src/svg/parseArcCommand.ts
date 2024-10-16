@@ -1,4 +1,4 @@
-import type { Point2D } from '../math'
+import type { Vector2 } from '../math'
 import type { Path2D } from '../paths'
 
 function svgAngle(ux: number, uy: number, vx: number, vy: number): number {
@@ -25,8 +25,8 @@ export function parseArcCommand(
   xAxisRotation: number,
   largeArcFlag: number,
   sweepFlag: number,
-  start: Point2D,
-  end: Point2D,
+  start: Vector2,
+  end: Vector2,
 ): void {
   if (rx === 0 || ry === 0) {
     // draw a line if either of the radii == 0

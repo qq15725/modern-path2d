@@ -1,4 +1,4 @@
-import { Point2D } from './Point2D'
+import { Vector2 } from './Vector2'
 
 export class BoundingBox {
   get x(): number { return this.left }
@@ -43,8 +43,8 @@ export class BoundingBox {
     return this
   }
 
-  getCenterPoint(): Point2D {
-    return new Point2D((this.left + this.right) / 2, (this.top + this.bottom) / 2)
+  getCenterPoint(): Vector2 {
+    return new Vector2((this.left + this.right) / 2, (this.top + this.bottom) / 2)
   }
 
   clone(): BoundingBox {

@@ -1,7 +1,7 @@
 import type { Curve } from '../curves'
 import type { Matrix3 } from '../math'
 import type { PathCommand } from '../svg'
-import { BoundingBox, Point2D } from '../math'
+import { BoundingBox, Vector2 } from '../math'
 import { addPathCommandsToPath2D, pathDataToPathCommands } from '../svg'
 import { CurvePath } from './CurvePath'
 
@@ -103,7 +103,7 @@ export class Path2D<T = any> {
     return this
   }
 
-  splineThru(points: Point2D[]): this {
+  splineThru(points: Vector2[]): this {
     this.currentPath.splineThru(points)
     return this
   }
@@ -113,12 +113,17 @@ export class Path2D<T = any> {
     return this
   }
 
+  transformPoint(cb: (point: Vector2) => void): this {
+    this.forEachCurve(curve => curve.transformPoint(cb))
+    return this
+  }
+
   transform(matrix: Matrix3): this {
     this.forEachCurve(curve => curve.transform(matrix))
     return this
   }
 
-  getMinMax(min = Point2D.MAX, max = Point2D.MIN): { min: Point2D, max: Point2D } {
+  getMinMax(min = Vector2.MAX, max = Vector2.MIN): { min: Vector2, max: Vector2 } {
     this.forEachCurve(curve => curve.getMinMax(min, max))
     return { min, max }
   }

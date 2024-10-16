@@ -1,12 +1,17 @@
 import type { Matrix3 } from './Matrix3'
 
-export class Point2D {
-  static get MAX(): Point2D {
-    return new Point2D(Infinity, Infinity)
+export interface VectorLike {
+  x: number
+  y: number
+}
+
+export class Vector2 {
+  static get MAX(): Vector2 {
+    return new Vector2(Infinity, Infinity)
   }
 
-  static get MIN(): Point2D {
-    return new Point2D(-Infinity, -Infinity)
+  static get MIN(): Vector2 {
+    return new Vector2(-Infinity, -Infinity)
   }
 
   constructor(
@@ -22,25 +27,25 @@ export class Point2D {
     return this
   }
 
-  add(point: Point2D): this {
-    this.x += point.x
-    this.y += point.y
+  add(vec: VectorLike): this {
+    this.x += vec.x
+    this.y += vec.y
     return this
   }
 
-  sub(point: Point2D): this {
-    this.x -= point.x
-    this.y -= point.y
+  sub(vec: VectorLike): this {
+    this.x -= vec.x
+    this.y -= vec.y
     return this
   }
 
-  distanceTo(point: Point2D): number {
-    return Math.sqrt(this.distanceToSquared(point))
+  distanceTo(vec: VectorLike): number {
+    return Math.sqrt(this.distanceToSquared(vec))
   }
 
-  distanceToSquared(point: Point2D): number {
-    const dx = this.x - point.x
-    const dy = this.y - point.y
+  distanceToSquared(vec: VectorLike): number {
+    const dx = this.x - vec.x
+    const dy = this.y - vec.y
     return dx * dx + dy * dy
   }
 
@@ -58,7 +63,7 @@ export class Point2D {
     return this.multiplyScalar(1 / scalar)
   }
 
-  subVectors(a: Point2D, b: Point2D): this {
+  subVectors(a: VectorLike, b: VectorLike): this {
     this.x = a.x - b.x
     this.y = a.y - b.y
     return this
@@ -68,14 +73,14 @@ export class Point2D {
     return this.divideScalar(this.length() || 1)
   }
 
-  lerpVectors(v1: Point2D, v2: Point2D, alpha: number): this {
+  lerpVectors(v1: VectorLike, v2: VectorLike, alpha: number): this {
     this.x = v1.x + (v2.x - v1.x) * alpha
     this.y = v1.y + (v2.y - v1.y) * alpha
     return this
   }
 
-  equals(point: Point2D): boolean {
-    return this.x === point.x && this.y === point.y
+  equals(vec: VectorLike): boolean {
+    return this.x === vec.x && this.y === vec.y
   }
 
   applyMatrix3(m: Matrix3): this {
@@ -87,13 +92,13 @@ export class Point2D {
     return this
   }
 
-  copy(point: Point2D): this {
-    this.x = point.x
-    this.y = point.y
+  copy(vec: VectorLike): this {
+    this.x = vec.x
+    this.y = vec.y
     return this
   }
 
-  clone(): Point2D {
-    return new Point2D(this.x, this.y)
+  clone(): Vector2 {
+    return new Vector2(this.x, this.y)
   }
 }
