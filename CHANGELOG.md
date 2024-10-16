@@ -1,3 +1,12 @@
+## [0.1.8](https://github.com/qq15725/modern-path2d/compare/v0.1.7...v0.1.8) (2024-10-16)
+
+
+### Features
+
+* add transformPoint ([ad7c786](https://github.com/qq15725/modern-path2d/commit/ad7c78663e600d3d3e6c80135be801d9537f208a))
+
+
+
 ## [0.1.7](https://github.com/qq15725/modern-path2d/compare/v0.1.6...v0.1.7) (2024-10-14)
 
 
