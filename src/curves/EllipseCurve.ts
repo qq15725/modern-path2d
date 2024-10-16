@@ -12,10 +12,10 @@ export class EllipseCurve extends Curve {
     public center = new Vector2(),
     public radiusX = 1,
     public radiusY = 1,
+    public rotation = 0,
     public startAngle = 0,
     public endAngle = Math.PI * 2,
     public clockwise = false,
-    public rotation = 0,
   ) {
     super()
   }

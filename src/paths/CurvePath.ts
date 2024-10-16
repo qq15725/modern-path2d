@@ -1,9 +1,12 @@
+import type { VectorLike } from '../math'
 import type { PathCommand } from '../svg'
 import { CubicBezierCurve, Curve, EllipseCurve, LineCurve, QuadraticBezierCurve, RectangularCurve, SplineCurve } from '../curves'
-import { Vector2 } from '../math'
+import { BoundingBox, Vector2 } from '../math'
+import { addPathCommandsToPath2D, pathDataToPathCommands } from '../svg'
 
 export class CurvePath extends Curve {
   curves: Curve[] = []
+  startPoint?: Vector2
   currentPoint = new Vector2()
   autoClose = false
 
@@ -12,7 +15,7 @@ export class CurvePath extends Curve {
   constructor(points?: Vector2[]) {
     super()
     if (points) {
-      this.setFromPoints(points)
+      this.addPoints(points)
     }
   }
 
@@ -21,17 +24,27 @@ export class CurvePath extends Curve {
     return this
   }
 
-  closePath(): this {
-    const start = this.curves[0].getPoint(0)
-    const end = this.curves[this.curves.length - 1].getPoint(1)
-    if (!start.equals(end)) {
-      this.curves.push(new LineCurve(end, start))
+  addPoints(points: Vector2[]): this {
+    this.moveTo(points[0].x, points[0].y)
+    for (let i = 1, len = points.length; i < len; i++) {
+      const { x, y } = points[i]
+      this.lineTo(x, y)
     }
     return this
   }
 
-  override getPoint(position: number, output = new Vector2()): Vector2 {
-    const d = position * this.getLength()
+  addCommands(commands: PathCommand[]): this {
+    addPathCommandsToPath2D(commands, this)
+    return this
+  }
+
+  addData(data: string): this {
+    this.addCommands(pathDataToPathCommands(data))
+    return this
+  }
+
+  override getPoint(t: number, output = new Vector2()): Vector2 {
+    const d = t * this.getLength()
     const curveLengths = this.getCurveLengths()
     let i = 0
     while (i < curveLengths.length) {
@@ -106,11 +119,41 @@ export class CurvePath extends Curve {
     return points
   }
 
-  setFromPoints(points: Vector2[]): this {
-    this.moveTo(points[0].x, points[0].y)
-    for (let i = 1, l = points.length; i < l; i++) {
-      this.lineTo(points[i].x, points[i].y)
+  protected _setCurrentPoint(point: VectorLike): this {
+    this.currentPoint.copy(point)
+    if (!this.startPoint) {
+      this.startPoint = this.currentPoint.clone()
     }
+    return this
+  }
+
+  closePath(): this {
+    const start = this.startPoint
+    if (start) {
+      const end = this.currentPoint
+      if (!start.equals(end)) {
+        this.curves.push(new LineCurve(end, start))
+        this.currentPoint.copy(start)
+      }
+      this.startPoint = undefined
+    }
+    return this
+  }
+
+  moveTo(x: number, y: number): this {
+    this.currentPoint.set(x, y)
+    this.startPoint = this.currentPoint.clone()
+    return this
+  }
+
+  lineTo(x: number, y: number): this {
+    this.curves.push(
+      new LineCurve(
+        this.currentPoint.clone(),
+        new Vector2(x, y),
+      ),
+    )
+    this._setCurrentPoint({ x, y })
     return this
   }
 
@@ -123,23 +166,7 @@ export class CurvePath extends Curve {
         new Vector2(x, y),
       ),
     )
-    this.currentPoint.set(x, y)
-    return this
-  }
-
-  lineTo(x: number, y: number): this {
-    this.curves.push(
-      new LineCurve(
-        this.currentPoint.clone(),
-        new Vector2(x, y),
-      ),
-    )
-    this.currentPoint.set(x, y)
-    return this
-  }
-
-  moveTo(x: number, y: number): this {
-    this.currentPoint.set(x, y)
+    this._setCurrentPoint({ x, y })
     return this
   }
 
@@ -151,7 +178,52 @@ export class CurvePath extends Curve {
         new Vector2(x, y),
       ),
     )
-    this.currentPoint.set(x, y)
+    this._setCurrentPoint({ x, y })
+    return this
+  }
+
+  arc(x: number, y: number, radius: number, startAngle: number, endAngle: number, counterclockwise?: boolean): this {
+    this.ellipse(x, y, radius, radius, 0, startAngle, endAngle, counterclockwise)
+    return this
+  }
+
+  relativeArc(x: number, y: number, radius: number, startAngle: number, endAngle: number, counterclockwise?: boolean): this {
+    const point = this.currentPoint
+    this.arc(x + point.x, y + point.y, radius, startAngle, endAngle, counterclockwise)
+    return this
+  }
+
+  // TODO
+  // eslint-disable-next-line unused-imports/no-unused-vars
+  arcTo(x1: number, y1: number, x2: number, y2: number, radius: number): this {
+    console.warn('Method arcTo not supported yet')
+    return this
+  }
+
+  ellipse(x: number, y: number, radiusX: number, radiusY: number, rotation: number, startAngle: number, endAngle: number, counterclockwise = true): this {
+    const curve = new EllipseCurve(
+      new Vector2(x, y),
+      radiusX,
+      radiusY,
+      rotation,
+      startAngle,
+      endAngle,
+      !counterclockwise,
+    )
+    if (this.curves.length > 0) {
+      const first = curve.getPoint(0)
+      if (!first.equals(this.currentPoint)) {
+        this.lineTo(first.x, first.y)
+      }
+    }
+    this.curves.push(curve)
+    this._setCurrentPoint(curve.getPoint(1))
+    return this
+  }
+
+  relativeEllipse(x: number, y: number, radiusX: number, radiusY: number, rotation: number, startAngle: number, endAngle: number, counterclockwise?: boolean): this {
+    const point = this.currentPoint
+    this.ellipse(x + point.x, y + point.y, radiusX, radiusY, rotation, startAngle, endAngle, counterclockwise)
     return this
   }
 
@@ -163,62 +235,33 @@ export class CurvePath extends Curve {
         w / h,
       ),
     )
-    this.currentPoint.set(x, y)
+    this._setCurrentPoint({ x, y })
     return this
   }
 
   splineThru(points: Vector2[]): this {
-    const npts = [this.currentPoint.clone()].concat(points)
-    this.curves.push(new SplineCurve(npts))
-    this.currentPoint.copy(points[points.length - 1])
+    this.curves.push(new SplineCurve([this.currentPoint.clone()].concat(points)))
+    this._setCurrentPoint(points[points.length - 1])
     return this
   }
 
-  arc(x: number, y: number, radius: number, startAngle: number, endAngle: number, clockwise = false): this {
-    const point = this.currentPoint
-    this.absarc(x + point.x, y + point.y, radius, startAngle, endAngle, clockwise)
+  override transformPoint(cb: (point: Vector2) => void): this {
+    this.curves.forEach(curve => curve.transformPoint(cb))
     return this
-  }
-
-  absarc(x: number, y: number, radius: number, startAngle: number, endAngle: number, clockwise = false): this {
-    this.absellipse(x, y, radius, radius, startAngle, endAngle, clockwise)
-    return this
-  }
-
-  ellipse(x: number, y: number, radiusX: number, radiusY: number, startAngle: number, endAngle: number, clockwise = false, rotation = 0): this {
-    const point = this.currentPoint
-    this.absellipse(x + point.x, y + point.y, radiusX, radiusY, startAngle, endAngle, clockwise, rotation)
-    return this
-  }
-
-  absellipse(x: number, y: number, radiusX: number, radiusY: number, startAngle: number, endAngle: number, clockwise = false, rotation = 0): this {
-    const curve = new EllipseCurve(
-      new Vector2(x, y),
-      radiusX,
-      radiusY,
-      startAngle,
-      endAngle,
-      clockwise,
-      rotation,
-    )
-    if (this.curves.length > 0) {
-      const first = curve.getPoint(0)
-      if (!first.equals(this.currentPoint)) {
-        this.lineTo(first.x, first.y)
-      }
-    }
-    this.curves.push(curve)
-    this.currentPoint.copy(curve.getPoint(1))
-    return this
-  }
-
-  override getCommands(): PathCommand[] {
-    return this.curves.flatMap(curve => curve.getCommands())
   }
 
   override getMinMax(min = Vector2.MAX, max = Vector2.MIN): { min: Vector2, max: Vector2 } {
     this.curves.forEach(curve => curve.getMinMax(min, max))
     return { min, max }
+  }
+
+  getBoundingBox(): BoundingBox {
+    const { min, max } = this.getMinMax()
+    return new BoundingBox(min.x, min.y, max.x - min.x, max.y - min.y)
+  }
+
+  override getCommands(): PathCommand[] {
+    return this.curves.flatMap(curve => curve.getCommands())
   }
 
   override drawTo(ctx: CanvasRenderingContext2D): this {

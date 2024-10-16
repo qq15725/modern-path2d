@@ -1,5 +1,5 @@
 import type { Vector2 } from '../math'
-import type { Path2D } from '../paths'
+import type { CurvePath, Path2D } from '../paths'
 
 function svgAngle(ux: number, uy: number, vx: number, vy: number): number {
   const dot = ux * vx + uy * vy
@@ -19,7 +19,7 @@ function svgAngle(ux: number, uy: number, vx: number, vy: number): number {
  * aX, aY, xRadius, yRadius, aStartAngle, aEndAngle, aClockwise, aRotation
  */
 export function parseArcCommand(
-  path: Path2D,
+  path: Path2D | CurvePath,
   rx: number,
   ry: number,
   xAxisRotation: number,
@@ -70,5 +70,5 @@ export function parseArcCommand(
   // Step 4: Compute θ1 and Δθ
   const theta = svgAngle(1, 0, (x1p - cxp) / rx, (y1p - cyp) / ry)
   const delta = svgAngle((x1p - cxp) / rx, (y1p - cyp) / ry, (-x1p - cxp) / rx, (-y1p - cyp) / ry) % (Math.PI * 2)
-  path.currentPath.absellipse(cx, cy, rx, ry, theta, theta + delta, sweepFlag === 0, xAxisRotation)
+  path.ellipse(cx, cy, rx, ry, xAxisRotation, theta, theta + delta, sweepFlag === 1)
 }

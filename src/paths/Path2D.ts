@@ -13,6 +13,14 @@ export class Path2D<T = any> {
   paths: CurvePath[] = [this.currentPath]
   userData?: T
 
+  get startPoint(): Vector2 | undefined {
+    return this.currentPath.startPoint
+  }
+
+  get currentPoint(): Vector2 | undefined {
+    return this.currentPath.currentPoint
+  }
+
   constructor(path?: Path2D | PathCommand[] | string) {
     if (path) {
       if (path instanceof Path2D) {
@@ -38,13 +46,20 @@ export class Path2D<T = any> {
   }
 
   closePath(): this {
-    this.currentPath.closePath()
+    const startPoint = this.startPoint
+    if (startPoint) {
+      this.currentPath.closePath()
+      if (this.currentPath.curves.length > 0) {
+        this.currentPath = new CurvePath().moveTo(startPoint.x, startPoint.y)
+        this.paths.push(this.currentPath)
+      }
+    }
     return this
   }
 
   moveTo(x: number, y: number): this {
     const { currentPoint, curves } = this.currentPath
-    if (currentPoint.x !== x || currentPoint.y !== y) {
+    if (!currentPoint.equals({ x, y })) {
       if (curves.length) {
         this.currentPath = new CurvePath().moveTo(x, y)
         this.paths.push(this.currentPath)
@@ -72,19 +87,17 @@ export class Path2D<T = any> {
   }
 
   arc(x: number, y: number, radius: number, startAngle: number, endAngle: number, counterclockwise?: boolean): this {
-    this.currentPath.absarc(x, y, radius, startAngle, endAngle, !counterclockwise)
+    this.currentPath.arc(x, y, radius, startAngle, endAngle, counterclockwise)
     return this
   }
 
-  // TODO
-  // eslint-disable-next-line unused-imports/no-unused-vars
   arcTo(x1: number, y1: number, x2: number, y2: number, radius: number): this {
-    console.warn('Method arcTo not supported yet')
+    this.currentPath.arcTo(x1, y1, x2, y2, radius)
     return this
   }
 
   ellipse(x: number, y: number, radiusX: number, radiusY: number, rotation: number, startAngle: number, endAngle: number, counterclockwise?: boolean): this {
-    this.currentPath.absellipse(x, y, radiusX, radiusY, startAngle, endAngle, !counterclockwise, rotation)
+    this.currentPath.ellipse(x, y, radiusX, radiusY, rotation, startAngle, endAngle, counterclockwise)
     return this
   }
 
@@ -134,7 +147,7 @@ export class Path2D<T = any> {
   }
 
   getCommands(): PathCommand[] {
-    return this.paths.flatMap(path => path.curves.flatMap(curve => curve.getCommands()))
+    return this.paths.flatMap(path => path.getCommands())
   }
 
   getData(): string {

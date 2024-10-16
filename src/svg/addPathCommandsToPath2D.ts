@@ -1,4 +1,4 @@
-import type { Path2D } from '../paths'
+import type { CurvePath, Path2D } from '../paths'
 import type { PathCommand } from './types'
 import { Vector2 } from '../math'
 import { parseArcCommand } from './parseArcCommand'
@@ -10,233 +10,187 @@ function getReflection(a: number, b: number): number {
 /**
  * @link http://www.w3.org/TR/SVG11/implnote.html#PathElementImplementationNotes
  */
-export function addPathCommandsToPath2D(commands: PathCommand[], path: Path2D): void {
-  const point = new Vector2()
+export function addPathCommandsToPath2D(commands: PathCommand[], path: Path2D | CurvePath): void {
+  const current = new Vector2()
   const control = new Vector2()
-  const firstPoint = new Vector2()
-  let isFirstPoint = true
-  let doSetFirstPoint = false
   for (let i = 0, l = commands.length; i < l; i++) {
-    const command = commands[i]
-    if (isFirstPoint) {
-      doSetFirstPoint = true
-      isFirstPoint = false
-    }
-    if (command.type === 'm' || command.type === 'M') {
-      if (command.type === 'm') {
-        point.x += command.x
-        point.y += command.y
+    const cmd = commands[i]
+    if (cmd.type === 'm' || cmd.type === 'M') {
+      if (cmd.type === 'm') {
+        current.add(cmd)
       }
       else {
-        point.x = command.x
-        point.y = command.y
+        current.copy(cmd)
       }
-      control.x = point.x
-      control.y = point.y
-      path.moveTo(point.x, point.y)
-      firstPoint.copy(point)
+      path.moveTo(current.x, current.y)
+      control.copy(current)
     }
-    else if (command.type === 'h' || command.type === 'H') {
-      if (command.type === 'h') {
-        point.x += command.x
+    else if (cmd.type === 'h' || cmd.type === 'H') {
+      if (cmd.type === 'h') {
+        current.x += cmd.x
       }
       else {
-        point.x = command.x
+        current.x = cmd.x
       }
-      control.x = point.x
-      control.y = point.y
-      path.lineTo(point.x, point.y)
-      if (doSetFirstPoint)
-        firstPoint.copy(point)
+      path.lineTo(current.x, current.y)
+      control.copy(current)
     }
-    else if (command.type === 'v' || command.type === 'V') {
-      if (command.type === 'v') {
-        point.y += command.y
+    else if (cmd.type === 'v' || cmd.type === 'V') {
+      if (cmd.type === 'v') {
+        current.y += cmd.y
       }
       else {
-        point.y = command.y
+        current.y = cmd.y
       }
-      control.x = point.x
-      control.y = point.y
-      path.lineTo(point.x, point.y)
-      if (doSetFirstPoint)
-        firstPoint.copy(point)
+      path.lineTo(current.x, current.y)
+      control.copy(current)
     }
-    else if (command.type === 'l' || command.type === 'L') {
-      if (command.type === 'l') {
-        point.x += command.x
-        point.y += command.y
+    else if (cmd.type === 'l' || cmd.type === 'L') {
+      if (cmd.type === 'l') {
+        current.add(cmd)
       }
       else {
-        point.x = command.x
-        point.y = command.y
+        current.copy(cmd)
       }
-      control.x = point.x
-      control.y = point.y
-      path.lineTo(point.x, point.y)
-      if (doSetFirstPoint)
-        firstPoint.copy(point)
+      path.lineTo(current.x, current.y)
+      control.copy(current)
     }
-    else if (command.type === 'c' || command.type === 'C') {
-      if (command.type === 'c') {
+    else if (cmd.type === 'c' || cmd.type === 'C') {
+      if (cmd.type === 'c') {
         path.bezierCurveTo(
-          point.x + command.x1,
-          point.y + command.y1,
-          point.x + command.x2,
-          point.y + command.y2,
-          point.x + command.x,
-          point.y + command.y,
+          current.x + cmd.x1,
+          current.y + cmd.y1,
+          current.x + cmd.x2,
+          current.y + cmd.y2,
+          current.x + cmd.x,
+          current.y + cmd.y,
         )
-        control.x = point.x + command.x2
-        control.y = point.y + command.y2
-        point.x += command.x
-        point.y += command.y
+        control.x = current.x + cmd.x2
+        control.y = current.y + cmd.y2
+        current.add(cmd)
       }
       else {
         path.bezierCurveTo(
-          command.x1,
-          command.y1,
-          command.x2,
-          command.y2,
-          command.x,
-          command.y,
+          cmd.x1,
+          cmd.y1,
+          cmd.x2,
+          cmd.y2,
+          cmd.x,
+          cmd.y,
         )
-        control.x = command.x2
-        control.y = command.y2
-        point.x = command.x
-        point.y = command.y
+        control.x = cmd.x2
+        control.y = cmd.y2
+        current.copy(cmd)
       }
-      if (doSetFirstPoint)
-        firstPoint.copy(point)
     }
-    else if (command.type === 's' || command.type === 'S') {
-      if (command.type === 's') {
+    else if (cmd.type === 's' || cmd.type === 'S') {
+      if (cmd.type === 's') {
         path.bezierCurveTo(
-          getReflection(point.x, control.x),
-          getReflection(point.y, control.y),
-          point.x + command.x2,
-          point.y + command.y2,
-          point.x + command.x,
-          point.y + command.y,
+          getReflection(current.x, control.x),
+          getReflection(current.y, control.y),
+          current.x + cmd.x2,
+          current.y + cmd.y2,
+          current.x + cmd.x,
+          current.y + cmd.y,
         )
-        control.x = point.x + command.x2
-        control.y = point.y + command.y2
-        point.x += command.x
-        point.y += command.y
+        control.x = current.x + cmd.x2
+        control.y = current.y + cmd.y2
+        current.add(cmd)
       }
       else {
         path.bezierCurveTo(
-          getReflection(point.x, control.x),
-          getReflection(point.y, control.y),
-          command.x2,
-          command.y2,
-          command.x,
-          command.y,
+          getReflection(current.x, control.x),
+          getReflection(current.y, control.y),
+          cmd.x2,
+          cmd.y2,
+          cmd.x,
+          cmd.y,
         )
-        control.x = command.x2
-        control.y = command.y2
-        point.x = command.x
-        point.y = command.y
+        control.x = cmd.x2
+        control.y = cmd.y2
+        current.copy(cmd)
       }
-      if (doSetFirstPoint)
-        firstPoint.copy(point)
     }
-    else if (command.type === 'q' || command.type === 'Q') {
-      if (command.type === 'q') {
+    else if (cmd.type === 'q' || cmd.type === 'Q') {
+      if (cmd.type === 'q') {
         path.quadraticCurveTo(
-          point.x + command.x1,
-          point.y + command.y1,
-          point.x + command.x,
-          point.y + command.y,
+          current.x + cmd.x1,
+          current.y + cmd.y1,
+          current.x + cmd.x,
+          current.y + cmd.y,
         )
-        control.x = point.x + command.x1
-        control.y = point.y + command.y1
-        point.x += command.x
-        point.y += command.y
+        control.x = current.x + cmd.x1
+        control.y = current.y + cmd.y1
+        current.add(cmd)
       }
       else {
         path.quadraticCurveTo(
-          command.x1,
-          command.y1,
-          command.x,
-          command.y,
+          cmd.x1,
+          cmd.y1,
+          cmd.x,
+          cmd.y,
         )
-        control.x = command.x1
-        control.y = command.y1
-        point.x = command.x
-        point.y = command.y
+        control.x = cmd.x1
+        control.y = cmd.y1
+        current.copy(cmd)
       }
-      if (doSetFirstPoint)
-        firstPoint.copy(point)
     }
-    else if (command.type === 't' || command.type === 'T') {
-      const rx = getReflection(point.x, control.x)
-      const ry = getReflection(point.y, control.y)
+    else if (cmd.type === 't' || cmd.type === 'T') {
+      const rx = getReflection(current.x, control.x)
+      const ry = getReflection(current.y, control.y)
       control.x = rx
       control.y = ry
-      if (command.type === 't') {
+      if (cmd.type === 't') {
         path.quadraticCurveTo(
           rx,
           ry,
-          point.x + command.x,
-          point.y + command.y,
+          current.x + cmd.x,
+          current.y + cmd.y,
         )
-        point.x += command.x
-        point.y += command.y
+        current.add(cmd)
       }
       else {
         path.quadraticCurveTo(
           rx,
           ry,
-          command.x,
-          command.y,
+          cmd.x,
+          cmd.y,
         )
-        point.x = command.x
-        point.y = command.y
+        current.copy(cmd)
       }
-      if (doSetFirstPoint)
-        firstPoint.copy(point)
     }
-    else if (command.type === 'a' || command.type === 'A') {
-      if (command.type === 'a') {
-        if (command.x === 0 && command.y === 0)
+    else if (cmd.type === 'a' || cmd.type === 'A') {
+      const start = current.clone()
+      if (cmd.type === 'a') {
+        if (cmd.x === 0 && cmd.y === 0)
           continue
-        point.x += command.x
-        point.y += command.y
+        current.add(cmd)
       }
       else {
-        if (command.x === point.x && command.y === point.y)
+        if (current.equals(cmd))
           continue
-        point.x = command.x
-        point.y = command.y
+        current.copy(cmd)
       }
-      const start = point.clone()
-      control.x = point.x
-      control.y = point.y
+      control.copy(current)
       parseArcCommand(
         path,
-        command.rx,
-        command.ry,
-        command.angle,
-        command.largeArcFlag,
-        command.sweepFlag,
+        cmd.rx,
+        cmd.ry,
+        cmd.angle,
+        cmd.largeArcFlag,
+        cmd.sweepFlag,
         start,
-        point,
+        current,
       )
-      if (doSetFirstPoint)
-        firstPoint.copy(point)
     }
-    else if (command.type === 'z' || command.type === 'Z') {
-      path.currentPath.autoClose = true
-      if (path.currentPath.curves.length > 0) {
-        point.copy(firstPoint)
-        path.currentPath.currentPoint.copy(point)
-        isFirstPoint = true
+    else if (cmd.type === 'z' || cmd.type === 'Z') {
+      if (path.startPoint) {
+        current.copy(path.startPoint)
       }
+      path.closePath()
     }
     else {
-      console.warn('Unsupported commands', command)
+      console.warn('Unsupported commands', cmd)
     }
-    doSetFirstPoint = false
   }
 }
