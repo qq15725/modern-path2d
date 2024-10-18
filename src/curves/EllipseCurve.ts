@@ -56,10 +56,6 @@ export class EllipseCurve extends Curve {
     return output.set(_x, _y)
   }
 
-  override getDivisions(divisions: number = 12): number {
-    return divisions * 2
-  }
-
   override getCommands(): PathCommand[] {
     const { center, radiusX: rx, radiusY: ry, startAngle, endAngle, clockwise, rotation } = this
     const { x: cx, y: cy } = center

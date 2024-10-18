@@ -9,10 +9,6 @@ export class SplineCurve extends Curve {
     super()
   }
 
-  override getDivisions(divisions: number = 12): number {
-    return divisions * this.points.length
-  }
-
   override getPoint(t: number, output = new Vector2()): Vector2 {
     const { points } = this
     const p = (points.length - 1) * t

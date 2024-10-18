@@ -125,10 +125,6 @@ export abstract class Curve {
     return this
   }
 
-  getDivisions(divisions: number): number {
-    return divisions
-  }
-
   getMinMax(min = Vector2.MAX, max = Vector2.MIN): { min: Vector2, max: Vector2 } {
     this.getPoints().forEach((point) => {
       min.x = Math.min(min.x, point.x)

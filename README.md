@@ -69,12 +69,18 @@ parsedPaths.forEach((parsedPath) => {
   path.addPath(parsedPath)
 })
 
-// export to ctx
-path.strokeTo(document.getElementById('canvas').getContext('2d'))
-
 // export path data
 console.log(path.getData())
 
 // export path commands
 console.log(path.getCommands())
+
+// export to ctx
+path.drawTo(document.getElementById('canvas').getContext('2d'))
+
+// export to canvas
+document.body.append(path.toCanvas())
+
+// export to svg
+document.body.append(path.toSvg())
 ```

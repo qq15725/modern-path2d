@@ -47,10 +47,6 @@ export class LineCurve extends Curve {
     return this
   }
 
-  override getDivisions(): number {
-    return 1
-  }
-
   override getMinMax(min = Vector2.MAX, max = Vector2.MIN): { min: Vector2, max: Vector2 } {
     const { start, end } = this
     min.x = Math.min(min.x, start.x, end.x)

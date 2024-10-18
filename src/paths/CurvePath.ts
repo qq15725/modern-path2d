@@ -97,10 +97,11 @@ export class CurvePath extends Curve {
 
   override getPoints(divisions = 12): Vector2[] {
     const points: Vector2[] = []
+    const curves = this.curves
     let last
-    for (let i = 0, curves = this.curves; i < curves.length; i++) {
+    for (let i = 0, len = curves.length; i < len; i++) {
       const curve = curves[i]
-      const curvePoints = curve.getPoints(curve.getDivisions(divisions))
+      const curvePoints = curve.getPoints(divisions)
       for (let i = 0; i < curvePoints.length; i++) {
         const point = curvePoints[i]
         if (last?.equals(point))
@@ -132,7 +133,7 @@ export class CurvePath extends Curve {
     if (start) {
       const end = this.currentPoint
       if (!start.equals(end)) {
-        this.curves.push(new LineCurve(end, start))
+        this.curves.push(new LineCurve(end.clone(), start))
         this.currentPoint.copy(start)
       }
       this.startPoint = undefined
@@ -147,37 +148,43 @@ export class CurvePath extends Curve {
   }
 
   lineTo(x: number, y: number): this {
-    this.curves.push(
-      new LineCurve(
-        this.currentPoint.clone(),
-        new Vector2(x, y),
-      ),
-    )
+    if (!this.currentPoint.equals({ x, y })) {
+      this.curves.push(
+        new LineCurve(
+          this.currentPoint.clone(),
+          new Vector2(x, y),
+        ),
+      )
+    }
     this._setCurrentPoint({ x, y })
     return this
   }
 
   bezierCurveTo(cp1x: number, cp1y: number, cp2x: number, cp2y: number, x: number, y: number): this {
-    this.curves.push(
-      new CubicBezierCurve(
-        this.currentPoint.clone(),
-        new Vector2(cp1x, cp1y),
-        new Vector2(cp2x, cp2y),
-        new Vector2(x, y),
-      ),
-    )
+    if (!this.currentPoint.equals({ x, y })) {
+      this.curves.push(
+        new CubicBezierCurve(
+          this.currentPoint.clone(),
+          new Vector2(cp1x, cp1y),
+          new Vector2(cp2x, cp2y),
+          new Vector2(x, y),
+        ),
+      )
+    }
     this._setCurrentPoint({ x, y })
     return this
   }
 
   quadraticCurveTo(cpx: number, cpy: number, x: number, y: number): this {
-    this.curves.push(
-      new QuadraticBezierCurve(
-        this.currentPoint.clone(),
-        new Vector2(cpx, cpy),
-        new Vector2(x, y),
-      ),
-    )
+    if (!this.currentPoint.equals({ x, y })) {
+      this.curves.push(
+        new QuadraticBezierCurve(
+          this.currentPoint.clone(),
+          new Vector2(cpx, cpy),
+          new Vector2(x, y),
+        ),
+      )
+    }
     this._setCurrentPoint({ x, y })
     return this
   }
