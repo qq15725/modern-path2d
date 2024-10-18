@@ -1,3 +1,12 @@
+## [0.1.11](https://github.com/qq15725/modern-path2d/compare/v0.1.10...v0.1.11) (2024-10-18)
+
+
+### Bug Fixes
+
+* path2D render from parseSvg ([468bb80](https://github.com/qq15725/modern-path2d/commit/468bb80e13f93ad0bd51d38f68d725215769a6cb))
+
+
+
 ## [0.1.10](https://github.com/qq15725/modern-path2d/compare/v0.1.9...v0.1.10) (2024-10-16)
 
 
