@@ -144,17 +144,33 @@ export class Path2D {
 
   transform(matrix: Matrix3): this {
     this.forEachCurve(curve => curve.transform(matrix))
+    const vec = new Vector2()
+    const transformX = (x: number): number => {
+      vec.x = x
+      vec.applyMatrix3(matrix)
+      return vec.x
+    }
+    const style = this.style
+    if (style.strokeWidth) {
+      style.strokeWidth = transformX(style.strokeWidth)
+    }
+    if (style.strokeDashoffset) {
+      style.strokeDashoffset = transformX(style.strokeDashoffset)
+    }
+    if (style.strokeDasharray) {
+      style.strokeDasharray = style.strokeDasharray.map(v => transformX(v))
+    }
     return this
   }
 
   getMinMax(min = Vector2.MAX, max = Vector2.MIN, withStyle = true): { min: Vector2, max: Vector2 } {
     this.forEachCurve(curve => curve.getMinMax(min, max))
     if (withStyle) {
-      const strokeWidth = this.strokeWidth / 2
-      min.x -= strokeWidth
-      min.y -= strokeWidth
-      max.x += strokeWidth
-      max.y += strokeWidth
+      const strokeHalfWidth = this.strokeWidth / 2
+      min.x -= strokeHalfWidth
+      min.y -= strokeHalfWidth
+      max.x += strokeHalfWidth
+      max.y += strokeHalfWidth
     }
     return { min, max }
   }
