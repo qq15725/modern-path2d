@@ -1,3 +1,12 @@
+## [0.1.12](https://github.com/qq15725/modern-path2d/compare/v0.1.11...v0.1.12) (2024-10-18)
+
+
+### Features
+
+* PathDrawStyle ([d53b8b3](https://github.com/qq15725/modern-path2d/commit/d53b8b36c1d13a0d8d6f20211a19f2a34bab5a13))
+
+
+
 ## [0.1.11](https://github.com/qq15725/modern-path2d/compare/v0.1.10...v0.1.11) (2024-10-18)
 
 
