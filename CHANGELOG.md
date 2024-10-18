@@ -1,3 +1,12 @@
+## [0.1.14](https://github.com/qq15725/modern-path2d/compare/v0.1.13...v0.1.14) (2024-10-18)
+
+
+### Features
+
+* getMinMax withStyle ([94fb995](https://github.com/qq15725/modern-path2d/commit/94fb9950ffec0cd2e57f16a0763d77f321198565))
+
+
+
 ## [0.1.13](https://github.com/qq15725/modern-path2d/compare/v0.1.12...v0.1.13) (2024-10-18)
 
 
