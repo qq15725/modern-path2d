@@ -144,22 +144,6 @@ export class Path2D {
 
   transform(matrix: Matrix3): this {
     this.forEachCurve(curve => curve.transform(matrix))
-    const vec = new Vector2()
-    const transformX = (x: number): number => {
-      vec.x = x
-      vec.applyMatrix3(matrix)
-      return vec.x
-    }
-    const style = this.style
-    if (style.strokeWidth) {
-      style.strokeWidth = transformX(style.strokeWidth)
-    }
-    if (style.strokeDashoffset) {
-      style.strokeDashoffset = transformX(style.strokeDashoffset)
-    }
-    if (style.strokeDasharray) {
-      style.strokeDasharray = style.strokeDasharray.map(v => transformX(v))
-    }
     return this
   }
 
