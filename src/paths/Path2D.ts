@@ -1,17 +1,19 @@
 import type { Curve } from '../curves'
 import type { Matrix3 } from '../math'
-import type { PathCommand } from '../svg'
+import type { PathCommand, PathStyle } from '../svg'
+import { setCanvasContextByPath } from '../canvas'
 import { BoundingBox, Vector2 } from '../math'
 import { addPathCommandsToPath2D, pathDataToPathCommands } from '../svg'
 import { CurvePath } from './CurvePath'
+import { toKebabCase } from './utils'
 
 /**
  * @see https://developer.mozilla.org/zh-CN/docs/Web/API/Path2D
  */
-export class Path2D<T = any> {
+export class Path2D {
   currentPath = new CurvePath()
   paths: CurvePath[] = [this.currentPath]
-  userData?: T
+  style: PathStyle = {}
 
   get startPoint(): Vector2 | undefined {
     return this.currentPath.startPoint
@@ -19,6 +21,15 @@ export class Path2D<T = any> {
 
   get currentPoint(): Vector2 | undefined {
     return this.currentPath.currentPoint
+  }
+
+  get strokeWidth(): number {
+    return this.style.strokeWidth
+      ?? (
+        (this.style.stroke ?? 'none') === 'none'
+          ? 0
+          : 1
+      )
   }
 
   constructor(path?: Path2D | PathCommand[] | string) {
@@ -141,9 +152,17 @@ export class Path2D<T = any> {
     return { min, max }
   }
 
-  getBoundingBox(): BoundingBox {
+  getBoundingBox(withStrokeWidth = true): BoundingBox {
     const { min, max } = this.getMinMax()
-    return new BoundingBox(min.x, min.y, max.x - min.x, max.y - min.y)
+    const bbox = new BoundingBox(min.x, min.y, max.x - min.x, max.y - min.y)
+    if (withStrokeWidth) {
+      const strokeWidth = this.strokeWidth
+      bbox.left -= strokeWidth / 2
+      bbox.top -= strokeWidth / 2
+      bbox.width += strokeWidth
+      bbox.height += strokeWidth
+    }
+    return bbox
   }
 
   getCommands(): PathCommand[] {
@@ -154,53 +173,82 @@ export class Path2D<T = any> {
     return this.paths.map(path => path.getData()).join(' ')
   }
 
-  getSvgString(): string {
+  getSvgPathXml(): string {
+    const style: Record<string, any> = {
+      ...this.style,
+      fill: this.style.fill ?? '#000',
+      stroke: this.style.stroke ?? 'none',
+    }
+    const cssStyle: Record<string, any> = {}
+    for (const key in style) {
+      if (style[key] !== undefined) {
+        cssStyle[toKebabCase(key)] = style[key]
+      }
+    }
+    Object.assign(cssStyle, {
+      'stroke-width': `${this.strokeWidth}px`,
+    })
+    let cssText = ''
+    for (const key in cssStyle) {
+      if (cssStyle[key] !== undefined) {
+        cssText += `${key}:${cssStyle[key]};`
+      }
+    }
+    return `<path d="${this.getData()}" style="${cssText}"></path>`
+  }
+
+  getSvgXml(): string {
     const { x, y, width, height } = this.getBoundingBox()
-    const strokeWidth = 1
-    return `<svg viewBox="${x - strokeWidth} ${y - strokeWidth} ${width + strokeWidth * 2} ${height + strokeWidth * 2}" xmlns="http://www.w3.org/2000/svg"><path fill="none" stroke="currentColor" d="${this.getData()}"></path></svg>`
+    const path = this.getSvgPathXml()
+    return `<svg viewBox="${x} ${y} ${width} ${height}" width="${width}px" height="${height}px" xmlns="http://www.w3.org/2000/svg">${path}</svg>`
   }
 
   getSvgDataUri(): string {
-    return `data:image/svg+xml;base64,${btoa(this.getSvgString())}`
+    return `data:image/svg+xml;base64,${btoa(this.getSvgXml())}`
   }
 
   drawTo(ctx: CanvasRenderingContext2D): void {
+    const {
+      fill = '#000',
+      stroke = 'none',
+    } = this.style
+    setCanvasContextByPath(ctx, this)
     this.paths.forEach((path) => {
       path.drawTo(ctx)
     })
-  }
-
-  strokeTo(ctx: CanvasRenderingContext2D): void {
-    this.drawTo(ctx)
-    ctx.stroke()
-  }
-
-  fillTo(ctx: CanvasRenderingContext2D): void {
-    this.drawTo(ctx)
-    ctx.fill()
+    if (fill !== 'none') {
+      ctx.fill()
+    }
+    if (stroke !== 'none') {
+      ctx.stroke()
+    }
   }
 
   copy(source: Path2D): this {
     this.currentPath = source.currentPath.clone()
     this.paths = source.paths.map(path => path.clone())
-    this.userData = source.userData
+    this.style = { ...source.style }
     return this
   }
 
-  toCanvas(fill = true): HTMLCanvasElement {
-    const canvas = document.createElement('canvas')
+  toSvg(): SVGElement {
+    return new DOMParser()
+      .parseFromString(this.getSvgXml(), 'image/svg+xml')
+      .documentElement as unknown as SVGElement
+  }
+
+  toCanvas(pixelRatio = 2): HTMLCanvasElement {
     const { left, top, width, height } = this.getBoundingBox()
-    canvas.width = width
-    canvas.height = height
+    const canvas = document.createElement('canvas')
+    canvas.width = width * pixelRatio
+    canvas.height = height * pixelRatio
+    canvas.style.width = `${width}px`
+    canvas.style.height = `${height}px`
     const ctx = canvas.getContext('2d')
     if (ctx) {
+      ctx.scale(pixelRatio, pixelRatio)
       ctx.translate(-left, -top)
-      if (fill) {
-        this.fillTo(ctx)
-      }
-      else {
-        this.strokeTo(ctx)
-      }
+      this.drawTo(ctx)
     }
     return canvas
   }

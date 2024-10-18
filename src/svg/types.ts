@@ -12,3 +12,24 @@ export type PathCommand =
   | { type: 't' | 'T', x: number, y: number }
   | { type: 'a' | 'A', rx: number, ry: number, angle: number, largeArcFlag: number, sweepFlag: number, x: number, y: number }
   | { type: 'z' | 'Z' }
+
+export type FillRule = 'nonzero' | 'evenodd'
+export type StrokeLinecap = 'butt' | 'round' | 'square'
+export type StrokeLinejoin = 'arcs' | 'bevel' | 'miter' | 'miter-clip' | 'round'
+
+export interface PathStyle {
+  [key: string]: any
+  fill?: string
+  fillOpacity?: number
+  fillRule?: FillRule
+  opacity?: number
+  stroke?: string
+  strokeOpacity?: number
+  strokeWidth?: number
+  strokeLinecap?: StrokeLinecap
+  strokeLinejoin?: StrokeLinejoin
+  strokeMiterlimit?: number
+  strokeDasharray?: number[]
+  strokeDashoffset?: number
+  visibility?: string
+}

@@ -92,7 +92,7 @@ export function parseNode(
     // }
     path.transform(currentTransform)
     paths.push(path)
-    path.userData = { node, style }
+    path.style = style
   }
 
   const childNodes = node.childNodes

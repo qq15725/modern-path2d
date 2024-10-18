@@ -1,4 +1,6 @@
+export * from './canvas'
 export * from './curves'
 export * from './math'
 export * from './paths'
+export * from './svg'
 export * from './svg-dom/parseSvg'

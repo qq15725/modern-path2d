@@ -43,18 +43,22 @@ export function parseStyle(node: SVGElement, style: Record<string, any>, stylesh
     return Math.max(0, parseFloatWithUnits(v))
   }
 
+  function array(v: string): number[] {
+    return v.split(' ').filter(v => v !== '').map(v => parseFloatWithUnits(v))
+  }
+
   addStyle('fill', 'fill')
   addStyle('fill-opacity', 'fillOpacity', clamp)
   addStyle('fill-rule', 'fillRule')
   addStyle('opacity', 'opacity', clamp)
   addStyle('stroke', 'stroke')
-  addStyle('stroke-dashoffset', 'strokeDashoffset')
-  addStyle('stroke-dasharray', 'strokeDasharray')
-  addStyle('stroke-linecap', 'strokeLineCap')
-  addStyle('stroke-linejoin', 'strokeLineJoin')
-  addStyle('stroke-miterlimit', 'strokeMiterLimit', positive)
   addStyle('stroke-opacity', 'strokeOpacity', clamp)
   addStyle('stroke-width', 'strokeWidth', positive)
+  addStyle('stroke-linecap', 'strokeLinecap')
+  addStyle('stroke-linejoin', 'strokeLinejoin')
+  addStyle('stroke-miterlimit', 'strokeMiterlimit', positive)
+  addStyle('stroke-dasharray', 'strokeDasharray', array)
+  addStyle('stroke-dashoffset', 'strokeDashoffset', parseFloatWithUnits)
   addStyle('visibility', 'visibility')
 
   return style
