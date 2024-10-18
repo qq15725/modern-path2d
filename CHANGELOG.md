@@ -1,3 +1,12 @@
+## [0.1.15](https://github.com/qq15725/modern-path2d/compare/v0.1.14...v0.1.15) (2024-10-18)
+
+
+### Bug Fixes
+
+* CubicBezierCurve min max ([5f0f0e5](https://github.com/qq15725/modern-path2d/commit/5f0f0e5dc2e3b8a1a2a226f74e8cdac64fd4f7b8))
+
+
+
 ## [0.1.14](https://github.com/qq15725/modern-path2d/compare/v0.1.13...v0.1.14) (2024-10-18)
 
 
