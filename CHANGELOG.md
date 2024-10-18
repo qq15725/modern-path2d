@@ -1,3 +1,7 @@
+## [0.1.16](https://github.com/qq15725/modern-path2d/compare/v0.1.15...v0.1.16) (2024-10-18)
+
+
+
 ## [0.1.15](https://github.com/qq15725/modern-path2d/compare/v0.1.14...v0.1.15) (2024-10-18)
 
 
