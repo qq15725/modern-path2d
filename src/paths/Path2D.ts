@@ -1,7 +1,7 @@
 import type { Curve } from '../curves'
 import type { Matrix3 } from '../math'
-import type { PathCommand, PathStyle } from '../svg'
-import { setCanvasContextByPath } from '../canvas'
+import type { PathCommand, PathStyle } from '../types'
+import { setCanvasContext } from '../canvas'
 import { BoundingBox, Vector2 } from '../math'
 import { addPathCommandsToPath2D, pathDataToPathCommands } from '../svg'
 import { CurvePath } from './CurvePath'
@@ -13,7 +13,7 @@ import { toKebabCase } from './utils'
 export class Path2D {
   currentPath = new CurvePath()
   paths: CurvePath[] = [this.currentPath]
-  style: PathStyle = {}
+  style: Partial<PathStyle> = {}
 
   get startPoint(): Vector2 | undefined {
     return this.currentPath.startPoint
@@ -207,12 +207,11 @@ export class Path2D {
     return `data:image/svg+xml;base64,${btoa(this.getSvgXml())}`
   }
 
-  drawTo(ctx: CanvasRenderingContext2D): void {
-    const {
-      fill = '#000',
-      stroke = 'none',
-    } = this.style
-    setCanvasContextByPath(ctx, this)
+  drawTo(ctx: CanvasRenderingContext2D, withStyle = true): void {
+    const { fill = '#000', stroke = 'none' } = this.style
+    if (withStyle) {
+      setCanvasContext(ctx, this.style)
+    }
     this.paths.forEach((path) => {
       path.drawTo(ctx)
     })

@@ -1,5 +1,4 @@
-import type { Path2D } from '../paths'
-import type { StrokeLinejoin } from '../svg'
+import type { PathStyle, StrokeLinejoin } from '../types'
 
 const lineJoinMap: Record<StrokeLinejoin, CanvasLineJoin> = {
   'arcs': 'bevel',
@@ -9,7 +8,10 @@ const lineJoinMap: Record<StrokeLinejoin, CanvasLineJoin> = {
   'round': 'round',
 }
 
-export function setCanvasContextByPath(ctx: CanvasRenderingContext2D, path: Path2D): void {
+export function setCanvasContext(
+  ctx: CanvasRenderingContext2D,
+  style: Partial<PathStyle>,
+): void {
   const {
     fill = '#000',
     stroke = 'none',
@@ -19,13 +21,26 @@ export function setCanvasContextByPath(ctx: CanvasRenderingContext2D, path: Path
     strokeMiterlimit = 0,
     strokeDasharray,
     strokeDashoffset = 0,
-  } = path.style
+    shadowOffsetX = 0,
+    shadowOffsetY = 0,
+    shadowBlur = 0,
+    shadowColor = 'rgba(0, 0, 0, 0)',
+  } = style
+
   ctx.fillStyle = fill
   ctx.strokeStyle = stroke
+
+  // stroke
   ctx.lineWidth = strokeWidth
   ctx.lineCap = strokeLinecap
   ctx.lineJoin = lineJoinMap[strokeLinejoin]
   ctx.miterLimit = strokeMiterlimit
-  ctx.lineDashOffset = strokeDashoffset
   strokeDasharray && ctx.setLineDash(strokeDasharray)
+  ctx.lineDashOffset = strokeDashoffset
+
+  // shadow
+  ctx.shadowOffsetX = shadowOffsetX
+  ctx.shadowOffsetY = shadowOffsetY
+  ctx.shadowBlur = shadowBlur
+  ctx.shadowColor = shadowColor
 }

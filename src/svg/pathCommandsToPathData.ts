@@ -1,4 +1,4 @@
-import type { PathCommand } from './types'
+import type { PathCommand } from '../types'
 
 function commandToData(cmd: PathCommand): string {
   switch (cmd.type) {

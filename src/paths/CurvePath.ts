@@ -1,5 +1,5 @@
 import type { VectorLike } from '../math'
-import type { PathCommand } from '../svg'
+import type { PathCommand } from '../types'
 import { CubicBezierCurve, Curve, EllipseCurve, LineCurve, QuadraticBezierCurve, RectangularCurve, SplineCurve } from '../curves'
 import { BoundingBox, Vector2 } from '../math'
 import { addPathCommandsToPath2D, pathDataToPathCommands } from '../svg'

@@ -1,4 +1,4 @@
-import type { PathCommand } from './types'
+import type { PathCommand } from '../types'
 import { parsePathDataArgs } from './parsePathDataArgs'
 
 const RE = /[a-df-z][^a-df-z]*/gi

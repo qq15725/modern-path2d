@@ -1,5 +1,5 @@
 import type { Path2D } from '../paths'
-import type { PathStyle } from '../svg'
+import type { PathStyle } from '../types'
 import { parseNode } from './parseNode'
 
 const dataUri = 'data:image/svg+xml;'
@@ -30,5 +30,5 @@ export function parseSvgToDom(svg: string | SVGElement): SVGElement {
 }
 
 export function parseSvg(svg: string | SVGElement): Path2D[] {
-  return parseNode(parseSvgToDom(svg), {} as PathStyle)
+  return parseNode(parseSvgToDom(svg), {} as Partial<PathStyle>)
 }

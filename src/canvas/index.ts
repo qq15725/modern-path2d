@@ -1,1 +1,1 @@
-export * from './setCanvasContextByPath'
+export * from './setCanvasContext'
