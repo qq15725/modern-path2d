@@ -1,4 +1,4 @@
-import type { PathCommand } from '../svg'
+import type { PathCommand } from '../types'
 import { Matrix3, Vector2 } from '../math'
 import { Curve } from './Curve'
 

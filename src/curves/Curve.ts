@@ -1,5 +1,5 @@
 import type { Matrix3 } from '../math'
-import type { PathCommand } from '../svg'
+import type { PathCommand } from '../types'
 import { BoundingBox, Vector2 } from '../math'
 import { pathCommandsToPathData } from '../svg'
 

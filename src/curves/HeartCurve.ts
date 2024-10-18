@@ -1,4 +1,4 @@
-import type { PathCommand } from '../svg'
+import type { PathCommand } from '../types'
 import { Vector2 } from '../math'
 import { CircleCurve } from './CircleCurve'
 import { Curve } from './Curve'
