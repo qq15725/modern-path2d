@@ -147,22 +147,21 @@ export class Path2D {
     return this
   }
 
-  getMinMax(min = Vector2.MAX, max = Vector2.MIN): { min: Vector2, max: Vector2 } {
+  getMinMax(min = Vector2.MAX, max = Vector2.MIN, withStyle = true): { min: Vector2, max: Vector2 } {
     this.forEachCurve(curve => curve.getMinMax(min, max))
+    if (withStyle) {
+      const strokeWidth = this.strokeWidth / 2
+      min.x -= strokeWidth
+      min.y -= strokeWidth
+      max.x += strokeWidth
+      max.y += strokeWidth
+    }
     return { min, max }
   }
 
-  getBoundingBox(withStrokeWidth = true): BoundingBox {
-    const { min, max } = this.getMinMax()
-    const bbox = new BoundingBox(min.x, min.y, max.x - min.x, max.y - min.y)
-    if (withStrokeWidth) {
-      const strokeWidth = this.strokeWidth
-      bbox.left -= strokeWidth / 2
-      bbox.top -= strokeWidth / 2
-      bbox.width += strokeWidth
-      bbox.height += strokeWidth
-    }
-    return bbox
+  getBoundingBox(withStyle = true): BoundingBox {
+    const { min, max } = this.getMinMax(undefined, undefined, withStyle)
+    return new BoundingBox(min.x, min.y, max.x - min.x, max.y - min.y)
   }
 
   getCommands(): PathCommand[] {
