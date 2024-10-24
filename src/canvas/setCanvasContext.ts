@@ -19,7 +19,7 @@ export function setCanvasContext(
     strokeLinecap = 'round',
     strokeLinejoin = 'miter',
     strokeMiterlimit = 0,
-    strokeDasharray,
+    strokeDasharray = [],
     strokeDashoffset = 0,
     shadowOffsetX = 0,
     shadowOffsetY = 0,
@@ -35,7 +35,7 @@ export function setCanvasContext(
   ctx.lineCap = strokeLinecap
   ctx.lineJoin = lineJoinMap[strokeLinejoin]
   ctx.miterLimit = strokeMiterlimit
-  strokeDasharray && ctx.setLineDash(strokeDasharray)
+  ctx.setLineDash(strokeDasharray)
   ctx.lineDashOffset = strokeDashoffset
 
   // shadow

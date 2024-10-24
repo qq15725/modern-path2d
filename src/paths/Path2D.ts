@@ -206,11 +206,10 @@ export class Path2D {
     return `data:image/svg+xml;base64,${btoa(this.getSvgXml())}`
   }
 
-  drawTo(ctx: CanvasRenderingContext2D, withStyle = true): void {
-    const { fill = '#000', stroke = 'none' } = this.style
-    if (withStyle) {
-      setCanvasContext(ctx, this.style)
-    }
+  drawTo(ctx: CanvasRenderingContext2D, style: Partial<PathStyle> = {}): void {
+    style = { ...this.style, ...style }
+    const { fill = '#000', stroke = 'none' } = style
+    setCanvasContext(ctx, style)
     this.paths.forEach((path) => {
       path.drawTo(ctx)
     })
