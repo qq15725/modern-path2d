@@ -1,3 +1,12 @@
+## [0.1.17](https://github.com/qq15725/modern-path2d/compare/v0.1.16...v0.1.17) (2024-10-24)
+
+
+### Features
+
+* support style option to drawTo method ([9464363](https://github.com/qq15725/modern-path2d/commit/9464363c065624a8104c6d6070cff917fb8b904d))
+
+
+
 ## [0.1.16](https://github.com/qq15725/modern-path2d/compare/v0.1.15...v0.1.16) (2024-10-18)
 
 
