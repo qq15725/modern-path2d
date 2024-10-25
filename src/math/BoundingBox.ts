@@ -18,6 +18,12 @@ export class BoundingBox {
   }
 
   static from(...boxes: BoundingBox[]): BoundingBox {
+    if (boxes.length === 0) {
+      return new BoundingBox()
+    }
+    else if (boxes.length === 1) {
+      return boxes[0].clone()
+    }
     const firstBox = boxes[0]
     const merged = boxes.slice(1).reduce(
       (merged, box) => {
