@@ -1,3 +1,12 @@
+## [0.1.18](https://github.com/qq15725/modern-path2d/compare/v0.1.17...v0.1.18) (2024-10-25)
+
+
+### Bug Fixes
+
+* BoundingBox from ([81f14e6](https://github.com/qq15725/modern-path2d/commit/81f14e6cf233f1dcf8dd953842c255fc6f0b0838))
+
+
+
 ## [0.1.17](https://github.com/qq15725/modern-path2d/compare/v0.1.16...v0.1.17) (2024-10-24)
 
 
