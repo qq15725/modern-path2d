@@ -87,10 +87,7 @@ export function parseNode(
   const transformStack: Matrix3[] = []
   const transform = getNodeTransform(node, currentTransform, transformStack)
   if (path) {
-    // if (style.fill !== undefined && style.fill !== 'none') {
-    //   path.color.setStyle(style.fill, COLOR_SPACE_SVG)
-    // }
-    path.transform(currentTransform)
+    path.matrix(currentTransform)
     paths.push(path)
     path.style = style
   }

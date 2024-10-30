@@ -21,11 +21,12 @@ export class QuadraticBezierCurve extends Curve {
     return output
   }
 
-  override transformPoint(cb: (point: Vector2) => void): this {
-    cb(this.start)
-    cb(this.control)
-    cb(this.end)
-    return this
+  override getControlPoints(): Vector2[] {
+    return [
+      this.start,
+      this.control,
+      this.end,
+    ]
   }
 
   override getMinMax(min = Vector2.MAX, max = Vector2.MIN): { min: Vector2, max: Vector2 } {
@@ -41,7 +42,7 @@ export class QuadraticBezierCurve extends Curve {
     return { min, max }
   }
 
-  override getCommands(): PathCommand[] {
+  override toCommands(): PathCommand[] {
     const { start, control, end } = this
     return [
       { type: 'M', x: start.x, y: start.y },
@@ -50,7 +51,8 @@ export class QuadraticBezierCurve extends Curve {
   }
 
   override drawTo(ctx: CanvasRenderingContext2D): this {
-    const { control, end } = this
+    const { start, control, end } = this
+    ctx.lineTo(start.x, start.y)
     ctx.quadraticCurveTo(control.x, control.y, end.x, end.y)
     return this
   }

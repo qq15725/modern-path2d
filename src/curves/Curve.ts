@@ -1,4 +1,4 @@
-import type { Matrix3 } from '../math'
+import type { Matrix3, VectorLike } from '../math'
 import type { PathCommand } from '../types'
 import { BoundingBox, Vector2 } from '../math'
 import { pathCommandsToPathData } from '../svg'
@@ -8,10 +8,20 @@ export abstract class Curve {
   protected _cacheArcLengths?: number[]
   protected _needsUpdate = false
 
+  isClockwise(): boolean {
+    const prev = this.getPoint(1)
+    const cur = this.getPoint(0.5)
+    const next = this.getPoint(1)
+    return (
+      (cur.x - prev.x) * (next.y - cur.y)
+      - (cur.y - prev.y) * (next.x - cur.x)
+    ) < 0
+  }
+
   abstract getPoint(t: number, output?: Vector2): Vector2
 
   getPointAt(u: number, output = new Vector2()): Vector2 {
-    return this.getPoint(this.getUtoTmapping(u), output)
+    return this.getPoint(this.getUToTMapping(u), output)
   }
 
   getPoints(divisions = 5): Vector2[] {
@@ -20,6 +30,13 @@ export abstract class Curve {
       points.push(this.getPoint(i / divisions))
     }
     return points
+  }
+
+  abstract getControlPoints(): Vector2[]
+
+  forEachControlPoints(cb: (point: Vector2, index: number) => void): this {
+    this.getControlPoints().forEach(cb)
+    return this
   }
 
   getSpacedPoints(divisions = 5): Vector2[] {
@@ -64,23 +81,23 @@ export abstract class Curve {
     this.getLengths()
   }
 
-  getUtoTmapping(u: number, distance?: number): number {
-    const arcLengths = this.getLengths()
+  getUToTMapping(u: number, distance?: number): number {
+    const lengths = this.getLengths()
     let i = 0
-    const il = arcLengths.length
-    let targetArcLength
+    const lengthsLen = lengths.length
+    let targetLength
     if (distance) {
-      targetArcLength = distance
+      targetLength = distance
     }
     else {
-      targetArcLength = u * arcLengths[il - 1]
+      targetLength = u * lengths[lengthsLen - 1]
     }
     let low = 0
-    let high = il - 1
+    let high = lengthsLen - 1
     let comparison
     while (low <= high) {
       i = Math.floor(low + (high - low) / 2)
-      comparison = arcLengths[i] - targetArcLength
+      comparison = lengths[i] - targetLength
       if (comparison < 0) {
         low = i + 1
       }
@@ -93,14 +110,14 @@ export abstract class Curve {
       }
     }
     i = high
-    if (arcLengths[i] === targetArcLength) {
-      return i / (il - 1)
+    if (lengths[i] === targetLength) {
+      return i / (lengthsLen - 1)
     }
-    const lengthBefore = arcLengths[i]
-    const lengthAfter = arcLengths[i + 1]
+    const lengthBefore = lengths[i]
+    const lengthAfter = lengths[i + 1]
     const segmentLength = lengthAfter - lengthBefore
-    const segmentFraction = (targetArcLength - lengthBefore) / segmentLength
-    return (i + segmentFraction) / (il - 1)
+    const segmentFraction = (targetLength - lengthBefore) / segmentLength
+    return (i + segmentFraction) / (lengthsLen - 1)
   }
 
   getTangent(t: number, output = new Vector2()): Vector2 {
@@ -111,17 +128,41 @@ export abstract class Curve {
   }
 
   getTangentAt(u: number, output?: Vector2): Vector2 {
-    return this.getTangent(this.getUtoTmapping(u), output)
+    return this.getTangent(this.getUToTMapping(u), output)
   }
 
-  /** overrideable */
-  // eslint-disable-next-line unused-imports/no-unused-vars
-  transformPoint(cb: (point: Vector2) => void): this {
-    return this
+  getNormal(t: number, output = new Vector2()): Vector2 {
+    this.getTangent(t, output)
+    return output.set(-output.y, output.x).normalize()
   }
 
-  transform(matrix: Matrix3): this {
-    this.transformPoint(point => point.applyMatrix3(matrix))
+  getNormalAt(u: number, output?: Vector2): Vector2 {
+    return this.getNormal(this.getUToTMapping(u), output)
+  }
+
+  getTForPoint(target: VectorLike, epsilon = 0.001): number {
+    let low = 0
+    let high = 1
+    let mid = (low + high) / 2
+    while ((high - low) > epsilon) {
+      mid = (low + high) / 2
+      const point = this.getPoint(mid)
+      const distance = point.distanceTo(target)
+      if (distance < epsilon) {
+        return mid
+      }
+      if (point.x < target.x) {
+        low = mid
+      }
+      else {
+        high = mid
+      }
+    }
+    return mid
+  }
+
+  matrix(matrix: Matrix3): this {
+    this.forEachControlPoints(point => point.applyMatrix3(matrix))
     return this
   }
 
@@ -140,7 +181,7 @@ export abstract class Curve {
     return new BoundingBox(min.x, min.y, max.x - min.x, max.y - min.y)
   }
 
-  getCommands(): PathCommand[] {
+  toCommands(): PathCommand[] {
     return this.getPoints().map((point, i) => {
       if (i === 0) {
         return { type: 'M', x: point.x, y: point.y }
@@ -151,13 +192,21 @@ export abstract class Curve {
     })
   }
 
-  getData(): string {
-    return pathCommandsToPathData(this.getCommands())
+  toData(): string {
+    return pathCommandsToPathData(this.toCommands())
   }
 
-  /** overrideable */
-  // eslint-disable-next-line unused-imports/no-unused-vars
   drawTo(ctx: CanvasRenderingContext2D): this {
+    this.toCommands().forEach((cmd) => {
+      switch (cmd.type) {
+        case 'M':
+          ctx.moveTo(cmd.x, cmd.y)
+          break
+        case 'L':
+          ctx.lineTo(cmd.x, cmd.y)
+          break
+      }
+    })
     return this
   }
 

@@ -59,6 +59,10 @@ export class CurvePath extends Curve {
     return output
   }
 
+  override getControlPoints(): Vector2[] {
+    return this.curves.flatMap(curve => curve.getControlPoints())
+  }
+
   override getLength(): number {
     const lengths = this.getCurveLengths()
     return lengths[lengths.length - 1]
@@ -252,11 +256,6 @@ export class CurvePath extends Curve {
     return this
   }
 
-  override transformPoint(cb: (point: Vector2) => void): this {
-    this.curves.forEach(curve => curve.transformPoint(cb))
-    return this
-  }
-
   override getMinMax(min = Vector2.MAX, max = Vector2.MIN): { min: Vector2, max: Vector2 } {
     this.curves.forEach(curve => curve.getMinMax(min, max))
     return { min, max }
@@ -267,8 +266,8 @@ export class CurvePath extends Curve {
     return new BoundingBox(min.x, min.y, max.x - min.x, max.y - min.y)
   }
 
-  override getCommands(): PathCommand[] {
-    return this.curves.flatMap(curve => curve.getCommands())
+  override toCommands(): PathCommand[] {
+    return this.curves.flatMap(curve => curve.toCommands())
   }
 
   override drawTo(ctx: CanvasRenderingContext2D): this {

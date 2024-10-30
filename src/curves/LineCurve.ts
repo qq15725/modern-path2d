@@ -18,7 +18,7 @@ export class LineCurve extends Curve {
       output
         .copy(this.end)
         .sub(this.start)
-        .multiplyScalar(t)
+        .scale(t)
         .add(this.start)
     }
     return output
@@ -36,15 +36,11 @@ export class LineCurve extends Curve {
     return this.getTangent(u, output)
   }
 
-  getNormal(t: number, output = new Vector2()): Vector2 {
-    const { x, y } = this.getPoint(t).sub(this.start)
-    return output.set(y, -x).normalize()
-  }
-
-  override transformPoint(cb: (point: Vector2) => void): this {
-    cb(this.start)
-    cb(this.end)
-    return this
+  override getControlPoints(): Vector2[] {
+    return [
+      this.start,
+      this.end,
+    ]
   }
 
   override getMinMax(min = Vector2.MAX, max = Vector2.MIN): { min: Vector2, max: Vector2 } {
@@ -56,7 +52,7 @@ export class LineCurve extends Curve {
     return { min, max }
   }
 
-  override getCommands(): PathCommand[] {
+  override toCommands(): PathCommand[] {
     const { start, end } = this
     return [
       { type: 'M', x: start.x, y: start.y },
@@ -65,7 +61,8 @@ export class LineCurve extends Curve {
   }
 
   override drawTo(ctx: CanvasRenderingContext2D): this {
-    const { end } = this
+    const { start, end } = this
+    ctx.lineTo(start.x, start.y)
     ctx.lineTo(end.x, end.y)
     return this
   }

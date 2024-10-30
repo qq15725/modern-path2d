@@ -70,10 +70,10 @@ parsedPaths.forEach((parsedPath) => {
 })
 
 // export path data
-console.log(path.getData())
+console.log(path.toData())
 
 // export path commands
-console.log(path.getCommands())
+console.log(path.toCommands())
 
 // export to ctx
 path.drawTo(document.getElementById('canvas').getContext('2d'))

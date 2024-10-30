@@ -15,19 +15,19 @@ export class CubicBezierCurve extends Curve {
 
   override getPoint(t: number, output = new Vector2()): Vector2 {
     const { start, startControl, endControl, end } = this
-    output.set(
+    return output.set(
       cubicBezier(t, start.x, startControl.x, endControl.x, end.x),
       cubicBezier(t, start.y, startControl.y, endControl.y, end.y),
     )
-    return output
   }
 
-  override transformPoint(cb: (point: Vector2) => void): this {
-    cb(this.start)
-    cb(this.startControl)
-    cb(this.endControl)
-    cb(this.end)
-    return this
+  override getControlPoints(): Vector2[] {
+    return [
+      this.start,
+      this.startControl,
+      this.endControl,
+      this.end,
+    ]
   }
 
   protected _solveQuadratic(a: number, b: number, c: number): number[] {
@@ -73,7 +73,7 @@ export class CubicBezierCurve extends Curve {
     return { min, max }
   }
 
-  override getCommands(): PathCommand[] {
+  override toCommands(): PathCommand[] {
     const { start, startControl, endControl, end } = this
     return [
       { type: 'M', x: start.x, y: start.y },
@@ -82,7 +82,8 @@ export class CubicBezierCurve extends Curve {
   }
 
   override drawTo(ctx: CanvasRenderingContext2D): this {
-    const { startControl, endControl, end } = this
+    const { start, startControl, endControl, end } = this
+    ctx.lineTo(start.x, start.y)
     ctx.bezierCurveTo(startControl.x, startControl.y, endControl.x, endControl.y, end.x, end.y)
     return this
   }

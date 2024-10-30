@@ -39,6 +39,39 @@ export class Vector2 {
     return this
   }
 
+  multiply(vec: VectorLike): this {
+    this.x *= vec.x
+    this.y *= vec.y
+    return this
+  }
+
+  divide(vec: VectorLike): this {
+    this.x /= vec.x
+    this.y /= vec.y
+    return this
+  }
+
+  dot(vec: VectorLike): number {
+    return this.x * vec.x + this.y * vec.y
+  }
+
+  cross(vec: VectorLike): number {
+    return this.x * vec.y - this.y * vec.x
+  }
+
+  rotate(a: number, target: VectorLike = { x: 0, y: 0 }): this {
+    const rotation = (-a / 180) * Math.PI
+    const x = this.x - target.x
+    const y = -(this.y - target.y)
+    const sin = Math.sin(rotation)
+    const cos = Math.cos(rotation)
+    this.set(
+      target.x + (x * cos - y * sin),
+      target.y - (x * sin + y * cos),
+    )
+    return this
+  }
+
   distanceTo(vec: VectorLike): number {
     return Math.sqrt(this.distanceToSquared(vec))
   }
@@ -49,18 +82,38 @@ export class Vector2 {
     return dx * dx + dy * dy
   }
 
-  length(): number {
-    return Math.sqrt(this.x * this.x + this.y * this.y)
+  lengthSquared(): number {
+    return this.x * this.x + this.y * this.y
   }
 
-  multiplyScalar(scalar: number): this {
-    this.x *= scalar
-    this.y *= scalar
+  length(): number {
+    return Math.sqrt(this.lengthSquared())
+  }
+
+  scale(sx: number, sy = sx, target: VectorLike = { x: 0, y: 0 }): this {
+    const x = sx < 0 ? target.x - this.x + target.x : this.x
+    const y = sy < 0 ? target.y - this.y + target.y : this.y
+    this.x = x * Math.abs(sx)
+    this.y = y * Math.abs(sy)
     return this
   }
 
-  divideScalar(scalar: number): this {
-    return this.multiplyScalar(1 / scalar)
+  skew(ax: number, ay = 0, target: VectorLike = { x: 0, y: 0 }): this {
+    const dx = this.x - target.x
+    const dy = this.y - target.y
+    this.x = target.x + (dx + Math.tan(ax) * dy)
+    this.y = target.y + (dy + Math.tan(ay) * dx)
+    return this
+  }
+
+  normalize(): this {
+    return this.scale(1 / (this.length() || 1))
+  }
+
+  addVectors(a: VectorLike, b: VectorLike): this {
+    this.x = a.x + b.x
+    this.y = a.y + b.y
+    return this
   }
 
   subVectors(a: VectorLike, b: VectorLike): this {
@@ -69,8 +122,16 @@ export class Vector2 {
     return this
   }
 
-  normalize(): this {
-    return this.divideScalar(this.length() || 1)
+  multiplyVectors(a: VectorLike, b: VectorLike): this {
+    this.x = a.x * b.x
+    this.y = a.y * b.y
+    return this
+  }
+
+  divideVectors(a: VectorLike, b: VectorLike): this {
+    this.x = a.x / b.x
+    this.y = a.y / b.y
+    return this
   }
 
   lerpVectors(v1: VectorLike, v2: VectorLike, alpha: number): this {

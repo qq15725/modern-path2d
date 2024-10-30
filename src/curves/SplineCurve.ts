@@ -25,9 +25,8 @@ export class SplineCurve extends Curve {
     return output
   }
 
-  override transformPoint(cb: (point: Vector2) => void): this {
-    this.points.forEach(point => cb(point))
-    return this
+  override getControlPoints(): Vector2[] {
+    return this.points
   }
 
   override copy(source: SplineCurve): this {

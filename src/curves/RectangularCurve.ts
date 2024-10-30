@@ -75,13 +75,12 @@ export class RectangularCurve extends Curve {
     return this.getCurve(t).getTangent(this.curveT, output)
   }
 
-  getNormal(t: number, output?: Vector2): Vector2 {
+  override getNormal(t: number, output?: Vector2): Vector2 {
     return this.getCurve(t).getNormal(this.curveT, output)
   }
 
-  override transformPoint(cb: (point: Vector2) => void): this {
-    this.curves.forEach(curve => curve.transformPoint(cb))
-    return this
+  override getControlPoints(): Vector2[] {
+    return this.curves.flatMap(curve => curve.getControlPoints())
   }
 
   override getMinMax(min = Vector2.MAX, max = Vector2.MIN): { min: Vector2, max: Vector2 } {
@@ -89,8 +88,8 @@ export class RectangularCurve extends Curve {
     return { min, max }
   }
 
-  override getCommands(): PathCommand[] {
-    return this.curves.flatMap(curve => curve.getCommands())
+  override toCommands(): PathCommand[] {
+    return this.curves.flatMap(curve => curve.toCommands())
   }
 
   override drawTo(ctx: CanvasRenderingContext2D): this {

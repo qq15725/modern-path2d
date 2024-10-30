@@ -1,4 +1,4 @@
-import { Matrix3, parseSvg, Path2D } from '../src'
+import { parseSvg, Path2D } from '../src'
 
 function createCtx(): CanvasRenderingContext2D {
   const canvas = document.createElement('canvas')
@@ -51,7 +51,7 @@ async function testSvgFixtures(): Promise<void> {
   for (const [key, value] of Object.entries(import.meta.glob('../test/fixtures/*.svg', { query: '?raw' }))) {
     const svg = await (value as () => Promise<any>)().then(rep => rep.default)
     parseSvg(svg).forEach((path) => {
-      path.transform(new Matrix3().makeScale(10, 10))
+      path.scale(10)
 
       const canvas = path.toCanvas()
       canvas.dataset.file = key
@@ -67,7 +67,13 @@ async function testSvgFixtures(): Promise<void> {
 async function testJsonFixtures(): Promise<void> {
   for (const [key, value] of Object.entries(import.meta.glob('../test/fixtures/*.json'))) {
     const commands = await (value as () => Promise<any>)().then(rep => rep.default)
-    const canvas = new Path2D(commands).toCanvas()
+    const path = new Path2D(commands)
+    path
+      .bold(0.5)
+      .scale(2)
+      .skew(-0.24)
+      .rotate(90)
+    const canvas = path.toCanvas()
     canvas.dataset.file = key
     document.body.append(canvas)
   }

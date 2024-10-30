@@ -1,11 +1,11 @@
 import type { Curve } from '../curves'
-import type { Matrix3 } from '../math'
+import type { Matrix3, VectorLike } from '../math'
 import type { PathCommand, PathStyle } from '../types'
 import { setCanvasContext } from '../canvas'
 import { BoundingBox, Vector2 } from '../math'
 import { addPathCommandsToPath2D, pathDataToPathCommands } from '../svg'
 import { CurvePath } from './CurvePath'
-import { toKebabCase } from './utils'
+import { getIntersectionPoint, toKebabCase } from './utils'
 
 /**
  * @see https://developer.mozilla.org/zh-CN/docs/Web/API/Path2D
@@ -132,23 +132,103 @@ export class Path2D {
     return this
   }
 
-  forEachCurve(cb: (curve: Curve) => void): this {
-    this.paths.forEach(path => path.curves.forEach(curve => cb(curve)))
+  getControlPoints(): Vector2[] {
+    return this.paths.flatMap(path => path.getControlPoints())
+  }
+
+  getCurves(): Curve[] {
+    return this.paths.flatMap(path => path.curves)
+  }
+
+  scale(sx: number, sy = sx, target: VectorLike = { x: 0, y: 0 }): this {
+    this.getControlPoints().forEach((point) => {
+      point.scale(sx, sy, target)
+    })
     return this
   }
 
-  transformPoint(cb: (point: Vector2) => void): this {
-    this.forEachCurve(curve => curve.transformPoint(cb))
+  skew(ax: number, ay = 0, target: VectorLike = { x: 0, y: 0 }): this {
+    this.getControlPoints().forEach((point) => {
+      point.skew(ax, ay, target)
+    })
     return this
   }
 
-  transform(matrix: Matrix3): this {
-    this.forEachCurve(curve => curve.transform(matrix))
+  rotate(a: number, target: VectorLike = { x: 0, y: 0 }): this {
+    this.getControlPoints().forEach((point) => {
+      point.rotate(a, target)
+    })
+    return this
+  }
+
+  bold(b: number): this {
+    if (b === 0) {
+      return this
+    }
+    const curves = this.getCurves()
+    const _list: { start: Vector2, end: Vector2, index: number }[] = []
+    const _isClockwise: boolean[] = []
+    const _points: Vector2[][] = []
+    curves.forEach((curve, index) => {
+      const points = curve.getControlPoints()
+      const isClockwise = curve.isClockwise()
+      _points[index] = points
+      _isClockwise[index] = isClockwise
+      const start = points[0]
+      const end = points[points.length - 1] ?? start
+      _list.push({
+        start: isClockwise ? end : start,
+        end: isClockwise ? start : end,
+        index,
+      })
+    })
+    const list: number[][] = []
+    _list.forEach((itemA, indexA) => {
+      list[indexA] = []
+      _list.forEach((itemB, indexB) => {
+        if (indexB !== indexA
+          && itemB.start.equals(itemA.end)) {
+          list[indexA].push(itemB.index)
+        }
+      })
+    })
+
+    curves.forEach((curve, index) => {
+      const isClockwise = _isClockwise[index]
+      const points = _points[index]
+      points.forEach((point) => {
+        const t = curve.getTForPoint(point)
+        const dist = curve.getNormal(t).scale(isClockwise ? b : -b)
+        point.add(dist)
+      })
+    })
+
+    list.forEach((indexes, indexA) => {
+      const pointsA = _points[indexA]
+      indexes.forEach((indexB) => {
+        const pointsB = _points[indexB]
+        const point = getIntersectionPoint(
+          pointsA[pointsA.length - 1],
+          pointsA[pointsA.length - 2] ?? pointsA[pointsA.length - 1],
+          pointsB[0],
+          pointsB[1] ?? pointsB[0],
+        )
+        if (point) {
+          pointsA[pointsA.length - 1].copy(point)
+          pointsB[0].copy(point)
+        }
+      })
+    })
+    return this
+  }
+
+  matrix(matrix: Matrix3): this {
+    this.getCurves().forEach(curve => curve.matrix(matrix))
     return this
   }
 
   getMinMax(min = Vector2.MAX, max = Vector2.MIN, withStyle = true): { min: Vector2, max: Vector2 } {
-    this.forEachCurve(curve => curve.getMinMax(min, max))
+    this.getCurves().forEach(curve => curve.getMinMax(min, max))
     if (withStyle) {
       const strokeHalfWidth = this.strokeWidth / 2
       min.x -= strokeHalfWidth
@@ -164,15 +244,54 @@ export class Path2D {
     return new BoundingBox(min.x, min.y, max.x - min.x, max.y - min.y)
   }
 
-  getCommands(): PathCommand[] {
-    return this.paths.flatMap(path => path.getCommands())
+  drawTo(ctx: CanvasRenderingContext2D, style: Partial<PathStyle> = {}): this {
+    style = { ...this.style, ...style }
+    const { fill = '#000', stroke = 'none' } = style
+    ctx.beginPath()
+    ctx.save()
+    setCanvasContext(ctx, style)
+    this.paths.forEach((path) => {
+      path.drawTo(ctx)
+    })
+    if (fill !== 'none') {
+      ctx.fill()
+    }
+    if (stroke !== 'none') {
+      ctx.stroke()
+    }
+    ctx.restore()
+    return this
   }
 
-  getData(): string {
-    return this.paths.map(path => path.getData()).join(' ')
+  drawControlPointsTo(ctx: CanvasRenderingContext2D, style: Partial<PathStyle> = {}): this {
+    style = { ...this.style, ...style }
+    const { fill = '#000', stroke = 'none' } = style
+    ctx.beginPath()
+    ctx.save()
+    setCanvasContext(ctx, style)
+    this.getControlPoints().forEach((point) => {
+      ctx.moveTo(point.x, point.y)
+      ctx.arc(point.x, point.y, 4, 0, Math.PI * 2)
+    })
+    if (fill !== 'none') {
+      ctx.fill()
+    }
+    if (stroke !== 'none') {
+      ctx.stroke()
+    }
+    ctx.restore()
+    return this
   }
 
-  getSvgPathXml(): string {
+  toCommands(): PathCommand[] {
+    return this.paths.flatMap(path => path.toCommands())
+  }
+
+  toData(): string {
+    return this.paths.map(path => path.toData()).join(' ')
+  }
+
+  toSvgPathString(): string {
     const style: Record<string, any> = {
       ...this.style,
       fill: this.style.fill ?? '#000',
@@ -193,48 +312,27 @@ export class Path2D {
         cssText += `${key}:${cssStyle[key]};`
       }
     }
-    return `<path d="${this.getData()}" style="${cssText}"></path>`
+    return `<path d="${this.toData()}" style="${cssText}"></path>`
   }
 
-  getSvgXml(): string {
+  toSvgString(): string {
     const { x, y, width, height } = this.getBoundingBox()
-    const path = this.getSvgPathXml()
+    const path = this.toSvgPathString()
     return `<svg viewBox="${x} ${y} ${width} ${height}" width="${width}px" height="${height}px" xmlns="http://www.w3.org/2000/svg">${path}</svg>`
   }
 
-  getSvgDataUri(): string {
-    return `data:image/svg+xml;base64,${btoa(this.getSvgXml())}`
-  }
-
-  drawTo(ctx: CanvasRenderingContext2D, style: Partial<PathStyle> = {}): void {
-    style = { ...this.style, ...style }
-    const { fill = '#000', stroke = 'none' } = style
-    setCanvasContext(ctx, style)
-    this.paths.forEach((path) => {
-      path.drawTo(ctx)
-    })
-    if (fill !== 'none') {
-      ctx.fill()
-    }
-    if (stroke !== 'none') {
-      ctx.stroke()
-    }
-  }
-
-  copy(source: Path2D): this {
-    this.currentPath = source.currentPath.clone()
-    this.paths = source.paths.map(path => path.clone())
-    this.style = { ...source.style }
-    return this
+  toSvgUrl(): string {
+    return `data:image/svg+xml;base64,${btoa(this.toSvgString())}`
   }
 
   toSvg(): SVGElement {
     return new DOMParser()
-      .parseFromString(this.getSvgXml(), 'image/svg+xml')
+      .parseFromString(this.toSvgString(), 'image/svg+xml')
       .documentElement as unknown as SVGElement
   }
 
-  toCanvas(pixelRatio = 2): HTMLCanvasElement {
+  toCanvas(options: Partial<PathStyle & { pixelRatio: number }> = {}): HTMLCanvasElement {
+    const { pixelRatio = 2, ...style } = options
     const { left, top, width, height } = this.getBoundingBox()
     const canvas = document.createElement('canvas')
     canvas.width = width * pixelRatio
@@ -245,9 +343,16 @@ export class Path2D {
     if (ctx) {
       ctx.scale(pixelRatio, pixelRatio)
       ctx.translate(-left, -top)
-      this.drawTo(ctx)
+      this.drawTo(ctx, style)
     }
     return canvas
+  }
+
+  copy(source: Path2D): this {
+    this.currentPath = source.currentPath.clone()
+    this.paths = source.paths.map(path => path.clone())
+    this.style = { ...source.style }
+    return this
   }
 
   clone(): this {

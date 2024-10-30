@@ -20,6 +20,10 @@ export class EllipseCurve extends Curve {
     super()
   }
 
+  override isClockwise(): boolean {
+    return this.clockwise
+  }
+
   override getPoint(t: number, output = new Vector2()): Vector2 {
     const twoPi = Math.PI * 2
     let deltaAngle = this.endAngle - this.startAngle
@@ -56,7 +60,7 @@ export class EllipseCurve extends Curve {
     return output.set(_x, _y)
   }
 
-  override getCommands(): PathCommand[] {
+  override toCommands(): PathCommand[] {
     const { center, radiusX: rx, radiusY: ry, startAngle, endAngle, clockwise, rotation } = this
     const { x: cx, y: cy } = center
     const startX = cx + rx * Math.cos(startAngle) * Math.cos(rotation) - ry * Math.sin(startAngle) * Math.sin(rotation)
@@ -100,7 +104,7 @@ export class EllipseCurve extends Curve {
     return this
   }
 
-  override transform(matrix: Matrix3): this {
+  override matrix(matrix: Matrix3): this {
     tempV2.set(this.center.x, this.center.y)
     tempV2.applyMatrix3(matrix)
     this.center.x = tempV2.x
@@ -114,9 +118,8 @@ export class EllipseCurve extends Curve {
     return this
   }
 
-  override transformPoint(cb: (point: Vector2) => void): this {
-    cb(this.center)
-    return this
+  override getControlPoints(): Vector2[] {
+    return [this.center]
   }
 
   override getMinMax(min: Vector2 = Vector2.MAX, max: Vector2 = Vector2.MIN): { min: Vector2, max: Vector2 } {
