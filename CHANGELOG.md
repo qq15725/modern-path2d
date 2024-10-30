@@ -1,3 +1,12 @@
+# [0.2.0](https://github.com/qq15725/modern-path2d/compare/v0.1.18...v0.2.0) (2024-10-30)
+
+
+### Features
+
+* add scale、skew、rotate、bold method ([a252426](https://github.com/qq15725/modern-path2d/commit/a252426d850cb0855d9c8c5ebb2becb046c26721))
+
+
+
 ## [0.1.18](https://github.com/qq15725/modern-path2d/compare/v0.1.17...v0.1.18) (2024-10-25)
 
 
