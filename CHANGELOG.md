@@ -1,3 +1,12 @@
+## [0.2.1](https://github.com/qq15725/modern-path2d/compare/v0.2.0...v0.2.1) (2024-11-04)
+
+
+### Features
+
+* getPathsBoundingBox ([a4b1420](https://github.com/qq15725/modern-path2d/commit/a4b142037a768f89b44380748960724d0faad170))
+
+
+
 # [0.2.0](https://github.com/qq15725/modern-path2d/compare/v0.1.18...v0.2.0) (2024-10-30)
 
 
