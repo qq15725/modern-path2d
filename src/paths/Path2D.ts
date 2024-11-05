@@ -228,14 +228,35 @@ export class Path2D {
   }
 
   getMinMax(min = Vector2.MAX, max = Vector2.MIN, withStyle = true): { min: Vector2, max: Vector2 } {
-    this.getCurves().forEach(curve => curve.getMinMax(min, max))
-    if (withStyle) {
-      const strokeHalfWidth = this.strokeWidth / 2
-      min.x -= strokeHalfWidth
-      min.y -= strokeHalfWidth
-      max.x += strokeHalfWidth
-      max.y += strokeHalfWidth
-    }
+    const strokeWidth = this.strokeWidth
+    this.getCurves().forEach((curve) => {
+      curve.getMinMax(min, max)
+      if (withStyle) {
+        if (strokeWidth > 1) {
+          const halfStrokeWidth = strokeWidth / 2
+          const isClockwise = curve.isClockwise()
+          const points = []
+          for (let t = 0; t <= 1; t += 1 / curve.arcLengthDivisions) {
+            const point = curve.getPoint(t)
+            const normal = curve.getNormal(t)
+            const dist1 = normal.clone().scale(isClockwise ? halfStrokeWidth : -halfStrokeWidth)
+            const dist2 = normal.clone().scale(isClockwise ? -halfStrokeWidth : halfStrokeWidth)
+            points.push(
+              point.clone().add(dist1),
+              point.clone().add(dist2),
+              point.clone().add({ x: halfStrokeWidth, y: 0 }),
+              point.clone().add({ x: -halfStrokeWidth, y: 0 }),
+              point.clone().add({ x: 0, y: halfStrokeWidth }),
+              point.clone().add({ x: 0, y: -halfStrokeWidth }),
+              point.clone().add({ x: halfStrokeWidth, y: halfStrokeWidth }),
+              point.clone().add({ x: -halfStrokeWidth, y: -halfStrokeWidth }),
+            )
+          }
+          min.min(...points)
+          max.max(...points)
+        }
+      }
+    })
     return { min, max }
   }
 

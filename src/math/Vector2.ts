@@ -106,6 +106,18 @@ export class Vector2 {
     return this
   }
 
+  min(...vecs: VectorLike[]): this {
+    this.x = Math.min(this.x, ...vecs.map(v => v.x))
+    this.y = Math.min(this.y, ...vecs.map(v => v.y))
+    return this
+  }
+
+  max(...vecs: VectorLike[]): this {
+    this.x = Math.max(this.x, ...vecs.map(v => v.x))
+    this.y = Math.max(this.y, ...vecs.map(v => v.y))
+    return this
+  }
+
   normalize(): this {
     return this.scale(1 / (this.length() || 1))
   }
