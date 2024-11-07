@@ -1,3 +1,12 @@
+## [0.2.4](https://github.com/qq15725/modern-path2d/compare/v0.2.3...v0.2.4) (2024-11-07)
+
+
+### Bug Fixes
+
+* svg style parse ([684000f](https://github.com/qq15725/modern-path2d/commit/684000f27f40dae1b6abe476aa9fcb68e9ea67c7))
+
+
+
 ## [0.2.3](https://github.com/qq15725/modern-path2d/compare/v0.2.2...v0.2.3) (2024-11-07)
 
 
