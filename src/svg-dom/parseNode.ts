@@ -15,6 +15,7 @@ export function parseNode(
   node: SVGElement,
   style: Record<string, any>,
   paths: Path2D[] = [],
+  stylesheets: Record<string, any> = {},
 ): Path2D[] {
   if (node.nodeType !== 1)
     return paths
@@ -22,7 +23,6 @@ export function parseNode(
   let isDefsNode = false
   let path: Path2D | null = null
   let _style = { ...style }
-  const stylesheets: Record<string, any> = {}
 
   switch (node.nodeName) {
     case 'svg':
@@ -72,7 +72,7 @@ export function parseNode(
       const usedNodeId = href.substring(1)
       const usedNode = (node.viewportElement as any)?.getElementById(usedNodeId)
       if (usedNode) {
-        parseNode(usedNode, _style, paths)
+        parseNode(usedNode, _style, paths, stylesheets)
       }
       else {
         console.warn(`'use node' references non-existent node id: ${usedNodeId}`)
@@ -104,7 +104,7 @@ export function parseNode(
     const node = childNodes[i]
     if (isDefsNode && node.nodeName !== 'style' && node.nodeName !== 'defs')
       continue
-    parseNode(node as SVGElement, style, paths)
+    parseNode(node as SVGElement, style, paths, stylesheets)
   }
 
   if (transform) {
