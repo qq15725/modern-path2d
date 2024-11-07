@@ -19,20 +19,24 @@ export function parseStyle(node: SVGElement, style: Record<string, any>, stylesh
     stylesheetStyles = Object.assign(stylesheetStyles, stylesheets[`#${node.getAttribute('id')}`])
   }
 
-  function addStyle(svgName: string, jsName: string, adjustFunction?: any): void {
-    if (adjustFunction === undefined) {
-      adjustFunction = function copy(v: any) {
-        if (v.startsWith('url'))
-          console.warn('url access in attributes is not implemented.')
-        return v
-      }
-    }
+  for (let len = node.style.length, i = 0; i < len; i++) {
+    const name = node.style.item(i)
+    const value = node.style.getPropertyValue(name)
+    style[name] = value
+    stylesheetStyles[name] = value
+  }
+
+  function addStyle(svgName: string, jsName: string, adjustFunction: any = copy): void {
     if (node.hasAttribute(svgName))
       style[jsName] = adjustFunction(node.getAttribute(svgName))
     if (stylesheetStyles[svgName])
       style[jsName] = adjustFunction(stylesheetStyles[svgName])
-    if (node.style && (node.style as any)[svgName] !== '')
-      style[jsName] = adjustFunction((node.style as any)[svgName])
+  }
+
+  function copy(v: any): any {
+    if (v.startsWith('url'))
+      console.warn('url access in attributes is not implemented.')
+    return v
   }
 
   function clamp(v: string): number {

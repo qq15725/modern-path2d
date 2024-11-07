@@ -1,4 +1,4 @@
-import { parseSvg, Path2D } from '../src'
+import { parseSvg, Path2D, pathsToCanvas, pathsToSvg } from '../src'
 
 function createCtx(): CanvasRenderingContext2D {
   const canvas = document.createElement('canvas')
@@ -49,18 +49,16 @@ function testWebPath2D(): void {
 
 async function testSvgFixtures(): Promise<void> {
   for (const [key, value] of Object.entries(import.meta.glob('../test/fixtures/*.svg', { query: '?raw' }))) {
-    const svg = await (value as () => Promise<any>)().then(rep => rep.default)
-    parseSvg(svg).forEach((path) => {
-      path.scale(10)
+    const svgSource = await (value as () => Promise<any>)().then(rep => rep.default)
+    const svgPaths = parseSvg(svgSource)
 
-      const canvas = path.toCanvas()
-      canvas.dataset.file = key
-      document.body.append(canvas)
+    const canvas = pathsToCanvas(svgPaths)
+    canvas.dataset.file = key
+    document.body.append(canvas)
 
-      const svg = path.toSvg()
-      svg.dataset.file = key
-      document.body.append(svg)
-    })
+    const svg = pathsToSvg(svgPaths)
+    svg.dataset.file = key
+    document.body.append(svg)
   }
 }
 

@@ -1,46 +1,78 @@
 import type { PathCommand } from '../types'
 
-function commandToData(cmd: PathCommand): string {
-  switch (cmd.type) {
-    case 'm':
-    case 'M':
-      return `${cmd.type} ${cmd.x} ${cmd.y}`
-    case 'h':
-    case 'H':
-      return `${cmd.type} ${cmd.x}`
-    case 'v':
-    case 'V':
-      return `${cmd.type} ${cmd.y}`
-    case 'l':
-    case 'L':
-      return `${cmd.type} ${cmd.x} ${cmd.y}`
-    case 'c':
-    case 'C':
-      return `${cmd.type} ${cmd.x1} ${cmd.y1} ${cmd.x2} ${cmd.y2} ${cmd.x} ${cmd.y}`
-    case 's':
-    case 'S':
-      return `${cmd.type} ${cmd.x2} ${cmd.y2} ${cmd.x} ${cmd.y}`
-    case 'q':
-    case 'Q':
-      return `${cmd.type} ${cmd.x1} ${cmd.y1} ${cmd.x} ${cmd.y}`
-    case 't':
-    case 'T':
-      return `${cmd.type} ${cmd.x} ${cmd.y}`
-    case 'a':
-    case 'A':
-      return `${cmd.type} ${cmd.rx} ${cmd.ry} ${cmd.angle} ${cmd.largeArcFlag} ${cmd.sweepFlag} ${cmd.x} ${cmd.y}`
-    case 'z':
-    case 'Z':
-      return cmd.type
-    default:
-      return ''
-  }
-}
-
 export function pathCommandsToPathData(commands: PathCommand[]): string {
+  const first = { x: 0, y: 0 }
+  const prev = { x: 0, y: 0 }
   let data = ''
   for (let i = 0, len = commands.length; i < len; i++) {
-    data += `${commandToData(commands[i])} `
+    const cmd = commands[i]
+    switch (cmd.type) {
+      case 'm':
+      case 'M':
+        if (cmd.x === prev.x && cmd.y === prev.y) {
+          continue
+        }
+        data += `${cmd.type} ${cmd.x} ${cmd.y}`
+        prev.x = cmd.x
+        prev.y = cmd.y
+        first.x = cmd.x
+        first.y = cmd.y
+        break
+      case 'h':
+      case 'H':
+        data += `${cmd.type} ${cmd.x}`
+        prev.x = cmd.x
+        break
+      case 'v':
+      case 'V':
+        data += `${cmd.type} ${cmd.y}`
+        prev.y = cmd.y
+        break
+      case 'l':
+      case 'L':
+        data += `${cmd.type} ${cmd.x} ${cmd.y}`
+        prev.x = cmd.x
+        prev.y = cmd.y
+        break
+      case 'c':
+      case 'C':
+        data += `${cmd.type} ${cmd.x1} ${cmd.y1} ${cmd.x2} ${cmd.y2} ${cmd.x} ${cmd.y}`
+        prev.x = cmd.x
+        prev.y = cmd.y
+        break
+      case 's':
+      case 'S':
+        data += `${cmd.type} ${cmd.x2} ${cmd.y2} ${cmd.x} ${cmd.y}`
+        prev.x = cmd.x
+        prev.y = cmd.y
+        break
+      case 'q':
+      case 'Q':
+        data += `${cmd.type} ${cmd.x1} ${cmd.y1} ${cmd.x} ${cmd.y}`
+        prev.x = cmd.x
+        prev.y = cmd.y
+        break
+      case 't':
+      case 'T':
+        data += `${cmd.type} ${cmd.x} ${cmd.y}`
+        prev.x = cmd.x
+        prev.y = cmd.y
+        break
+      case 'a':
+      case 'A':
+        data += `${cmd.type} ${cmd.rx} ${cmd.ry} ${cmd.angle} ${cmd.largeArcFlag} ${cmd.sweepFlag} ${cmd.x} ${cmd.y}`
+        prev.x = cmd.x
+        prev.y = cmd.y
+        break
+      case 'z':
+      case 'Z':
+        data += cmd.type
+        prev.x = first.x
+        prev.y = first.y
+        break
+      default:
+        break
+    }
   }
   return data
 }

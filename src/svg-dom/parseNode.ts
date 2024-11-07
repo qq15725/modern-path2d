@@ -21,57 +21,58 @@ export function parseNode(
 
   let isDefsNode = false
   let path: Path2D | null = null
+  let _style = { ...style }
   const stylesheets: Record<string, any> = {}
 
   switch (node.nodeName) {
     case 'svg':
-      style = parseStyle(node, style, stylesheets)
+      _style = parseStyle(node, _style, stylesheets)
       break
     case 'style':
       parseCSSStylesheet(node as SVGStyleElement, stylesheets)
       break
     case 'g':
-      style = parseStyle(node, style, stylesheets)
+      _style = parseStyle(node, _style, stylesheets)
       break
     case 'path':
-      style = parseStyle(node, style, stylesheets)
+      _style = parseStyle(node, _style, stylesheets)
       if (node.hasAttribute('d'))
         path = parsePathNode(node as SVGPathElement)
       break
     case 'rect':
-      style = parseStyle(node, style, stylesheets)
+      _style = parseStyle(node, _style, stylesheets)
       path = parseRectNode(node as SVGRectElement)
       break
     case 'polygon':
-      style = parseStyle(node, style, stylesheets)
+      _style = parseStyle(node, _style, stylesheets)
       path = parsePolygonNode(node as SVGPolygonElement)
       break
     case 'polyline':
-      style = parseStyle(node, style, stylesheets)
+      _style = parseStyle(node, _style, stylesheets)
       path = parsePolylineNode(node as SVGPolylineElement)
       break
     case 'circle':
-      style = parseStyle(node, style, stylesheets)
+      _style = parseStyle(node, _style, stylesheets)
       path = parseCircleNode(node as SVGCircleElement)
       break
     case 'ellipse':
-      style = parseStyle(node, style, stylesheets)
+      _style = parseStyle(node, _style, stylesheets)
       path = parseEllipseNode(node as SVGEllipseElement)
       break
     case 'line':
-      style = parseStyle(node, style, stylesheets)
+      _style = parseStyle(node, _style, stylesheets)
       path = parseLineNode(node as SVGLineElement)
       break
     case 'defs':
       isDefsNode = true
       break
     case 'use': {
-      style = parseStyle(node, style, stylesheets)
+      _style = parseStyle(node, _style, stylesheets)
       const href = node.getAttributeNS('http://www.w3.org/1999/xlink', 'href') || ''
       const usedNodeId = href.substring(1)
       const usedNode = (node.viewportElement as any)?.getElementById(usedNodeId)
       if (usedNode) {
-        parseNode(usedNode, style, paths)
+        parseNode(usedNode, _style, paths)
       }
       else {
         console.warn(`'use node' references non-existent node id: ${usedNodeId}`)
@@ -82,6 +83,12 @@ export function parseNode(
       console.warn(node)
       break
   }
+
+  if (_style.display === 'none') {
+    return paths
+  }
+
+  Object.assign(style, _style)
 
   const currentTransform = new Matrix3()
   const transformStack: Matrix3[] = []
