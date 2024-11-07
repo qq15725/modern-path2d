@@ -1,3 +1,12 @@
+## [0.2.3](https://github.com/qq15725/modern-path2d/compare/v0.2.2...v0.2.3) (2024-11-07)
+
+
+### Bug Fixes
+
+* parse svg ([8ea7f63](https://github.com/qq15725/modern-path2d/commit/8ea7f6381cfe7e2fbbf004b269140da34cad3108))
+
+
+
 ## [0.2.2](https://github.com/qq15725/modern-path2d/compare/v0.2.1...v0.2.2) (2024-11-05)
 
 
