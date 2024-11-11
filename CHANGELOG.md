@@ -1,3 +1,12 @@
+## [0.2.5](https://github.com/qq15725/modern-path2d/compare/v0.2.4...v0.2.5) (2024-11-11)
+
+
+### Features
+
+* add BoundingBox.copy util method ([c6bfe4e](https://github.com/qq15725/modern-path2d/commit/c6bfe4ec7c6d6701f8d12fdb13255f515aeead66))
+
+
+
 ## [0.2.4](https://github.com/qq15725/modern-path2d/compare/v0.2.3...v0.2.4) (2024-11-07)
 
 
