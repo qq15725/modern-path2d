@@ -168,10 +168,8 @@ export abstract class Curve {
 
   getMinMax(min = Vector2.MAX, max = Vector2.MIN): { min: Vector2, max: Vector2 } {
     this.getPoints().forEach((point) => {
-      min.x = Math.min(min.x, point.x)
-      min.y = Math.min(min.y, point.y)
-      max.x = Math.max(max.x, point.x)
-      max.y = Math.max(max.y, point.y)
+      min.min(point)
+      max.max(point)
     })
     return { min, max }
   }

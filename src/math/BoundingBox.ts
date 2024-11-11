@@ -8,6 +8,14 @@ export class BoundingBox {
   get right(): number { return this.left + this.width }
   get bottom(): number { return this.top + this.height }
 
+  get center(): Vector2 {
+    return new Vector2((this.left + this.right) / 2, (this.top + this.bottom) / 2)
+  }
+
+  get array(): [number, number, number, number] {
+    return [this.left, this.top, this.width, this.height]
+  }
+
   constructor(
     public left = 0,
     public top = 0,
@@ -49,15 +57,15 @@ export class BoundingBox {
     return this
   }
 
-  getCenterPoint(): Vector2 {
-    return new Vector2((this.left + this.right) / 2, (this.top + this.bottom) / 2)
+  copy(box: BoundingBox): this {
+    this.left = box.left
+    this.top = box.top
+    this.width = box.width
+    this.height = box.height
+    return this
   }
 
   clone(): BoundingBox {
     return new BoundingBox(this.left, this.top, this.width, this.height)
-  }
-
-  toArray(): [number, number, number, number] {
-    return [this.left, this.top, this.width, this.height]
   }
 }

@@ -14,6 +14,10 @@ export class Vector2 {
     return new Vector2(-Infinity, -Infinity)
   }
 
+  get array(): [number, number] {
+    return [this.x, this.y]
+  }
+
   constructor(
     public x = 0,
     public y = 0,
