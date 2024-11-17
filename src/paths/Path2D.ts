@@ -13,7 +13,7 @@ import { getIntersectionPoint, toKebabCase } from './utils'
 export class Path2D {
   currentPath = new CurvePath()
   paths: CurvePath[] = [this.currentPath]
-  style: Partial<PathStyle> = {}
+  style: Partial<PathStyle>
 
   get startPoint(): Vector2 | undefined {
     return this.currentPath.startPoint
@@ -32,7 +32,7 @@ export class Path2D {
       )
   }
 
-  constructor(path?: Path2D | PathCommand[] | string) {
+  constructor(path?: Path2D | PathCommand[] | string, style: Partial<PathStyle> = {}) {
     if (path) {
       if (path instanceof Path2D) {
         this.addPath(path)
@@ -44,6 +44,7 @@ export class Path2D {
         this.addData(path)
       }
     }
+    this.style = style
   }
 
   addPath(path: Path2D | CurvePath): this {
