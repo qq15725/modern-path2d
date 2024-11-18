@@ -1,3 +1,12 @@
+## [0.2.6](https://github.com/qq15725/modern-path2d/compare/v0.2.5...v0.2.6) (2024-11-18)
+
+
+### Features
+
+* Path2D style option ([d7b0260](https://github.com/qq15725/modern-path2d/commit/d7b02606038e2daaf59834de097a05004a43cc15))
+
+
+
 ## [0.2.5](https://github.com/qq15725/modern-path2d/compare/v0.2.4...v0.2.5) (2024-11-11)
 
 
