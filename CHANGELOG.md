@@ -1,3 +1,9 @@
+## <small>0.2.7 (2024-12-18)</small>
+
+* fix: pathCommandsToPathData ([a9aaeec](https://github.com/qq15725/modern-path2d/commit/a9aaeec))
+
+
+
 ## [0.2.6](https://github.com/qq15725/modern-path2d/compare/v0.2.5...v0.2.6) (2024-11-18)
 
 
