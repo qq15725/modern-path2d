@@ -59,6 +59,8 @@ async function testSvgFixtures(): Promise<void> {
     const svg = pathsToSvg(svgPaths)
     svg.dataset.file = key
     document.body.append(svg)
+
+    console.warn(svgPaths)
   }
 }
 

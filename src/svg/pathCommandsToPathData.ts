@@ -9,7 +9,10 @@ export function pathCommandsToPathData(commands: PathCommand[]): string {
     switch (cmd.type) {
       case 'm':
       case 'M':
-        if (cmd.x === prev?.x && cmd.y === prev?.y) {
+        if (
+          cmd.x.toFixed(4) === prev?.x.toFixed(4)
+          && cmd.y.toFixed(4) === prev?.y.toFixed(4)
+        ) {
           continue
         }
         data.push(`${cmd.type} ${cmd.x} ${cmd.y}`)
