@@ -1,3 +1,14 @@
+## [0.2.8](https://github.com/qq15725/modern-path2d/compare/v0.2.7...v0.2.8) (2024-12-21)
+
+
+### Bug Fixes
+
+* moveTo 0,0 point not set currentPoint in Path2D ([5f1e943](https://github.com/qq15725/modern-path2d/commit/5f1e943684e2874280543b675e1d145d22577d8e))
+* path cmds to path data ([3798882](https://github.com/qq15725/modern-path2d/commit/3798882ce189196c90d9c91ed55cfeb3bdbee0b9))
+* **svg:** parse sweepFlag to counterclockwise error ([a7a596d](https://github.com/qq15725/modern-path2d/commit/a7a596d69c83a0048aa612bfffb4c662acc006b8))
+
+
+
 ## <small>0.2.7 (2024-12-18)</small>
 
 * fix: pathCommandsToPathData ([a9aaeec](https://github.com/qq15725/modern-path2d/commit/a9aaeec))
