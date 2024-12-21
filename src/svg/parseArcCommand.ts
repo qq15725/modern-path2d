@@ -11,8 +11,8 @@ function svgAngle(ux: number, uy: number, vx: number, vy: number): number {
 }
 
 /**
- * https://www.w3.org/TR/SVG/implnote.html#ArcImplementationNotes
- * https://mortoray.com/2017/02/16/rendering-an-svg-elliptical-arc-as-bezier-curves/ Appendix: Endpoint to center arc conversion
+ * @link https://www.w3.org/TR/SVG/implnote.html#ArcImplementationNotes
+ * @link https://mortoray.com/2017/02/16/rendering-an-svg-elliptical-arc-as-bezier-curves/ Appendix: Endpoint to center arc conversion
  * From
  * rx ry x-axis-rotation large-arc-flag sweep-flag x y
  * To
@@ -70,5 +70,5 @@ export function parseArcCommand(
   // Step 4: Compute θ1 and Δθ
   const theta = svgAngle(1, 0, (x1p - cxp) / rx, (y1p - cyp) / ry)
   const delta = svgAngle((x1p - cxp) / rx, (y1p - cyp) / ry, (-x1p - cxp) / rx, (-y1p - cyp) / ry) % (Math.PI * 2)
-  path.ellipse(cx, cy, rx, ry, xAxisRotation, theta, theta + delta, sweepFlag === 1)
+  path.ellipse(cx, cy, rx, ry, xAxisRotation, theta, theta + delta, sweepFlag === 0)
 }
