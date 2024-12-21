@@ -8,7 +8,7 @@ import { CurvePath } from './CurvePath'
 import { getIntersectionPoint, toKebabCase } from './utils'
 
 /**
- * @see https://developer.mozilla.org/zh-CN/docs/Web/API/Path2D
+ * @link https://developer.mozilla.org/zh-CN/docs/Web/API/Path2D
  */
 export class Path2D {
   currentPath = new CurvePath()
@@ -71,7 +71,7 @@ export class Path2D {
 
   moveTo(x: number, y: number): this {
     const { currentPoint, curves } = this.currentPath
-    if (!currentPoint.equals({ x, y })) {
+    if (!currentPoint?.equals({ x, y })) {
       if (curves.length) {
         this.currentPath = new CurvePath().moveTo(x, y)
         this.paths.push(this.currentPath)

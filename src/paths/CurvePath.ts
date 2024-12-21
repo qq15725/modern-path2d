@@ -7,7 +7,7 @@ import { addPathCommandsToPath2D, pathDataToPathCommands } from '../svg'
 export class CurvePath extends Curve {
   curves: Curve[] = []
   startPoint?: Vector2
-  currentPoint = new Vector2()
+  currentPoint?: Vector2
   autoClose = false
 
   protected _cacheLengths: number[] = []
@@ -125,7 +125,7 @@ export class CurvePath extends Curve {
   }
 
   protected _setCurrentPoint(point: VectorLike): this {
-    this.currentPoint.copy(point)
+    this.currentPoint = new Vector2(point.x, point.y)
     if (!this.startPoint) {
       this.startPoint = this.currentPoint.clone()
     }
@@ -136,9 +136,9 @@ export class CurvePath extends Curve {
     const start = this.startPoint
     if (start) {
       const end = this.currentPoint
-      if (!start.equals(end)) {
+      if (end && !start.equals(end)) {
         this.curves.push(new LineCurve(end.clone(), start))
-        this.currentPoint.copy(start)
+        end.copy(start)
       }
       this.startPoint = undefined
     }
@@ -146,16 +146,17 @@ export class CurvePath extends Curve {
   }
 
   moveTo(x: number, y: number): this {
-    this.currentPoint.set(x, y)
+    this.currentPoint = new Vector2(x, y)
     this.startPoint = this.currentPoint.clone()
     return this
   }
 
   lineTo(x: number, y: number): this {
-    if (!this.currentPoint.equals({ x, y })) {
+    const start = this.currentPoint
+    if (!start?.equals({ x, y })) {
       this.curves.push(
         new LineCurve(
-          this.currentPoint.clone(),
+          start?.clone() ?? new Vector2(),
           new Vector2(x, y),
         ),
       )
@@ -165,10 +166,11 @@ export class CurvePath extends Curve {
   }
 
   bezierCurveTo(cp1x: number, cp1y: number, cp2x: number, cp2y: number, x: number, y: number): this {
-    if (!this.currentPoint.equals({ x, y })) {
+    const start = this.currentPoint
+    if (!start?.equals({ x, y })) {
       this.curves.push(
         new CubicBezierCurve(
-          this.currentPoint.clone(),
+          start?.clone() ?? new Vector2(),
           new Vector2(cp1x, cp1y),
           new Vector2(cp2x, cp2y),
           new Vector2(x, y),
@@ -180,10 +182,11 @@ export class CurvePath extends Curve {
   }
 
   quadraticCurveTo(cpx: number, cpy: number, x: number, y: number): this {
-    if (!this.currentPoint.equals({ x, y })) {
+    const start = this.currentPoint
+    if (!start?.equals({ x, y })) {
       this.curves.push(
         new QuadraticBezierCurve(
-          this.currentPoint.clone(),
+          start?.clone() ?? new Vector2(),
           new Vector2(cpx, cpy),
           new Vector2(x, y),
         ),
@@ -199,7 +202,7 @@ export class CurvePath extends Curve {
   }
 
   relativeArc(x: number, y: number, radius: number, startAngle: number, endAngle: number, counterclockwise?: boolean): this {
-    const point = this.currentPoint
+    const point = this.currentPoint ?? new Vector2()
     this.arc(x + point.x, y + point.y, radius, startAngle, endAngle, counterclockwise)
     return this
   }
@@ -223,7 +226,7 @@ export class CurvePath extends Curve {
     )
     if (this.curves.length > 0) {
       const first = curve.getPoint(0)
-      if (!first.equals(this.currentPoint)) {
+      if (!this.currentPoint || !first.equals(this.currentPoint)) {
         this.lineTo(first.x, first.y)
       }
     }
@@ -233,7 +236,7 @@ export class CurvePath extends Curve {
   }
 
   relativeEllipse(x: number, y: number, radiusX: number, radiusY: number, rotation: number, startAngle: number, endAngle: number, counterclockwise?: boolean): this {
-    const point = this.currentPoint
+    const point = this.currentPoint ?? new Vector2()
     this.ellipse(x + point.x, y + point.y, radiusX, radiusY, rotation, startAngle, endAngle, counterclockwise)
     return this
   }
@@ -251,7 +254,8 @@ export class CurvePath extends Curve {
   }
 
   splineThru(points: Vector2[]): this {
-    this.curves.push(new SplineCurve([this.currentPoint.clone()].concat(points)))
+    const currentPoint = this.currentPoint ?? new Vector2()
+    this.curves.push(new SplineCurve([currentPoint].concat(points)))
     this._setCurrentPoint(points[points.length - 1])
     return this
   }
@@ -289,7 +293,7 @@ export class CurvePath extends Curve {
       this.curves.push(source.curves[i].clone())
     }
     this.autoClose = source.autoClose
-    this.currentPoint.copy(source.currentPoint)
+    this.currentPoint = source.currentPoint?.clone()
     return this
   }
 }
