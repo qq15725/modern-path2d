@@ -1,4 +1,4 @@
-import { parseSvg, Path2D, pathsToCanvas, pathsToSvg } from '../src'
+import { parseSVG, Path2D, pathsToCanvas, pathsToSVG } from '../src'
 
 function createCtx(): CanvasRenderingContext2D {
   const canvas = document.createElement('canvas')
@@ -47,16 +47,16 @@ function testWebPath2D(): void {
   createCtx().stroke(path2)
 }
 
-async function testSvgFixtures(): Promise<void> {
+async function testSVGFixtures(): Promise<void> {
   for (const [key, value] of Object.entries(import.meta.glob('../test/fixtures/*.svg', { query: '?raw' }))) {
     const svgSource = await (value as () => Promise<any>)().then(rep => rep.default)
-    const svgPaths = parseSvg(svgSource)
+    const svgPaths = parseSVG(svgSource)
 
     const canvas = pathsToCanvas(svgPaths)
     canvas.dataset.file = key
     document.body.append(canvas)
 
-    const svg = pathsToSvg(svgPaths)
+    const svg = pathsToSVG(svgPaths)
     svg.dataset.file = key
     document.body.append(svg)
 
@@ -64,7 +64,7 @@ async function testSvgFixtures(): Promise<void> {
   }
 }
 
-async function testJsonFixtures(): Promise<void> {
+async function testJSONFixtures(): Promise<void> {
   for (const [key, value] of Object.entries(import.meta.glob('../test/fixtures/*.json'))) {
     const commands = await (value as () => Promise<any>)().then(rep => rep.default)
     const path = new Path2D(commands)
@@ -81,8 +81,8 @@ async function testJsonFixtures(): Promise<void> {
 
 async function main(): Promise<void> {
   testWebPath2D()
-  await testJsonFixtures()
-  await testSvgFixtures()
+  await testJSONFixtures()
+  await testSVGFixtures()
 }
 
 main()

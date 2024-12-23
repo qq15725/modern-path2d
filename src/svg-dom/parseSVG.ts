@@ -5,7 +5,7 @@ import { parseNode } from './parseNode'
 const dataUri = 'data:image/svg+xml;'
 const base64DataUri = `${dataUri}base64,`
 const utf8DataUri = `${dataUri}charset=utf8,`
-export function parseSvgToDom(svg: string | SVGElement): SVGElement {
+export function parseSVGToDOM(svg: string | SVGElement): SVGElement {
   if (typeof svg === 'string') {
     let xml
     if (svg.startsWith(base64DataUri)) {
@@ -31,6 +31,6 @@ export function parseSvgToDom(svg: string | SVGElement): SVGElement {
   }
 }
 
-export function parseSvg(svg: string | SVGElement): Path2D[] {
-  return parseNode(parseSvgToDom(svg), {} as Partial<PathStyle>)
+export function parseSVG(svg: string | SVGElement): Path2D[] {
+  return parseNode(parseSVGToDOM(svg), {} as Partial<PathStyle>)
 }

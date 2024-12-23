@@ -12,19 +12,19 @@ export function getPathsBoundingBox(paths: Path2D[], withStyle = true): Bounding
   return new BoundingBox(min.x, min.y, max.x - min.x, max.y - min.y)
 }
 
-export function pathsToSvgString(paths: Path2D[]): string {
+export function pathsToSVGString(paths: Path2D[]): string {
   const { x, y, width, height } = getPathsBoundingBox(paths)!
-  const content = paths.map(path => path.toSvgPathString()).join('')
+  const content = paths.map(path => path.toSVGPathString()).join('')
   return `<svg viewBox="${x} ${y} ${width} ${height}" width="${width}px" height="${height}px" xmlns="http://www.w3.org/2000/svg">${content}</svg>`
 }
 
-export function pathsToSvgUrl(paths: Path2D[]): string {
-  return `data:image/svg+xml;base64,${btoa(pathsToSvgString(paths))}`
+export function pathsToSVGUrl(paths: Path2D[]): string {
+  return `data:image/svg+xml;base64,${btoa(pathsToSVGString(paths))}`
 }
 
-export function pathsToSvg(paths: Path2D[]): SVGElement {
+export function pathsToSVG(paths: Path2D[]): SVGElement {
   return new DOMParser()
-    .parseFromString(pathsToSvgString(paths), 'image/svg+xml')
+    .parseFromString(pathsToSVGString(paths), 'image/svg+xml')
     .documentElement as unknown as SVGElement
 }
 

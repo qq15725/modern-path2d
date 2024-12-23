@@ -39,7 +39,7 @@ npm i modern-path2d
 ## 🦄 Usage
 
 ```ts
-import { parseSvg, Path2D } from 'modern-path2d'
+import { parseSVG, Path2D } from 'modern-path2d'
 
 const path = new Path2D()
 
@@ -62,7 +62,7 @@ path.addCommands([
 ])
 
 // add svg
-const parsedPaths = parseSvg(`<svg xmlns="http://www.w3.org/2000/svg" width="72" height="72" viewBox="0 0 72 72" fill="none">
+const parsedPaths = parseSVG(`<svg xmlns="http://www.w3.org/2000/svg" width="72" height="72" viewBox="0 0 72 72" fill="none">
 <path d="M51.3646 45.8642C49.7808 46.2782 47.906 46.705 45.8588 47.0857M45.8588 47.0857C34.1649 49.2607 16.8486 49.9343 16.0277 38.1484C15.22 26.5533 32.264 22.3636 45.6135 24.5626C53.601 25.8783 57.4507 29.6208 57.9285 34.237C58.2811 37.6435 55.778 43.3702 45.8588 47.0857ZM45.8588 47.0857C42.3367 48.4051 37.8795 49.4708 32.283 50.0891" stroke="#FFC300" stroke-width="2.5" stroke-linecap="round"/>
 </svg>`)
 parsedPaths.forEach((parsedPath) => {
@@ -82,5 +82,5 @@ path.drawTo(document.getElementById('canvas').getContext('2d'))
 document.body.append(path.toCanvas())
 
 // export to svg
-document.body.append(path.toSvg())
+document.body.append(path.toSVG())
 ```

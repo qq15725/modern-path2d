@@ -313,7 +313,7 @@ export class Path2D {
     return this.paths.map(path => path.toData()).join(' ')
   }
 
-  toSvgPathString(): string {
+  toSVGPathString(): string {
     const style: Record<string, any> = {
       ...this.style,
       fill: this.style.fill ?? '#000',
@@ -337,19 +337,19 @@ export class Path2D {
     return `<path d="${this.toData()}" style="${cssText}"></path>`
   }
 
-  toSvgString(): string {
+  toSVGString(): string {
     const { x, y, width, height } = this.getBoundingBox()
-    const path = this.toSvgPathString()
+    const path = this.toSVGPathString()
     return `<svg viewBox="${x} ${y} ${width} ${height}" width="${width}px" height="${height}px" xmlns="http://www.w3.org/2000/svg">${path}</svg>`
   }
 
-  toSvgUrl(): string {
-    return `data:image/svg+xml;base64,${btoa(this.toSvgString())}`
+  toSVGUrl(): string {
+    return `data:image/svg+xml;base64,${btoa(this.toSVGString())}`
   }
 
-  toSvg(): SVGElement {
+  toSVG(): SVGElement {
     return new DOMParser()
-      .parseFromString(this.toSvgString(), 'image/svg+xml')
+      .parseFromString(this.toSVGString(), 'image/svg+xml')
       .documentElement as unknown as SVGElement
   }
 
