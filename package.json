@@ -2,7 +2,7 @@
   "name": "modern-path2d",
   "type": "module",
   "version": "0.2.8",
-  "packageManager": "pnpm@9.9.0",
+  "packageManager": "pnpm@9.15.1",
   "description": "A modern Path2D library, fully compatible with Web Path2D, with additional support for path animation, path deformation, path playback, etc.",
   "author": "wxm",
   "license": "MIT",
@@ -56,17 +56,17 @@
     "prepare": "simple-git-hooks"
   },
   "devDependencies": {
-    "@antfu/eslint-config": "^3.7.1",
-    "@types/node": "^22.6.1",
-    "bumpp": "^9.5.2",
+    "@antfu/eslint-config": "^3.12.0",
+    "@types/node": "^22.10.2",
+    "bumpp": "^9.9.2",
     "conventional-changelog-cli": "^5.0.0",
-    "eslint": "^9.11.1",
-    "lint-staged": "^15.2.10",
+    "eslint": "^9.17.0",
+    "lint-staged": "^15.2.11",
     "simple-git-hooks": "^2.11.1",
     "typescript": "^5.7.2",
     "unbuild": "^3.0.1",
-    "vite": "^5.4.7",
-    "vitest": "^2.1.1"
+    "vite": "^6.0.5",
+    "vitest": "^2.1.8"
   },
   "simple-git-hooks": {
     "pre-commit": "pnpm lint-staged"
