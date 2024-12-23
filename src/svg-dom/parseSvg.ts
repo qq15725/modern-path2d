@@ -19,10 +19,12 @@ export function parseSvgToDom(svg: string | SVGElement): SVGElement {
     else {
       xml = svg
     }
-    return new DOMParser().parseFromString(
-      xml,
-      'image/svg+xml',
-    ).documentElement as unknown as SVGElement
+    const doc = new DOMParser().parseFromString(xml, 'text/xml') as XMLDocument
+    const error = doc.querySelector('parsererror')
+    if (error) {
+      throw new Error(`${error.textContent ?? 'parser error'}\n${xml}`)
+    }
+    return doc.documentElement as unknown as SVGElement
   }
   else {
     return svg
