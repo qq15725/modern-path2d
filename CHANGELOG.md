@@ -1,3 +1,12 @@
+# [1.0.0](https://github.com/qq15725/modern-path2d/compare/v0.2.9...v1.0.0) (2024-12-23)
+
+
+### Features
+
+* rename method `toSvg` to `toSVG` ([a1fcb6a](https://github.com/qq15725/modern-path2d/commit/a1fcb6ada8ecbce100c525738714ecd4d1fe8a6e))
+
+
+
 ## [0.2.9](https://github.com/qq15725/modern-path2d/compare/v0.2.8...v0.2.9) (2024-12-23)
 
 
