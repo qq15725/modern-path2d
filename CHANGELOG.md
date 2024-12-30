@@ -1,3 +1,12 @@
+## [1.0.1](https://github.com/qq15725/modern-path2d/compare/v1.0.0...v1.0.1) (2024-12-30)
+
+
+### Bug Fixes
+
+* use href ([7f3642f](https://github.com/qq15725/modern-path2d/commit/7f3642f39daabd2628f93e1fbe74e16d994a11b8))
+
+
+
 # [1.0.0](https://github.com/qq15725/modern-path2d/compare/v0.2.9...v1.0.0) (2024-12-23)
 
 
