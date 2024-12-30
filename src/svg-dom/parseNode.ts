@@ -68,7 +68,9 @@ export function parseNode(
       break
     case 'use': {
       _style = parseStyle(node, _style, stylesheets)
-      const href = node.getAttributeNS('http://www.w3.org/1999/xlink', 'href') || ''
+      const href = node.getAttributeNS('http://www.w3.org/1999/xlink', 'href')
+        || node.getAttribute('href')
+        || ''
       const usedNodeId = href.substring(1)
       const usedNode = (node.viewportElement as any)?.getElementById(usedNodeId)
       if (usedNode) {
