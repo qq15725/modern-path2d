@@ -1,4 +1,4 @@
-import type { PathStyle, StrokeLinejoin } from '../types'
+import type { Path2DStyle, StrokeLinejoin } from '../core'
 
 const lineJoinMap: Record<StrokeLinejoin, CanvasLineJoin> = {
   'arcs': 'bevel',
@@ -10,7 +10,7 @@ const lineJoinMap: Record<StrokeLinejoin, CanvasLineJoin> = {
 
 export function setCanvasContext(
   ctx: CanvasRenderingContext2D,
-  style: Partial<PathStyle>,
+  style: Partial<Path2DStyle>,
 ): void {
   const {
     fill = '#000',

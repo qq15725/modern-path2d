@@ -47,7 +47,7 @@
   "scripts": {
     "build": "vite build && unbuild",
     "dev": "vite docs",
-    "lint": "eslint ./src",
+    "lint": "eslint src",
     "version": "conventional-changelog -p angular -i CHANGELOG.md -s && git add CHANGELOG.md",
     "release": "bumpp package.json --commit \"release: v%s\" --push --all --tag",
     "start": "esno src/index.ts",
@@ -55,8 +55,12 @@
     "typecheck": "tsc --noEmit",
     "prepare": "simple-git-hooks"
   },
+  "dependencies": {
+    "earcut": "^3.0.1"
+  },
   "devDependencies": {
     "@antfu/eslint-config": "^3.12.0",
+    "@types/earcut": "^2.1.4",
     "@types/node": "^22.10.2",
     "bumpp": "^9.9.2",
     "conventional-changelog-cli": "^5.0.0",
@@ -72,6 +76,6 @@
     "pre-commit": "pnpm lint-staged"
   },
   "lint-staged": {
-    "*": "eslint ./src --fix"
+    "*": "eslint src --fix"
   }
 }

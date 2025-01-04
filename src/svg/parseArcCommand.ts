@@ -1,5 +1,5 @@
+import type { CurvePath, Path2D } from '../core'
 import type { Vector2 } from '../math'
-import type { CurvePath, Path2D } from '../paths'
 
 function svgAngle(ux: number, uy: number, vx: number, vy: number): number {
   const dot = ux * vx + uy * vy

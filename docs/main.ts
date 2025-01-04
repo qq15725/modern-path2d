@@ -1,6 +1,6 @@
-import { parseSVG, Path2D, pathsToCanvas, pathsToSVG } from '../src'
+import { drawPoint, parseSVG, Path2D, Path2DSet } from '../src'
 
-function createCtx(): CanvasRenderingContext2D {
+function genCtx(): CanvasRenderingContext2D {
   const canvas = document.createElement('canvas')
   canvas.width = 200
   canvas.height = 200
@@ -43,24 +43,24 @@ function testWebPath2D(): void {
   })
   path1.style.stroke = 'currentColor'
   path1.style.fill = 'none'
-  path1.drawTo(createCtx())
-  createCtx().stroke(path2)
+  path1.drawTo(genCtx())
+  genCtx().stroke(path2)
 }
 
 async function testSVGFixtures(): Promise<void> {
   for (const [key, value] of Object.entries(import.meta.glob('../test/fixtures/*.svg', { query: '?raw' }))) {
     const svgSource = await (value as () => Promise<any>)().then(rep => rep.default)
-    const svgPaths = parseSVG(svgSource)
+    const pathSet = parseSVG(svgSource)
 
-    const canvas = pathsToCanvas(svgPaths)
+    const canvas = pathSet.toCanvas()
     canvas.dataset.file = key
     document.body.append(canvas)
 
-    const svg = pathsToSVG(svgPaths)
+    const svg = pathSet.toSVG()
     svg.dataset.file = key
     document.body.append(svg)
 
-    console.warn(svgPaths)
+    console.warn(pathSet)
   }
 }
 
@@ -73,16 +73,31 @@ async function testJSONFixtures(): Promise<void> {
       .scale(2)
       .skew(-0.24)
       .rotate(90)
-    const canvas = path.toCanvas()
+    const canvas = new Path2DSet([path]).toCanvas()
     canvas.dataset.file = key
     document.body.append(canvas)
   }
+}
+
+function testPoints(): void {
+  const ctx = genCtx()
+  const path = new Path2D()
+  path.quadraticCurveTo(25, 25, 25, 62.5)
+  const points = path.getPoints()
+  for (let i = 0; i < points.length; i += 2) {
+    const x = points[i]
+    const y = points[i + 1]
+    drawPoint(ctx, x, y)
+  }
+  ctx.fillStyle = 'red'
+  ctx.fill()
 }
 
 async function main(): Promise<void> {
   testWebPath2D()
   await testJSONFixtures()
   await testSVGFixtures()
+  testPoints()
 }
 
 main()
