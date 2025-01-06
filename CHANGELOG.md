@@ -1,3 +1,20 @@
+# [1.1.0](https://github.com/qq15725/modern-path2d/compare/v1.0.1...v1.1.0) (2025-01-06)
+
+
+### Bug Fixes
+
+* miss file ([8895691](https://github.com/qq15725/modern-path2d/commit/889569167c8d94abc81e6f4925ab2e1313460324))
+
+
+### Features
+
+* add `fillTriangulate`、`strokeTriangulate`、`getAdaptivePoints` method to `Curve` ([eb3d8b1](https://github.com/qq15725/modern-path2d/commit/eb3d8b130f3ea14cdeefa43426ef4e552bcb4136))
+* EquilateralPloygonCurve ([eadefcb](https://github.com/qq15725/modern-path2d/commit/eadefcb785b1a3550fd02a49f4c5584059a0c3e7))
+* update CompositeCurve ([301a10a](https://github.com/qq15725/modern-path2d/commit/301a10ac60f3a18080d38cade2b09d94874808b5))
+* update triangulate ([1cc87e6](https://github.com/qq15725/modern-path2d/commit/1cc87e6c82255775aecbc8bd8b14a66dade977e8))
+
+
+
 ## [1.0.1](https://github.com/qq15725/modern-path2d/compare/v1.0.0...v1.0.1) (2024-12-30)
 
 
