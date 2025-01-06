@@ -26,7 +26,9 @@
 
 - Path transform
 
-- Parse svg to Path2D array
+- Path triangulate
+
+- Parse svg to Path2DSet
 
 - TypeScript
 
@@ -39,7 +41,7 @@ npm i modern-path2d
 ## 🦄 Usage
 
 ```ts
-import { parseSVG, Path2D } from 'modern-path2d'
+import { parseSVG, Path2D, Path2DSet } from 'modern-path2d'
 
 const path = new Path2D()
 
@@ -79,8 +81,8 @@ console.log(path.toCommands())
 path.drawTo(document.getElementById('canvas').getContext('2d'))
 
 // export to canvas
-document.body.append(path.toCanvas())
+document.body.append(new Path2DSet([path]).toCanvas())
 
 // export to svg
-document.body.append(path.toSVG())
+document.body.append(new Path2DSet([path]).toSVG())
 ```
