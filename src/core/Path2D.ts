@@ -301,11 +301,11 @@ export class Path2D extends CompositeCurve<CurvePath> {
   }
 
   toCommands(): Path2DCommand[] {
-    return this.curves.flatMap(path => path.toCommands())
+    return this.curves.flatMap(v => v.toCommands())
   }
 
   toData(): Path2DData {
-    return this.curves.map(path => path.toData()).join(' ')
+    return this.curves.filter(v => v.curves.length).map(v => v.toData()).join(' ')
   }
 
   toSVGPathString(): string {

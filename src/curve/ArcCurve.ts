@@ -3,12 +3,12 @@ import { EllipseCurve } from './EllipseCurve'
 export class ArcCurve extends EllipseCurve {
   constructor(
     cx = 0, cy = 0,
-    r = 1,
+    radius = 1,
     startAngle = 0,
     endAngle = Math.PI * 2,
     clockwise = false,
   ) {
-    super(cx, cy, r, r, 0, startAngle, endAngle, clockwise)
+    super(cx, cy, radius, radius, 0, startAngle, endAngle, clockwise)
   }
 
   override getAdaptivePointArray(output: number[] = []): number[] {
