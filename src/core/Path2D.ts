@@ -75,12 +75,10 @@ export class Path2D extends CompositeCurve<CurvePath> {
   moveTo(x: number, y: number): this {
     if (!this.currentCurve.currentPoint?.equals({ x, y })) {
       if (this.currentCurve.curves.length) {
-        this.currentCurve = new CurvePath().moveTo(x, y)
+        this.currentCurve = new CurvePath()
         this.curves.push(this.currentCurve)
       }
-      else {
-        this.currentCurve.moveTo(x, y)
-      }
+      this.currentCurve.moveTo(x, y)
     }
     return this
   }

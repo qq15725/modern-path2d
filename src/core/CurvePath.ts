@@ -1,3 +1,4 @@
+import type { Curve } from '../curve'
 import type { VectorLike } from '../math'
 import type { Path2DCommand } from './Path2DCommand'
 import {
@@ -82,6 +83,16 @@ export class CurvePath extends CompositeCurve {
     return this
   }
 
+  protected _connetLineTo(curve: Curve): this {
+    if (this.curves.length > 0) {
+      const first = curve.getPoint(0)
+      if (!this.currentPoint || !first.equals(this.currentPoint)) {
+        this.lineTo(first.x, first.y)
+      }
+    }
+    return this
+  }
+
   closePath(): this {
     const start = this.startPoint
     if (start) {
@@ -153,12 +164,7 @@ export class CurvePath extends CompositeCurve {
       startAngle, endAngle,
       !counterclockwise,
     )
-    if (this.curves.length > 0) {
-      const first = curve.getPoint(0)
-      if (!this.currentPoint || !first.equals(this.currentPoint)) {
-        this.lineTo(first.x, first.y)
-      }
-    }
+    this._connetLineTo(curve)
     this.curves.push(curve)
     this._setCurrentPoint(curve.getPoint(1))
     return this
@@ -186,12 +192,7 @@ export class CurvePath extends CompositeCurve {
       startAngle, endAngle,
       !counterclockwise,
     )
-    if (this.curves.length > 0) {
-      const first = curve.getPoint(0)
-      if (!this.currentPoint || !first.equals(this.currentPoint)) {
-        this.lineTo(first.x, first.y)
-      }
-    }
+    this._connetLineTo(curve)
     this.curves.push(curve)
     this._setCurrentPoint(curve.getPoint(1))
     return this
@@ -205,7 +206,9 @@ export class CurvePath extends CompositeCurve {
   }
 
   rect(x: number, y: number, w: number, h: number): this {
-    this.curves.push(new RectangleCurve(x, y, w, h))
+    const curve = new RectangleCurve(x, y, w, h)
+    this._connetLineTo(curve)
+    this.curves.push(curve)
     this._setCurrentPoint({ x, y })
     return this
   }

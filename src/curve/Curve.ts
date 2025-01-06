@@ -1,6 +1,11 @@
 import type { Path2DCommand, Path2DData } from '../core'
 import type { Matrix3, VectorLike } from '../math'
-import type { FillTriangulateOptions, StrokeTriangulateOptions } from './utils'
+import type {
+  FillTriangulateOptions,
+  FillTriangulateResult,
+  StrokeTriangulateOptions,
+  StrokeTriangulateResult,
+} from './utils'
 import { BoundingBox, Vector2 } from '../math'
 import { svgPathCommandsToData } from '../svg'
 import { fillTriangulate, strokeTriangulate } from './utils'
@@ -53,22 +58,42 @@ export abstract class Curve {
     return this.getUnevenPointArray(5, output)
   }
 
-  getPointArray(count?: number, output: number[] = []): number[] {
-    if (count) {
-      return this.getUnevenPointArray(count, output)
+  protected _pointArrayToPoint(array: number[], output: Vector2[] = []): Vector2[] {
+    for (let i = 0, len = array.length; i < len; i += 2) {
+      const x = array[i]
+      const y = array[i + 1]
+      output.push(new Vector2(x, y))
     }
-    else {
-      return this.getAdaptivePointArray(output)
-    }
+    return output
+  }
+
+  getSpacedPoints(count?: number, output: Vector2[] = []): Vector2[] {
+    const array = this.getSpacedPointArray(count)
+    this._pointArrayToPoint(array, output)
+    return output
+  }
+
+  getUnevenPoints(count?: number, output: Vector2[] = []): Vector2[] {
+    const array = this.getUnevenPointArray(count)
+    this._pointArrayToPoint(array, output)
+    return output
+  }
+
+  getAdaptivePoints(output: Vector2[] = []): Vector2[] {
+    const array = this.getAdaptivePointArray()
+    this._pointArrayToPoint(array, output)
+    return output
   }
 
   getPoints(count?: number, output: Vector2[] = []): Vector2[] {
-    const arrayPoints = this.getPointArray(count)
-    for (let i = 0, len = arrayPoints.length; i < len; i += 2) {
-      const x = arrayPoints[i]
-      const y = arrayPoints[i + 1]
-      output.push(new Vector2(x, y))
+    let array
+    if (count) {
+      array = this.getUnevenPointArray(count)
     }
+    else {
+      array = this.getAdaptivePointArray()
+    }
+    this._pointArrayToPoint(array, output)
     return output
   }
 
@@ -107,21 +132,18 @@ export abstract class Curve {
 
   getUToTMapping(u: number, distance?: number): number {
     const lengths = this.getLengths()
-    let i = 0
     const lengthsLen = lengths.length
-    let targetLength
-    if (distance) {
-      targetLength = distance
+    const targetLen = distance ?? u * lengths[lengthsLen - 1]
+    if (lengthsLen < 2) {
+      return targetLen / lengths[0]
     }
-    else {
-      targetLength = u * lengths[lengthsLen - 1]
-    }
+    let i = 0
     let low = 0
     let high = lengthsLen - 1
     let comparison
     while (low <= high) {
       i = Math.floor(low + (high - low) / 2)
-      comparison = lengths[i] - targetLength
+      comparison = lengths[i] - targetLen
       if (comparison < 0) {
         low = i + 1
       }
@@ -134,13 +156,13 @@ export abstract class Curve {
       }
     }
     i = high
-    if (lengths[i] === targetLength) {
+    if (lengths[i] === targetLen) {
       return i / (lengthsLen - 1)
     }
-    const lengthBefore = lengths[i]
-    const lengthAfter = lengths[i + 1]
-    const segmentLength = lengthAfter - lengthBefore
-    const segmentFraction = (targetLength - lengthBefore) / segmentLength
+    const before = lengths[i]
+    const after = lengths[i + 1]
+    const segmentLength = after - before
+    const segmentFraction = (targetLen - before) / segmentLength
     return (i + segmentFraction) / (lengthsLen - 1)
   }
 
@@ -205,34 +227,22 @@ export abstract class Curve {
     return new BoundingBox(min.x, min.y, max.x - min.x, max.y - min.y)
   }
 
-  fillTriangulate(
-    vertices: number[],
-    indices: number[],
-    options: FillTriangulateOptions = {},
-  ): void {
-    fillTriangulate(
+  fillTriangulate(options?: FillTriangulateOptions): FillTriangulateResult {
+    return fillTriangulate(
       this.getPoints().reduce((arr, p) => {
         arr.push(p.x, p.y)
         return arr
       }, [] as number[]),
-      vertices,
-      indices,
       options,
     )
   }
 
-  strokeTriangulate(
-    vertices: number[],
-    indices: number[],
-    options: StrokeTriangulateOptions = {},
-  ): void {
-    strokeTriangulate(
+  strokeTriangulate(options?: StrokeTriangulateOptions): StrokeTriangulateResult {
+    return strokeTriangulate(
       this.getPoints().reduce((arr, p) => {
         arr.push(p.x, p.y)
         return arr
       }, [] as number[]),
-      vertices,
-      indices,
       options,
     )
   }

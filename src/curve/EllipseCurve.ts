@@ -1,5 +1,5 @@
 import type { Path2DCommand } from '../core'
-import type { FillTriangulateOptions } from './utils'
+import type { FillTriangulateOptions, FillTriangulateResult } from './utils'
 import { Matrix3, Vector2 } from '../math'
 import { Curve } from './Curve'
 
@@ -127,6 +127,7 @@ export class EllipseCurve extends Curve {
   }
 
   override getAdaptivePointArray(output: number[] = []): number[] {
+    const i = output.length - 1
     const x = this.center.x
     const y = this.center.y
     const rx = this.radius.x
@@ -147,18 +148,18 @@ export class EllipseCurve extends Curve {
     }
 
     if (n === 0) {
-      output[0] = output[6] = x + dx
-      output[1] = output[3] = y + dy
-      output[2] = output[4] = x - dx
-      output[5] = output[7] = y - dy
+      output[i] = output[i + 6] = x + dx
+      output[i + 1] = output[i + 3] = y + dy
+      output[i + 2] = output[i + 4] = x - dx
+      output[i + 5] = output[i + 7] = y - dy
 
       return output
     }
 
-    let j1 = 0
-    let j2 = (n * 4) + (dx ? 2 : 0) + 2
+    let j1 = i
+    let j2 = (n * 4) + (dx ? 2 : 0) + 2 + i
     let j3 = j2
-    let j4 = m
+    let j4 = m + i
 
     let x0 = dx + rx
     let y0 = dy
@@ -221,19 +222,17 @@ export class EllipseCurve extends Curve {
     return output
   }
 
-  override fillTriangulate(
-    vertices: number[],
-    indices: number[],
-    options: FillTriangulateOptions = {},
-  ): void {
+  override fillTriangulate(options: FillTriangulateOptions = {}): FillTriangulateResult {
     let {
+      vertices = [],
+      indices = [],
       verticesStride = 2,
       verticesOffset = 0,
       indicesOffset = 0,
     } = options
-    const points = this.getPointArray()
+    const points = this.getAdaptivePointArray()
     if (points.length === 0) {
-      return
+      return { vertices, indices }
     }
     // Compute center (average of all points)
     let centerX = 0
@@ -264,6 +263,10 @@ export class EllipseCurve extends Curve {
     indices[indicesOffset++] = centerIndex + 1
     indices[indicesOffset++] = centerIndex
     indices[indicesOffset++] = count - 1
+    return {
+      vertices,
+      indices,
+    }
   }
 
   override getMinMax(min: Vector2 = Vector2.MAX, max: Vector2 = Vector2.MIN): { min: Vector2, max: Vector2 } {

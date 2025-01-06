@@ -1,4 +1,4 @@
-import type { FillTriangulateOptions } from './utils'
+import type { FillTriangulateOptions, FillTriangulateResult } from './utils'
 import { Vector2 } from '../math'
 import { LineCurve } from './LineCurve'
 import { PloygonCurve } from './PloygonCurve'
@@ -25,18 +25,23 @@ export class RectangleCurve extends PloygonCurve {
     ])
   }
 
-  override fillTriangulate(
-    vertices: number[],
-    indices: number[],
-    options: FillTriangulateOptions = {},
-  ): void {
+  override fillTriangulate(options: FillTriangulateOptions = {}): FillTriangulateResult {
     let {
+      vertices = [],
+      indices = [],
       verticesStride = 2,
       verticesOffset = 0,
       indicesOffset = 0,
     } = options
 
-    const points = this.getPointArray()
+    const { x, y, width, height } = this
+
+    const points = [
+      x, y,
+      x + width, y,
+      x + width, y + height,
+      x, y + height,
+    ]
 
     let count = 0
     verticesOffset *= verticesStride
@@ -61,5 +66,7 @@ export class RectangleCurve extends PloygonCurve {
     indices[indicesOffset++] = verticesIndex + 1
     indices[indicesOffset++] = verticesIndex + 3
     indices[indicesOffset++] = verticesIndex + 2
+
+    return { vertices, indices }
   }
 }

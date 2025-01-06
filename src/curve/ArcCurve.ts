@@ -18,7 +18,6 @@ export class ArcCurve extends EllipseCurve {
     const y = this.center.y
     const clockwise = this.clockwise
     const radius = this.radius.x
-
     // determine distance between the two angles
     // ...probably a nicer way of writing this
     let dist = Math.abs(start - end)

@@ -49,7 +49,6 @@ function testWebPath2D(): void {
 
 async function testSVGFixtures(): Promise<void> {
   for (const [key, value] of Object.entries(import.meta.glob('../test/fixtures/*.svg', { query: '?raw' }))) {
-    console.warn(key)
     const svgSource = await (value as () => Promise<any>)().then(rep => rep.default)
     const pathSet = parseSVG(svgSource)
 
@@ -83,9 +82,23 @@ async function testJSONFixtures(): Promise<void> {
 function testPoints(): void {
   const ctx = genCtx()
   const path = new Path2D()
+  path.rect(10, 10, 100, 100)
+  path.arc(75, 75, 50, 0, Math.PI * 2, true) // 绘制
+  path.moveTo(110, 75)
+  path.arc(75, 75, 35, 0, Math.PI, false) // 口 (顺时针)
+  path.moveTo(65, 65)
+  path.arc(60, 65, 5, 0, Math.PI * 2, true) // 左眼
+  path.moveTo(95, 65)
+  path.arc(90, 65, 5, 0, Math.PI * 2, true) // 右眼
+  path.moveTo(75, 25)
   path.quadraticCurveTo(25, 25, 25, 62.5)
-  path.rect(25, 25, 25, 40)
-  path.getPoints().forEach((p) => {
+  path.quadraticCurveTo(25, 100, 50, 100)
+  path.quadraticCurveTo(50, 120, 30, 125)
+  path.quadraticCurveTo(60, 120, 65, 100)
+  path.quadraticCurveTo(125, 100, 125, 62.5)
+  path.quadraticCurveTo(125, 25, 75, 25)
+  path.ellipse(100, 100, 50, 75, Math.PI / 4, 0, 2 * Math.PI)
+  path.getAdaptivePoints().forEach((p) => {
     drawPoint(ctx, p.x, p.y)
   })
   ctx.fillStyle = 'red'

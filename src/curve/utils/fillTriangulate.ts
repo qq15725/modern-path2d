@@ -2,18 +2,25 @@ import earcut from 'earcut'
 
 export interface FillTriangulateOptions {
   holes?: number[]
+  vertices?: number[]
+  indices?: number[]
   verticesStride?: number
   verticesOffset?: number
   indicesOffset?: number
 }
 
+export interface FillTriangulateResult {
+  vertices: number[]
+  indices: number[]
+}
+
 export function fillTriangulate(
   points: number[],
-  vertices: number[],
-  indices: number[],
   options: FillTriangulateOptions = {},
-): void {
+): FillTriangulateResult {
   let {
+    vertices = [],
+    indices = [],
     holes = [],
     verticesStride = 2,
     verticesOffset = 0,
@@ -34,5 +41,10 @@ export function fillTriangulate(
       vertices[index + 1] = points[i + 1]
       index += verticesStride
     }
+  }
+
+  return {
+    vertices,
+    indices,
   }
 }

@@ -2,9 +2,16 @@ export type LineCap = 'butt' | 'round' | 'square'
 export type LineJoin = 'round' | 'bevel' | 'miter'
 
 export interface StrokeTriangulateOptions {
+  vertices?: number[]
+  indices?: number[]
   lineStyle?: LineStyle
   flipAlignment?: boolean
   closed?: boolean
+}
+
+export interface StrokeTriangulateResult {
+  vertices: number[]
+  indices: number[]
 }
 
 export interface LineStyle {
@@ -20,11 +27,11 @@ const curveEps = 0.0001
 
 export function strokeTriangulate(
   points: number[],
-  vertices: number[],
-  indices: number[],
   options: StrokeTriangulateOptions = {},
-): void {
+): StrokeTriangulateResult {
   const {
+    vertices = [],
+    indices = [],
     lineStyle = {
       alignment: 0.5,
       cap: 'butt',
@@ -39,7 +46,7 @@ export function strokeTriangulate(
   const eps = closePointEps
 
   if (points.length === 0) {
-    return
+    return { vertices, indices }
   }
 
   const style = lineStyle
@@ -418,6 +425,11 @@ export function strokeTriangulate(
     }
 
     indices.push(i, i + 1, i + 2)
+  }
+
+  return {
+    vertices,
+    indices,
   }
 }
 
