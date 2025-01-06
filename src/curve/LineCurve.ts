@@ -49,7 +49,7 @@ export class LineCurve extends Curve {
     return [this.p1, this.p2]
   }
 
-  override getAdaptivePoints(output: number[] = []): number[] {
+  override getAdaptivePointArray(output: number[] = []): number[] {
     output.push(
       this.p1.x, this.p1.y,
       this.p2.x, this.p2.y,

@@ -44,24 +44,8 @@ export class CurvePath extends CompositeCurve {
     return this
   }
 
-  override getPoint(t: number, output = new Vector2()): Vector2 {
-    const d = t * this.getLength()
-    const curveLengths = this.getCurveLengths()
-    let i = 0
-    while (i < curveLengths.length) {
-      if (curveLengths[i] >= d) {
-        const diff = curveLengths[i] - d
-        const curve = this.curves[i]
-        const segmentLength = curve.getLength()
-        return curve.getPointAt(segmentLength === 0 ? 0 : 1 - diff / segmentLength, output)
-      }
-      i++
-    }
-    return output
-  }
-
-  override getUnevenPoints(count = 40, output: number[] = []): number[] {
-    super.getUnevenPoints(count, output)
+  override getUnevenPointArray(count = 40, output: number[] = []): number[] {
+    super.getUnevenPointArray(count, output)
     if (
       this.autoClose
       && output.length >= 4
@@ -75,8 +59,8 @@ export class CurvePath extends CompositeCurve {
     return output
   }
 
-  override getSpacedPoints(count = 40, output: number[] = []): number[] {
-    super.getSpacedPoints(count, output)
+  override getSpacedPointArray(count = 40, output: number[] = []): number[] {
+    super.getSpacedPointArray(count, output)
     if (
       this.autoClose
       && output.length >= 4

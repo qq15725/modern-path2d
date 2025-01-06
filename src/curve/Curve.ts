@@ -8,9 +8,14 @@ import { fillTriangulate, strokeTriangulate } from './utils'
 export abstract class Curve {
   startT = 0
   endT = 1
-  arcLengthDivisions = 200
-  protected _cacheArcLengths?: number[]
-  protected _needsUpdate = false
+  arcLengthDivision = 200
+  protected _arcLengths?: number[]
+
+  abstract getPoint(t: number, output?: Vector2): Vector2
+
+  getPointAt(u: number, output = new Vector2()): Vector2 {
+    return this.getPoint(this.getUToTMapping(u), output)
+  }
 
   isClockwise(): boolean {
     const prev = this.getPoint(1)
@@ -22,47 +27,49 @@ export abstract class Curve {
     ) < 0
   }
 
-  abstract getPoint(t: number, output?: Vector2): Vector2
-
-  getPointAt(u: number, output = new Vector2()): Vector2 {
-    return this.getPoint(this.getUToTMapping(u), output)
-  }
-
   getControlPointRefs(): Vector2[] {
     return []
   }
 
-  getUnevenPoints(count = 5, output: number[] = []): number[] {
-    count = Math.max(1, count)
-    const point = new Vector2()
-    for (let i = 0, len = count - 1; i <= len; i++) {
-      this.getPoint(i / len, point)
-      output.push(point.x, point.y)
+  getUnevenPointArray(count = 5, output: number[] = []): number[] {
+    const p = new Vector2()
+    for (let i = 0, len = Math.max(1, count) - 1; i <= len; i++) {
+      this.getPoint(i / len, p)
+      output.push(p.x, p.y)
     }
     return output
   }
 
-  getSpacedPoints(count = 5, output: number[] = []): number[] {
-    count = Math.max(1, count)
-    const point = new Vector2()
-    for (let i = 0, len = count - 1; i <= len; i++) {
-      this.getPointAt(i / len, point)
-      output.push(point.x, point.y)
+  getSpacedPointArray(count = 5, output: number[] = []): number[] {
+    const p = new Vector2()
+    for (let i = 0, len = Math.max(1, count) - 1; i <= len; i++) {
+      this.getPointAt(i / len, p)
+      output.push(p.x, p.y)
     }
     return output
   }
 
-  getAdaptivePoints(output: number[] = []): number[] {
-    return this.getUnevenPoints(5, output)
+  getAdaptivePointArray(output: number[] = []): number[] {
+    return this.getUnevenPointArray(5, output)
   }
 
-  getPoints(count?: number, output: number[] = []): number[] {
+  getPointArray(count?: number, output: number[] = []): number[] {
     if (count) {
-      return this.getUnevenPoints(count, output)
+      return this.getUnevenPointArray(count, output)
     }
     else {
-      return this.getAdaptivePoints(output)
+      return this.getAdaptivePointArray(output)
     }
+  }
+
+  getPoints(count?: number, output: Vector2[] = []): Vector2[] {
+    const arrayPoints = this.getPointArray(count)
+    for (let i = 0, len = arrayPoints.length; i < len; i += 2) {
+      const x = arrayPoints[i]
+      const y = arrayPoints[i + 1]
+      output.push(new Vector2(x, y))
+    }
+    return output
   }
 
   getLength(): number {
@@ -70,33 +77,32 @@ export abstract class Curve {
     return lengths[lengths.length - 1]
   }
 
-  getLengths(divisions = this.arcLengthDivisions): number[] {
+  getLengths(): number[] {
     if (
-      this._cacheArcLengths
-      && (this._cacheArcLengths.length === divisions + 1)
-      && !this._needsUpdate
+      !this._arcLengths
+      || (this._arcLengths.length !== this.arcLengthDivision + 1)
     ) {
-      return this._cacheArcLengths
+      this.updateLengths()
     }
-    this._needsUpdate = false
-    const cache = []
-    let current
-    let prev = this.getPoint(0)
-    let sum = 0
-    cache.push(0)
-    for (let i = 1; i <= divisions; i++) {
-      current = this.getPoint(i / divisions)
-      sum += current.distanceTo(prev)
-      cache.push(sum)
-      prev = current
-    }
-    this._cacheArcLengths = cache
-    return cache
+    return this._arcLengths!
   }
 
   updateLengths(): void {
-    this._needsUpdate = true
-    this.getLengths()
+    const divisions = this.arcLengthDivision
+    const arcLengths = [0]
+    for (
+      let sum = 0,
+        prev = this.getPoint(0),
+        i = 1;
+      i <= divisions;
+      i++
+    ) {
+      const current = this.getPoint(i / divisions)
+      sum += current.distanceTo(prev)
+      arcLengths.push(sum)
+      prev = current
+    }
+    this._arcLengths = arcLengths
   }
 
   getUToTMapping(u: number, distance?: number): number {
@@ -186,8 +192,8 @@ export abstract class Curve {
 
   getMinMax(min = Vector2.MAX, max = Vector2.MIN): { min: Vector2, max: Vector2 } {
     const potins = this.getPoints()
-    for (let i = 0, len = potins.length; i < len; i += 2) {
-      const p = { x: potins[i], y: potins[i + 1] }
+    for (let i = 0, len = potins.length; i < len; i++) {
+      const p = potins[i]
       min.min(p)
       max.max(p)
     }
@@ -205,7 +211,10 @@ export abstract class Curve {
     options: FillTriangulateOptions = {},
   ): void {
     fillTriangulate(
-      this.getPoints(),
+      this.getPoints().reduce((arr, p) => {
+        arr.push(p.x, p.y)
+        return arr
+      }, [] as number[]),
       vertices,
       indices,
       options,
@@ -218,7 +227,10 @@ export abstract class Curve {
     options: StrokeTriangulateOptions = {},
   ): void {
     strokeTriangulate(
-      this.getPoints(),
+      this.getPoints().reduce((arr, p) => {
+        arr.push(p.x, p.y)
+        return arr
+      }, [] as number[]),
       vertices,
       indices,
       options,
@@ -228,13 +240,13 @@ export abstract class Curve {
   toCommands(): Path2DCommand[] {
     const comds: Path2DCommand[] = []
     const potins = this.getPoints()
-    for (let i = 0, len = potins.length; i < len; i += 2) {
-      const p = { x: potins[i], y: potins[i + 1] }
+    for (let i = 0, len = potins.length; i < len; i++) {
+      const p = potins[i]
       if (i === 0) {
-        comds.push({ type: 'M', ...p })
+        comds.push({ type: 'M', x: p.x, y: p.y })
       }
       else {
-        comds.push({ type: 'L', ...p })
+        comds.push({ type: 'L', x: p.x, y: p.y })
       }
     }
     return comds
@@ -259,7 +271,7 @@ export abstract class Curve {
   }
 
   copy(source: Curve): this {
-    this.arcLengthDivisions = source.arcLengthDivisions
+    this.arcLengthDivision = source.arcLengthDivision
     return this
   }
 

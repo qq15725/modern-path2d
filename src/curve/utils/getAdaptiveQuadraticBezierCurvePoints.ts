@@ -8,14 +8,11 @@ const curveAngleToleranceEpsilon = 0.01
 const mAngleTolerance = 0
 
 export function getAdaptiveQuadraticBezierCurvePoints(
-  points: number[],
-  sX: number,
-  sY: number,
-  x1: number,
-  y1: number,
-  x: number,
-  y: number,
+  sX: number, sY: number,
+  x1: number, y1: number,
+  x: number, y: number,
   smoothness = 0.5,
+  points: number[],
 ): number[] {
   const scale = 1.0
   const smoothing = Math.min(

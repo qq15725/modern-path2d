@@ -126,7 +126,7 @@ export class EllipseCurve extends Curve {
     return [this.center]
   }
 
-  override getAdaptivePoints(output: number[] = []): number[] {
+  override getAdaptivePointArray(output: number[] = []): number[] {
     const x = this.center.x
     const y = this.center.y
     const rx = this.radius.x
@@ -231,7 +231,7 @@ export class EllipseCurve extends Curve {
       verticesOffset = 0,
       indicesOffset = 0,
     } = options
-    const points = this.getPoints()
+    const points = this.getPointArray()
     if (points.length === 0) {
       return
     }

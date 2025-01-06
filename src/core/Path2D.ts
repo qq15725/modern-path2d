@@ -1,9 +1,9 @@
-import type { Curve } from '../curve'
 import type { Matrix3, VectorLike } from '../math'
 import type { Path2DCommand } from './Path2DCommand'
 import type { Path2DData } from './Path2DData'
 import type { Path2DStyle } from './Path2DStyle'
 import { drawPoint, setCanvasContext } from '../canvas'
+import { CompositeCurve } from '../curve'
 import { BoundingBox, Vector2 } from '../math'
 import { svgPathCommandsAddToPath2D, svgPathDataToCommands } from '../svg'
 import { CurvePath } from './CurvePath'
@@ -12,17 +12,16 @@ import { getIntersectionPoint, toKebabCase } from './utils'
 /**
  * @link https://developer.mozilla.org/zh-CN/docs/Web/API/Path2D
  */
-export class Path2D {
-  currentPath = new CurvePath()
-  paths: CurvePath[] = [this.currentPath]
+export class Path2D extends CompositeCurve<CurvePath> {
+  currentCurve = new CurvePath()
   style: Partial<Path2DStyle>
 
   get startPoint(): Vector2 | undefined {
-    return this.currentPath.startPoint
+    return this.currentCurve.startPoint
   }
 
   get currentPoint(): Vector2 | undefined {
-    return this.currentPath.currentPoint
+    return this.currentCurve.currentPoint
   }
 
   get strokeWidth(): number {
@@ -35,6 +34,9 @@ export class Path2D {
   }
 
   constructor(path?: Path2D | Path2DCommand[] | Path2DData, style: Partial<Path2DStyle> = {}) {
+    super()
+    this.curves.push(this.currentCurve)
+    this.style = style
     if (path) {
       if (path instanceof Path2D) {
         this.addPath(path)
@@ -46,15 +48,14 @@ export class Path2D {
         this.addData(path)
       }
     }
-    this.style = style
   }
 
   addPath(path: Path2D | CurvePath): this {
     if (path instanceof Path2D) {
-      this.paths.push(...path.paths.map(v => v.clone()))
+      this.curves.push(...path.curves.map(v => v.clone()))
     }
     else {
-      this.paths.push(path)
+      this.curves.push(path)
     }
     return this
   }
@@ -62,61 +63,60 @@ export class Path2D {
   closePath(): this {
     const startPoint = this.startPoint
     if (startPoint) {
-      this.currentPath.closePath()
-      if (this.currentPath.curves.length > 0) {
-        this.currentPath = new CurvePath().moveTo(startPoint.x, startPoint.y)
-        this.paths.push(this.currentPath)
+      this.currentCurve.closePath()
+      if (this.currentCurve.curves.length > 0) {
+        this.currentCurve = new CurvePath().moveTo(startPoint.x, startPoint.y)
+        this.curves.push(this.currentCurve)
       }
     }
     return this
   }
 
   moveTo(x: number, y: number): this {
-    const { currentPoint, curves } = this.currentPath
-    if (!currentPoint?.equals({ x, y })) {
-      if (curves.length) {
-        this.currentPath = new CurvePath().moveTo(x, y)
-        this.paths.push(this.currentPath)
+    if (!this.currentCurve.currentPoint?.equals({ x, y })) {
+      if (this.currentCurve.curves.length) {
+        this.currentCurve = new CurvePath().moveTo(x, y)
+        this.curves.push(this.currentCurve)
       }
       else {
-        this.currentPath.moveTo(x, y)
+        this.currentCurve.moveTo(x, y)
       }
     }
     return this
   }
 
   lineTo(x: number, y: number): this {
-    this.currentPath.lineTo(x, y)
+    this.currentCurve.lineTo(x, y)
     return this
   }
 
   bezierCurveTo(cp1x: number, cp1y: number, cp2x: number, cp2y: number, x: number, y: number): this {
-    this.currentPath.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y)
+    this.currentCurve.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y)
     return this
   }
 
   quadraticCurveTo(cpx: number, cpy: number, x: number, y: number): this {
-    this.currentPath.quadraticCurveTo(cpx, cpy, x, y)
+    this.currentCurve.quadraticCurveTo(cpx, cpy, x, y)
     return this
   }
 
   arc(x: number, y: number, radius: number, startAngle: number, endAngle: number, counterclockwise?: boolean): this {
-    this.currentPath.arc(x, y, radius, startAngle, endAngle, counterclockwise)
+    this.currentCurve.arc(x, y, radius, startAngle, endAngle, counterclockwise)
     return this
   }
 
   arcTo(x1: number, y1: number, x2: number, y2: number, radius: number): this {
-    this.currentPath.arcTo(x1, y1, x2, y2, radius)
+    this.currentCurve.arcTo(x1, y1, x2, y2, radius)
     return this
   }
 
   ellipse(x: number, y: number, radiusX: number, radiusY: number, rotation: number, startAngle: number, endAngle: number, counterclockwise?: boolean): this {
-    this.currentPath.ellipse(x, y, radiusX, radiusY, rotation, startAngle, endAngle, counterclockwise)
+    this.currentCurve.ellipse(x, y, radiusX, radiusY, rotation, startAngle, endAngle, counterclockwise)
     return this
   }
 
   rect(x: number, y: number, w: number, h: number): this {
-    this.currentPath.rect(x, y, w, h)
+    this.currentCurve.rect(x, y, w, h)
     return this
   }
 
@@ -131,20 +131,8 @@ export class Path2D {
   }
 
   splineThru(points: Vector2[]): this {
-    this.currentPath.splineThru(points)
+    this.currentCurve.splineThru(points)
     return this
-  }
-
-  getControlPointRefs(): Vector2[] {
-    return this.paths.flatMap(path => path.getControlPointRefs())
-  }
-
-  getCurves(): Curve[] {
-    return this.paths.flatMap(path => path.curves)
-  }
-
-  getPoints(): number[] {
-    return this.paths.flatMap(path => path.getPoints())
   }
 
   scale(sx: number, sy = sx, target: VectorLike = { x: 0, y: 0 }): this {
@@ -172,11 +160,13 @@ export class Path2D {
     if (b === 0) {
       return this
     }
-    const curves = this.getCurves()
+    const curves = this.curves
     const _list: { start: Vector2, end: Vector2, index: number }[] = []
     const _isClockwise: boolean[] = []
     const _points: Vector2[][] = []
     curves.forEach((curve, index) => {
+      if (!curve.getLength())
+        return
       const points = curve.getControlPointRefs()
       const isClockwise = curve.isClockwise()
       _points[index] = points
@@ -201,6 +191,8 @@ export class Path2D {
     })
 
     curves.forEach((curve, index) => {
+      if (!curve.getLength())
+        return
       const isClockwise = _isClockwise[index]
       const points = _points[index]
       points.forEach((point) => {
@@ -230,20 +222,20 @@ export class Path2D {
   }
 
   matrix(matrix: Matrix3): this {
-    this.getCurves().forEach(curve => curve.matrix(matrix))
+    this.curves.forEach(curve => curve.matrix(matrix))
     return this
   }
 
   getMinMax(min = Vector2.MAX, max = Vector2.MIN, withStyle = true): { min: Vector2, max: Vector2 } {
     const strokeWidth = this.strokeWidth
-    this.getCurves().forEach((curve) => {
+    this.curves.forEach((curve) => {
       curve.getMinMax(min, max)
       if (withStyle) {
         if (strokeWidth > 1) {
           const halfStrokeWidth = strokeWidth / 2
           const isClockwise = curve.isClockwise()
           const points = []
-          for (let t = 0; t <= 1; t += 1 / curve.arcLengthDivisions) {
+          for (let t = 0; t <= 1; t += 1 / curve.arcLengthDivision) {
             const point = curve.getPoint(t)
             const normal = curve.getNormal(t)
             const dist1 = normal.clone().scale(isClockwise ? halfStrokeWidth : -halfStrokeWidth)
@@ -278,7 +270,7 @@ export class Path2D {
     ctx.beginPath()
     ctx.save()
     setCanvasContext(ctx, style)
-    this.paths.forEach((path) => {
+    this.curves.forEach((path) => {
       path.drawTo(ctx)
     })
     if (fill !== 'none') {
@@ -311,11 +303,11 @@ export class Path2D {
   }
 
   toCommands(): Path2DCommand[] {
-    return this.paths.flatMap(path => path.toCommands())
+    return this.curves.flatMap(path => path.toCommands())
   }
 
   toData(): Path2DData {
-    return this.paths.map(path => path.toData()).join(' ')
+    return this.curves.map(path => path.toData()).join(' ')
   }
 
   toSVGPathString(): string {
@@ -343,8 +335,8 @@ export class Path2D {
   }
 
   copy(source: Path2D): this {
-    this.currentPath = source.currentPath.clone()
-    this.paths = source.paths.map(path => path.clone())
+    this.currentCurve = source.currentCurve.clone()
+    this.curves = source.curves.map(path => path.clone())
     this.style = { ...source.style }
     return this
   }

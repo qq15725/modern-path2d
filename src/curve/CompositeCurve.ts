@@ -3,8 +3,6 @@ import { BoundingBox, Vector2 } from '../math'
 import { Curve } from './Curve'
 
 export class CompositeCurve<T extends Curve = Curve> extends Curve {
-  protected _cacheLengths: number[] = []
-
   constructor(
     public curves: T[] = [],
   ) {
@@ -18,17 +16,17 @@ export class CompositeCurve<T extends Curve = Curve> extends Curve {
 
   override getPoint(t: number, output = new Vector2()): Vector2 {
     const d = t * this.getLength()
-    const curveLengths = this.getCurveLengths()
+    const lengths = this.getLengths()
     let i = 0
-    while (i < curveLengths.length) {
-      if (curveLengths[i] >= d) {
-        const diff = curveLengths[i] - d
+    while (i < lengths.length) {
+      if (lengths[i] >= d) {
+        const diff = lengths[i] - d
         const curve = this.curves[i]
-        const segmentLength = curve.getLength()
+        const length = curve.getLength()
         return curve.getPointAt(
-          segmentLength === 0
+          length === 0
             ? 0
-            : 1 - diff / segmentLength,
+            : 1 - diff / length,
           output,
         )
       }
@@ -37,37 +35,40 @@ export class CompositeCurve<T extends Curve = Curve> extends Curve {
     return output
   }
 
-  override getLength(): number {
-    const lengths = this.getCurveLengths()
-    return lengths[lengths.length - 1]
-  }
-
   override updateLengths(): void {
-    super.updateLengths()
-    this._cacheLengths = []
-    this.getCurveLengths()
-  }
-
-  getCurveLengths(): number[] {
-    if (this._cacheLengths.length === this.curves.length) {
-      return this._cacheLengths
+    const arcLengths = []
+    for (
+      let i = 0,
+        sum = 0,
+        len = this.curves.length;
+      i < len;
+      i++
+    ) {
+      sum += this.curves[i].getLength()
+      arcLengths.push(sum)
     }
-    const lengths = []
-    let sums = 0
-    for (let i = 0, l = this.curves.length; i < l; i++) {
-      sums += this.curves[i].getLength()
-      lengths.push(sums)
-    }
-    this._cacheLengths = lengths
-    return lengths
+    this._arcLengths = arcLengths
   }
 
   override getControlPointRefs(): Vector2[] {
     return this.curves.flatMap(curve => curve.getControlPointRefs())
   }
 
-  override getAdaptivePoints(): number[] {
-    return this.curves.flatMap(curve => curve.getAdaptivePoints())
+  override getAdaptivePointArray(output: number[] = []): number[] {
+    let offset: number | undefined
+    this.curves.forEach((curve) => {
+      curve.getAdaptivePointArray(output)
+      if (offset) {
+        if (
+          output[offset - 1] === output[offset + 1]
+          && output[offset] === output[offset + 2]
+        ) {
+          output.splice(offset + 1, 2)
+        }
+      }
+      offset = output.length - 1
+    })
+    return output
   }
 
   override getMinMax(min = Vector2.MAX, max = Vector2.MIN): { min: Vector2, max: Vector2 } {

@@ -4,22 +4,17 @@
 const RECURSION_LIMIT = 8
 const FLT_EPSILON = 1.19209290e-7
 const PATH_DISTANCE_EPSILON = 1.0
-
 const curveAngleToleranceEpsilon = 0.01
 const mAngleTolerance = 0
 const mCuspLimit = 0
 
 export function getAdaptiveCubicBezierCurvePoints(
-  points: number[],
-  sX: number,
-  sY: number,
-  x1: number,
-  y1: number,
-  x2: number,
-  y2: number,
-  x: number,
-  y: number,
+  sX: number, sY: number,
+  x1: number, y1: number,
+  x2: number, y2: number,
+  x: number, y: number,
   smoothness = 0.5,
+  points: number[],
 ): number[] {
   // TODO expose as a parameter
   const scale = 1

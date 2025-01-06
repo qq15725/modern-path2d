@@ -36,7 +36,7 @@ export class RectangleCurve extends PloygonCurve {
       indicesOffset = 0,
     } = options
 
-    const points = this.getPoints()
+    const points = this.getPointArray()
 
     let count = 0
     verticesOffset *= verticesStride

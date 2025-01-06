@@ -49,6 +49,7 @@ function testWebPath2D(): void {
 
 async function testSVGFixtures(): Promise<void> {
   for (const [key, value] of Object.entries(import.meta.glob('../test/fixtures/*.svg', { query: '?raw' }))) {
+    console.warn(key)
     const svgSource = await (value as () => Promise<any>)().then(rep => rep.default)
     const pathSet = parseSVG(svgSource)
 
@@ -83,12 +84,10 @@ function testPoints(): void {
   const ctx = genCtx()
   const path = new Path2D()
   path.quadraticCurveTo(25, 25, 25, 62.5)
-  const points = path.getPoints()
-  for (let i = 0; i < points.length; i += 2) {
-    const x = points[i]
-    const y = points[i + 1]
-    drawPoint(ctx, x, y)
-  }
+  path.rect(25, 25, 25, 40)
+  path.getPoints().forEach((p) => {
+    drawPoint(ctx, p.x, p.y)
+  })
   ctx.fillStyle = 'red'
   ctx.fill()
 }

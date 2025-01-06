@@ -40,12 +40,13 @@ export class QuadraticBezierCurve extends Curve {
     return [this.p1, this.cp, this.p2]
   }
 
-  override getAdaptivePoints(output: number[] = []): number[] {
+  override getAdaptivePointArray(output: number[] = []): number[] {
     return getAdaptiveQuadraticBezierCurvePoints(
-      output,
       this.p1.x, this.p1.y,
       this.cp.x, this.cp.y,
       this.p2.x, this.p2.y,
+      0.5,
+      output,
     )
   }
 

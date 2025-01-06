@@ -11,7 +11,7 @@ export class ArcCurve extends EllipseCurve {
     super(cx, cy, r, r, 0, startAngle, endAngle, clockwise)
   }
 
-  override getAdaptivePoints(output: number[] = []): number[] {
+  override getAdaptivePointArray(output: number[] = []): number[] {
     const start = 0
     const end = 1
     const x = this.center.x
