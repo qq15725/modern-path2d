@@ -1,11 +1,7 @@
-import type { Path2DStyle } from '../../core'
-import { Path2DSet } from '../../core'
-import { parseNode } from './parseNode'
-
 const dataUri = 'data:image/svg+xml;'
 const base64DataUri = `${dataUri}base64,`
 const utf8DataUri = `${dataUri}charset=utf8,`
-export function parseSVGToDOM(svg: string | SVGElement): SVGElement {
+export function svgToDom(svg: string | SVGElement): SVGElement {
   if (typeof svg === 'string') {
     let xml
     if (svg.startsWith(base64DataUri)) {
@@ -29,8 +25,4 @@ export function parseSVGToDOM(svg: string | SVGElement): SVGElement {
   else {
     return svg
   }
-}
-
-export function parseSVG(svg: string | SVGElement): Path2DSet {
-  return new Path2DSet(parseNode(parseSVGToDOM(svg), {} as Partial<Path2DStyle>))
 }
