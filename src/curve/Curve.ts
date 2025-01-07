@@ -229,20 +229,14 @@ export abstract class Curve {
 
   fillTriangulate(options?: FillTriangulateOptions): FillTriangulateResult {
     return fillTriangulate(
-      this.getPoints().reduce((arr, p) => {
-        arr.push(p.x, p.y)
-        return arr
-      }, [] as number[]),
+      this.getAdaptivePointArray(),
       options,
     )
   }
 
   strokeTriangulate(options?: StrokeTriangulateOptions): StrokeTriangulateResult {
     return strokeTriangulate(
-      this.getPoints().reduce((arr, p) => {
-        arr.push(p.x, p.y)
-        return arr
-      }, [] as number[]),
+      this.getAdaptivePointArray(),
       options,
     )
   }

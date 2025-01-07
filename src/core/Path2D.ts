@@ -123,6 +123,13 @@ export class Path2D extends CompositeCurve<CurvePath> {
     return this
   }
 
+  reset(): this {
+    this.currentCurve = new CurvePath()
+    this.curves.push(this.currentCurve)
+    this.style = {}
+    return this
+  }
+
   addCommands(commands: Path2DCommand[]): this {
     svgPathCommandsAddToPath2D(commands, this)
     return this
