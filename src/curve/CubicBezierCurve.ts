@@ -4,31 +4,27 @@ import { Curve } from './Curve'
 import { cubicBezier, getAdaptiveCubicBezierCurvePoints } from './utils'
 
 export class CubicBezierCurve extends Curve {
-  p1: Vector2
-  cp1: Vector2
-  cp2: Vector2
-  p2: Vector2
-
-  static from(p1: Vector2, cp1: Vector2, cp2: Vector2, p2: Vector2): CubicBezierCurve {
-    return new CubicBezierCurve(
-      p1.x, p1.y,
-      cp1.x, cp1.y,
-      cp2.x, cp2.y,
-      p2.x, p2.y,
-    )
-  }
-
-  constructor(
+  static from(
     p1x: number, p1y: number,
     cp1x: number, cp1y: number,
     cp2x: number, cp2y: number,
     p2x: number, p2y: number,
+  ): CubicBezierCurve {
+    return new CubicBezierCurve(
+      new Vector2(p1x, p1y),
+      new Vector2(cp1x, cp1y),
+      new Vector2(cp2x, cp2y),
+      new Vector2(p2x, p2y),
+    )
+  }
+
+  constructor(
+    public p1: Vector2,
+    public cp1: Vector2,
+    public cp2: Vector2,
+    public p2: Vector2,
   ) {
     super()
-    this.p1 = new Vector2(p1x, p1y)
-    this.cp1 = new Vector2(cp1x, cp1y)
-    this.cp2 = new Vector2(cp2x, cp2y)
-    this.p2 = new Vector2(p2x, p2y)
   }
 
   override getPoint(t: number, output = new Vector2()): Vector2 {

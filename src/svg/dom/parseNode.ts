@@ -96,7 +96,7 @@ export function parseNode(
   const transformStack: Matrix3[] = []
   const transform = getNodeTransform(node, currentTransform, transformStack)
   if (path) {
-    path.matrix(currentTransform)
+    path.applyTransform(currentTransform)
     paths.push(path)
     path.style = style
   }

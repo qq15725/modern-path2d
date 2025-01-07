@@ -113,8 +113,13 @@ export class Path2D extends CompositeCurve<CurvePath> {
     return this
   }
 
-  rect(x: number, y: number, w: number, h: number): this {
-    this.currentCurve.rect(x, y, w, h)
+  rect(x: number, y: number, width: number, height: number): this {
+    this.currentCurve.rect(x, y, width, height)
+    return this
+  }
+
+  roundRect(x: number, y: number, width: number, height: number, radii: number): this {
+    this.currentCurve.roundRect(x, y, width, height, radii)
     return this
   }
 
@@ -219,8 +224,8 @@ export class Path2D extends CompositeCurve<CurvePath> {
     return this
   }
 
-  matrix(matrix: Matrix3): this {
-    this.curves.forEach(curve => curve.matrix(matrix))
+  applyTransform(transform: Matrix3): this {
+    this.curves.forEach(curve => curve.applyTransform(transform))
     return this
   }
 

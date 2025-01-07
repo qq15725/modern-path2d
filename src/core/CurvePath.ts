@@ -1,16 +1,15 @@
 import type { Curve } from '../curve'
 import type { VectorLike } from '../math'
 import type { Path2DCommand } from './Path2DCommand'
-import {
-  ArcCurve,
+import { ArcCurve,
   CompositeCurve,
   CubicBezierCurve,
   EllipseCurve,
   LineCurve,
   QuadraticBezierCurve,
   RectangleCurve,
-  SplineCurve,
-} from '../curve'
+  RoundRectangleCurve,
+  SplineCurve } from '../curve'
 import { Vector2 } from '../math'
 import { svgPathCommandsAddToPath2D, svgPathDataToCommands } from '../svg'
 
@@ -98,7 +97,7 @@ export class CurvePath extends CompositeCurve {
     if (start) {
       const end = this.currentPoint
       if (end && !start.equals(end)) {
-        this.curves.push(LineCurve.from(end, start))
+        this.curves.push(new LineCurve(end, start))
         end.copy(start)
       }
       this.startPoint = undefined
@@ -116,7 +115,7 @@ export class CurvePath extends CompositeCurve {
     const start = this.currentPoint
     if (!start?.equals({ x, y })) {
       this.curves.push(
-        new LineCurve(
+        LineCurve.from(
           start?.x ?? 0, start?.y ?? 0,
           x, y,
         ),
@@ -130,7 +129,7 @@ export class CurvePath extends CompositeCurve {
     const start = this.currentPoint
     if (!start?.equals({ x, y })) {
       this.curves.push(
-        new CubicBezierCurve(
+        CubicBezierCurve.from(
           start?.x ?? 0, start?.y ?? 0,
           cp1x, cp1y,
           cp2x, cp2y,
@@ -146,7 +145,7 @@ export class CurvePath extends CompositeCurve {
     const start = this.currentPoint
     if (!start?.equals({ x, y })) {
       this.curves.push(
-        new QuadraticBezierCurve(
+        QuadraticBezierCurve.from(
           start?.x ?? 0, start?.y ?? 0,
           cpx, cpy,
           x, y,
@@ -205,8 +204,16 @@ export class CurvePath extends CompositeCurve {
     return this
   }
 
-  rect(x: number, y: number, w: number, h: number): this {
-    const curve = new RectangleCurve(x, y, w, h)
+  rect(x: number, y: number, width: number, height: number): this {
+    const curve = new RectangleCurve(x, y, width, height)
+    this._connetLineTo(curve)
+    this.curves.push(curve)
+    this._setCurrentPoint({ x, y })
+    return this
+  }
+
+  roundRect(x: number, y: number, width: number, height: number, radii: number): this {
+    const curve = new RoundRectangleCurve(x, y, width, height, radii)
     this._connetLineTo(curve)
     this.curves.push(curve)
     this._setCurrentPoint({ x, y })

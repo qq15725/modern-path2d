@@ -4,27 +4,24 @@ import { Curve } from './Curve'
 import { getAdaptiveQuadraticBezierCurvePoints, quadraticBezier } from './utils'
 
 export class QuadraticBezierCurve extends Curve {
-  p1: Vector2
-  cp: Vector2
-  p2: Vector2
-
-  static from(p1: Vector2, cp: Vector2, p2: Vector2): QuadraticBezierCurve {
+  static from(
+    p1x: number, p1y: number,
+    cpx: number, cpy: number,
+    p2x: number, p2y: number,
+  ): QuadraticBezierCurve {
     return new QuadraticBezierCurve(
-      p1.x, p1.y,
-      cp.x, cp.y,
-      p2.x, p2.y,
+      new Vector2(p1x, p1y),
+      new Vector2(cpx, cpy),
+      new Vector2(p2x, p2y),
     )
   }
 
   constructor(
-    p1x: number, p1y: number,
-    cpx: number, cpy: number,
-    p2x: number, p2y: number,
+    public p1: Vector2,
+    public cp: Vector2,
+    public p2: Vector2,
   ) {
     super()
-    this.p1 = new Vector2(p1x, p1y)
-    this.cp = new Vector2(cpx, cpy)
-    this.p2 = new Vector2(p2x, p2y)
   }
 
   override getPoint(t: number, output = new Vector2()): Vector2 {

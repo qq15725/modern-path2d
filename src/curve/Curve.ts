@@ -36,6 +36,13 @@ export abstract class Curve {
     return []
   }
 
+  applyTransform(transform: Matrix3): this {
+    this.getControlPointRefs().forEach((p) => {
+      p.applyMatrix3(transform)
+    })
+    return this
+  }
+
   getUnevenPointArray(count = 5, output: number[] = []): number[] {
     const p = new Vector2()
     for (let i = 0, len = Math.max(1, count) - 1; i <= len; i++) {
@@ -205,11 +212,6 @@ export abstract class Curve {
       }
     }
     return mid
-  }
-
-  matrix(matrix: Matrix3): this {
-    this.getControlPointRefs().forEach(point => point.applyMatrix3(matrix))
-    return this
   }
 
   getMinMax(min = Vector2.MAX, max = Vector2.MIN): { min: Vector2, max: Vector2 } {

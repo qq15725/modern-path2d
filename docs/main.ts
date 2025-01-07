@@ -15,6 +15,7 @@ function testWebPath2D(): void {
   ;[path1, path2].forEach((path) => {
     // rect
     path.rect(10, 10, 100, 100)
+    path.roundRect(40, 40, 100, 100, 10)
 
     // arc
     path.arc(75, 75, 50, 0, Math.PI * 2, true) // 绘制

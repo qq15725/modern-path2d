@@ -5,10 +5,10 @@ import { PloygonCurve } from './PloygonCurve'
 
 export class RectangleCurve extends PloygonCurve {
   constructor(
-    public x = 0,
-    public y = 0,
-    public width = 0,
-    public height = 0,
+    public readonly x = 0,
+    public readonly y = 0,
+    public readonly width = 0,
+    public readonly height = 0,
   ) {
     const points = [
       new Vector2(x, y),
@@ -18,11 +18,16 @@ export class RectangleCurve extends PloygonCurve {
     ]
 
     super([
-      LineCurve.from(points[0], points[1]),
-      LineCurve.from(points[1], points[2]),
-      LineCurve.from(points[2], points[3]),
-      LineCurve.from(points[3], points[0]),
+      new LineCurve(points[0], points[1]),
+      new LineCurve(points[1], points[2]),
+      new LineCurve(points[2], points[3]),
+      new LineCurve(points[3], points[0]),
     ])
+  }
+
+  override drawTo(ctx: CanvasRenderingContext2D): this {
+    ctx.rect(this.x, this.y, this.width, this.height)
+    return this
   }
 
   override fillTriangulate(options: FillTriangulateOptions = {}): FillTriangulateResult {

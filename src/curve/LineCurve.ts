@@ -3,20 +3,21 @@ import { Vector2 } from '../math'
 import { Curve } from './Curve'
 
 export class LineCurve extends Curve {
-  p1: Vector2
-  p2: Vector2
-
-  static from(p1: Vector2, p2: Vector2): LineCurve {
-    return new LineCurve(p1.x, p1.y, p2.x, p2.y)
+  static from(
+    p1x: number, p1y: number,
+    p2x: number, p2y: number,
+  ): LineCurve {
+    return new LineCurve(
+      new Vector2(p1x, p1y),
+      new Vector2(p2x, p2y),
+    )
   }
 
   constructor(
-    p1x: number, p1y: number,
-    p2x: number, p2y: number,
+    public p1: Vector2,
+    public p2: Vector2,
   ) {
     super()
-    this.p1 = new Vector2(p1x, p1y)
-    this.p2 = new Vector2(p2x, p2y)
   }
 
   override getPoint(t: number, output = new Vector2()): Vector2 {
