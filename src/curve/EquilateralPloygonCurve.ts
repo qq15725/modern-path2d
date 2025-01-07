@@ -4,11 +4,18 @@ import { PloygonCurve } from './PloygonCurve'
 
 export class EquilateralPloygonCurve extends PloygonCurve {
   constructor(
-    public readonly cx = 0,
-    public readonly cy = 0,
-    public readonly radius = 1,
-    public readonly sideCount = 3,
+    public cx = 0,
+    public cy = 0,
+    public radius = 1,
+    public sideCount = 3,
   ) {
+    super()
+    this.update()
+  }
+
+  update(): this {
+    const { cx, cy, radius, sideCount } = this
+
     const points: Vector2[] = []
     for (let i = 0; i < sideCount; i++) {
       const radian = (i * 2 * Math.PI) / sideCount - 0.5 * Math.PI
@@ -31,6 +38,18 @@ export class EquilateralPloygonCurve extends PloygonCurve {
       )
     }
 
-    super(curves)
+    this.curves = curves
+
+    return this
+  }
+
+  override copy(source: EquilateralPloygonCurve): this {
+    super.copy(source)
+    this.cx = source.cx
+    this.cy = source.cy
+    this.radius = source.radius
+    this.sideCount = source.sideCount
+    this.update()
+    return this
   }
 }

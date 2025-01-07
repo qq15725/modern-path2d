@@ -19,10 +19,10 @@ export class CubicBezierCurve extends Curve {
   }
 
   constructor(
-    public p1: Vector2,
-    public cp1: Vector2,
-    public cp2: Vector2,
-    public p2: Vector2,
+    public p1 = new Vector2(),
+    public cp1 = new Vector2(),
+    public cp2 = new Vector2(),
+    public p2 = new Vector2(),
   ) {
     super()
   }

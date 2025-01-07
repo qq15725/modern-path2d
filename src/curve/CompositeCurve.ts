@@ -93,4 +93,10 @@ export class CompositeCurve<T extends Curve = Curve> extends Curve {
     this.curves.forEach(curve => curve.drawTo(ctx))
     return this
   }
+
+  override copy(source: CompositeCurve<T>): this {
+    super.copy(source)
+    this.curves = source.curves.map(curve => curve.clone())
+    return this
+  }
 }

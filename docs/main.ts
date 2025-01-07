@@ -85,7 +85,7 @@ function testPoints(): void {
   const ctx = genCtx()
   const path = new Path2D()
   drawPath2D(path)
-  path.getAdaptivePoints().forEach((p) => {
+  path.clone().getAdaptivePoints().forEach((p) => {
     drawPoint(ctx, p.x, p.y)
   })
   ctx.fillStyle = 'red'

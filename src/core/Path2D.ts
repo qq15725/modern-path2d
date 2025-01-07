@@ -337,14 +337,10 @@ export class Path2D extends CompositeCurve<CurvePath> {
     return `<path d="${this.toData()}" style="${cssText}"></path>`
   }
 
-  copy(source: Path2D): this {
+  override copy(source: Path2D): this {
+    super.copy(source)
     this.currentCurve = source.currentCurve.clone()
-    this.curves = source.curves.map(path => path.clone())
     this.style = { ...source.style }
     return this
-  }
-
-  clone(): this {
-    return new (this.constructor as any)().copy(this)
   }
 }

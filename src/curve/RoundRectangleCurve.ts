@@ -3,12 +3,18 @@ import { RoundCurve } from './RoundCurve'
 
 export class RoundRectangleCurve extends RoundCurve {
   constructor(
-    public readonly x = 0,
-    public readonly y = 0,
-    public readonly width = 1,
-    public readonly height = 1,
-    public readonly radius = 1,
+    public x = 0,
+    public y = 0,
+    public width = 1,
+    public height = 1,
+    public radius = 1,
   ) {
+    super()
+    this.update()
+  }
+
+  update(): this {
+    const { x, y, width, height, radius } = this
     const halfWidth = width / 2
     const halfHeight = height / 2
     const cx = x + halfWidth
@@ -17,16 +23,26 @@ export class RoundRectangleCurve extends RoundCurve {
     const ry = rx
     const dx = halfWidth - rx
     const dy = halfHeight - ry
-    super(
-      new Vector2(cx, cy),
-      new Vector2(rx, ry),
-      new Vector2(dx, dy),
-    )
+    this._center = new Vector2(cx, cy)
+    this._radius = new Vector2(rx, ry)
+    this._diff = new Vector2(dx, dy)
+    return this
   }
 
   override drawTo(ctx: CanvasRenderingContext2D): this {
     const { x, y, width, height, radius } = this
     ctx.roundRect(x, y, width, height, radius)
+    return this
+  }
+
+  override copy(source: RoundRectangleCurve): this {
+    super.copy(source)
+    this.x = source.x
+    this.y = source.y
+    this.width = source.width
+    this.height = source.height
+    this.radius = source.radius
+    this.update()
     return this
   }
 }

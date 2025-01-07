@@ -241,10 +241,6 @@ export class CurvePath extends CompositeCurve {
 
   override copy(source: CurvePath): this {
     super.copy(source)
-    this.curves = []
-    for (let i = 0, len = source.curves.length; i < len; i++) {
-      this.curves.push(source.curves[i].clone())
-    }
     this.autoClose = source.autoClose
     this.currentPoint = source.currentPoint?.clone()
     return this

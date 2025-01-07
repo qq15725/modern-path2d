@@ -5,11 +5,18 @@ import { PloygonCurve } from './PloygonCurve'
 
 export class RectangleCurve extends PloygonCurve {
   constructor(
-    public readonly x = 0,
-    public readonly y = 0,
-    public readonly width = 0,
-    public readonly height = 0,
+    public x = 0,
+    public y = 0,
+    public width = 0,
+    public height = 0,
   ) {
+    super()
+    this.update()
+  }
+
+  update(): this {
+    const { x, y, width, height } = this
+
     const points = [
       new Vector2(x, y),
       new Vector2(x + width, y),
@@ -17,12 +24,14 @@ export class RectangleCurve extends PloygonCurve {
       new Vector2(x, y + height),
     ]
 
-    super([
+    this.curves = [
       new LineCurve(points[0], points[1]),
       new LineCurve(points[1], points[2]),
       new LineCurve(points[2], points[3]),
       new LineCurve(points[3], points[0]),
-    ])
+    ]
+
+    return this
   }
 
   override drawTo(ctx: CanvasRenderingContext2D): this {
@@ -73,5 +82,15 @@ export class RectangleCurve extends PloygonCurve {
     indices[indicesOffset++] = verticesIndex + 2
 
     return { vertices, indices }
+  }
+
+  override copy(source: RectangleCurve): this {
+    super.copy(source)
+    this.x = source.x
+    this.y = source.y
+    this.width = source.width
+    this.height = source.height
+    this.update()
+    return this
   }
 }

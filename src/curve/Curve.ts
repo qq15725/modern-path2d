@@ -11,8 +11,6 @@ import { svgPathCommandsToData } from '../svg'
 import { fillTriangulate, strokeTriangulate } from './utils'
 
 export abstract class Curve {
-  startT = 0
-  endT = 1
   arcLengthDivision = 200
   protected _arcLengths?: number[]
 

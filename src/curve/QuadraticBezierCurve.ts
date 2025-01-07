@@ -17,9 +17,9 @@ export class QuadraticBezierCurve extends Curve {
   }
 
   constructor(
-    public p1: Vector2,
-    public cp: Vector2,
-    public p2: Vector2,
+    public p1 = new Vector2(),
+    public cp = new Vector2(),
+    public p2 = new Vector2(),
   ) {
     super()
   }

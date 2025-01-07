@@ -25,9 +25,9 @@ export class RoundCurve extends Curve {
   set dy(val) { this._diff.y = val }
 
   constructor(
-    public _center: Vector2,
-    public _radius: Vector2,
-    public _diff: Vector2,
+    public _center = new Vector2(),
+    public _radius = new Vector2(),
+    public _diff = new Vector2(),
     public rotate = 0,
     public startAngle = 0,
     public endAngle = Math.PI * 2,
@@ -283,6 +283,8 @@ export class RoundCurve extends Curve {
     this.cy = source.cy
     this.rx = source.rx
     this.ry = source.ry
+    this.dx = source.dx
+    this.dy = source.dy
     this.startAngle = source.startAngle
     this.endAngle = source.endAngle
     this.clockwise = source.clockwise

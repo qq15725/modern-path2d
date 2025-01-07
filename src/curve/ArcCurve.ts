@@ -4,7 +4,7 @@ import { RoundCurve } from './RoundCurve'
 export class ArcCurve extends RoundCurve {
   constructor(
     cx = 0, cy = 0,
-    public readonly radius = 1,
+    radius = 1,
     startAngle = 0,
     endAngle = Math.PI * 2,
     clockwise = false,
@@ -21,10 +21,10 @@ export class ArcCurve extends RoundCurve {
   }
 
   override drawTo(ctx: CanvasRenderingContext2D): this {
-    const { cx, cy, radius, startAngle, endAngle, clockwise } = this
+    const { cx, cy, rx, startAngle, endAngle, clockwise } = this
     ctx.arc(
       cx, cy,
-      radius,
+      rx,
       startAngle,
       endAngle,
       !clockwise,
@@ -33,7 +33,7 @@ export class ArcCurve extends RoundCurve {
   }
 
   override getAdaptivePointArray(output: number[] = []): number[] {
-    const { cx, cy, radius, startAngle, endAngle, clockwise } = this
+    const { cx, cy, rx, startAngle, endAngle, clockwise } = this
     let dist = Math.abs(startAngle - endAngle)
     if (!clockwise && startAngle > endAngle) {
       dist = (2 * Math.PI) - dist
@@ -41,7 +41,7 @@ export class ArcCurve extends RoundCurve {
     else if (clockwise && endAngle > startAngle) {
       dist = (2 * Math.PI) - dist
     }
-    let steps = Math.max(6, Math.floor(6 * radius ** (1 / 3) * (dist / (Math.PI))))
+    let steps = Math.max(6, Math.floor(6 * rx ** (1 / 3) * (dist / (Math.PI))))
     steps = Math.max(steps, 3)
     let f = dist / (steps)
     let t = startAngle
@@ -49,8 +49,8 @@ export class ArcCurve extends RoundCurve {
     for (let i = 0; i < steps + 1; i++) {
       const cs = Math.cos(t)
       const sn = Math.sin(t)
-      const nx = cx + (cs * radius)
-      const ny = cy + (sn * radius)
+      const nx = cx + (cs * rx)
+      const ny = cy + (sn * rx)
       output.push(nx, ny)
       t += f
     }
