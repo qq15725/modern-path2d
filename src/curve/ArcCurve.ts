@@ -33,31 +33,24 @@ export class ArcCurve extends RoundCurve {
   }
 
   override getAdaptivePointArray(output: number[] = []): number[] {
-    const { cx, cy, rx, clockwise } = this
-    const start = 0
-    const end = 1
-    // determine distance between the two angles
-    // ...probably a nicer way of writing this
-    let dist = Math.abs(start - end)
-    if (!clockwise && start > end) {
+    const { cx, cy, radius, startAngle, endAngle, clockwise } = this
+    let dist = Math.abs(startAngle - endAngle)
+    if (!clockwise && startAngle > endAngle) {
       dist = (2 * Math.PI) - dist
     }
-    else if (clockwise && end > start) {
+    else if (clockwise && endAngle > startAngle) {
       dist = (2 * Math.PI) - dist
     }
-    // approximate the # of steps using the cube root of the radius
-    let steps = Math.max(6, Math.floor(6 * rx ** (1 / 3) * (dist / (Math.PI))))
-    // ensure we have at least 3 steps..
+    let steps = Math.max(6, Math.floor(6 * radius ** (1 / 3) * (dist / (Math.PI))))
     steps = Math.max(steps, 3)
     let f = dist / (steps)
-    let t = start
-    // modify direction
-    f *= clockwise ? -1 : 1
+    let t = startAngle
+    f *= !clockwise ? -1 : 1
     for (let i = 0; i < steps + 1; i++) {
       const cs = Math.cos(t)
       const sn = Math.sin(t)
-      const nx = cx + (cs * rx)
-      const ny = cy + (sn * rx)
+      const nx = cx + (cs * radius)
+      const ny = cy + (sn * radius)
       output.push(nx, ny)
       t += f
     }
