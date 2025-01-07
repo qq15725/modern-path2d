@@ -1,3 +1,12 @@
+## [1.2.3](https://github.com/qq15725/modern-path2d/compare/v1.2.2...v1.2.3) (2025-01-07)
+
+
+### Features
+
+* Path2D.reset ([239ddce](https://github.com/qq15725/modern-path2d/commit/239ddce5b2a30b0e92b28f2b98ad8d5d88b1585d))
+
+
+
 ## [1.2.2](https://github.com/qq15725/modern-path2d/compare/v1.2.1...v1.2.2) (2025-01-07)
 
 
