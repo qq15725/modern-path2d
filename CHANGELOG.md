@@ -1,3 +1,19 @@
+# [1.2.0](https://github.com/qq15725/modern-path2d/compare/v1.1.0...v1.2.0) (2025-01-07)
+
+
+### Bug Fixes
+
+* ArcCurve.getAdaptivePointArray ([b0a1af5](https://github.com/qq15725/modern-path2d/commit/b0a1af56169ad85e3735dd97813bf672b91a2dd6))
+* RoundCurve.getAdaptivePointArray ([120bf09](https://github.com/qq15725/modern-path2d/commit/120bf0968aab6aa6e89ae9b1f4208f559606f848))
+
+
+### Features
+
+* Path2D.roundRect ([70bdacc](https://github.com/qq15725/modern-path2d/commit/70bdacc09b7226cba0792995146879907b5694e1))
+* util method `parseSVG` rename to `svgToPath2DSet` ([cef7d40](https://github.com/qq15725/modern-path2d/commit/cef7d40ffa8e5fd030f5e69a6b610bc31f774160))
+
+
+
 # [1.1.0](https://github.com/qq15725/modern-path2d/compare/v1.0.1...v1.1.0) (2025-01-06)
 
 
