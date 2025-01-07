@@ -136,98 +136,78 @@ export class RoundCurve extends Curve {
   }
 
   override getAdaptivePointArray(output: number[] = []): number[] {
-    const i = output.length - 1
-    const x = this.cx
-    const y = this.cy
-    const rx = this.rx
-    const ry = this.ry
-    const dx = this.dx
-    const dy = this.dy
-
+    const { cx, cy, rx, ry, dx, dy } = this
     if (!(rx >= 0 && ry >= 0 && dx >= 0 && dy >= 0)) {
       return output
     }
-
-    // Choose a number of segments such that the maximum absolute deviation from the circle is approximately 0.029
     const n = Math.ceil(2.3 * Math.sqrt(rx + ry))
     const m = (n * 8) + (dx ? 4 : 0) + (dy ? 4 : 0)
-
     if (m === 0) {
       return output
     }
-
+    const array: number[] = []
     if (n === 0) {
-      output[i] = output[i + 6] = x + dx
-      output[i + 1] = output[i + 3] = y + dy
-      output[i + 2] = output[i + 4] = x - dx
-      output[i + 5] = output[i + 7] = y - dy
-
-      return output
+      array[0] = array[6] = cx + dx
+      array[1] = array[3] = cy + dy
+      array[2] = array[4] = cx - dx
+      array[5] = array[7] = cy - dy
     }
-
-    let j1 = i
-    let j2 = (n * 4) + (dx ? 2 : 0) + 2 + i
-    let j3 = j2
-    let j4 = m + i
-
-    let x0 = dx + rx
-    let y0 = dy
-    let x1 = x + x0
-    let x2 = x - x0
-    let y1 = y + y0
-
-    output[j1++] = x1
-    output[j1++] = y1
-    output[--j2] = y1
-    output[--j2] = x2
-
-    if (dy) {
-      const y2 = y - y0
-
-      output[j3++] = x2
-      output[j3++] = y2
-      output[--j4] = y2
-      output[--j4] = x1
+    else {
+      let j1 = 0
+      let j2 = (n * 4) + (dx ? 2 : 0) + 2
+      let j3 = j2
+      let j4 = m
+      let x0 = dx + rx
+      let y0 = dy
+      let x1 = cx + x0
+      let x2 = cx - x0
+      let y1 = cy + y0
+      array[j1++] = x1
+      array[j1++] = y1
+      array[--j2] = y1
+      array[--j2] = x2
+      if (dy) {
+        const y2 = cy - y0
+        array[j3++] = x2
+        array[j3++] = y2
+        array[--j4] = y2
+        array[--j4] = x1
+      }
+      for (let i = 1; i < n; i++) {
+        const a = Math.PI / 2 * (i / n)
+        const x0 = dx + (Math.cos(a) * rx)
+        const y0 = dy + (Math.sin(a) * ry)
+        const x1 = cx + x0
+        const x2 = cx - x0
+        const y1 = cy + y0
+        const y2 = cy - y0
+        array[j1++] = x1
+        array[j1++] = y1
+        array[--j2] = y1
+        array[--j2] = x2
+        array[j3++] = x2
+        array[j3++] = y2
+        array[--j4] = y2
+        array[--j4] = x1
+      }
+      x0 = dx
+      y0 = dy + ry
+      x1 = cx + x0
+      x2 = cx - x0
+      y1 = cy + y0
+      const y2 = cy - y0
+      array[j1++] = x1
+      array[j1++] = y1
+      array[--j4] = y2
+      array[--j4] = x1
+      if (dx) {
+        array[j1++] = x2
+        array[j1++] = y1
+        array[--j4] = y2
+        array[--j4] = x2
+      }
     }
-
-    for (let i = 1; i < n; i++) {
-      const a = Math.PI / 2 * (i / n)
-      const x0 = dx + (Math.cos(a) * rx)
-      const y0 = dy + (Math.sin(a) * ry)
-      const x1 = x + x0
-      const x2 = x - x0
-      const y1 = y + y0
-      const y2 = y - y0
-
-      output[j1++] = x1
-      output[j1++] = y1
-      output[--j2] = y1
-      output[--j2] = x2
-      output[j3++] = x2
-      output[j3++] = y2
-      output[--j4] = y2
-      output[--j4] = x1
-    }
-
-    x0 = dx
-    y0 = dy + ry
-    x1 = x + x0
-    x2 = x - x0
-    y1 = y + y0
-    const y2 = y - y0
-
-    output[j1++] = x1
-    output[j1++] = y1
-    output[--j4] = y2
-    output[--j4] = x1
-
-    if (dx) {
-      output[j1++] = x2
-      output[j1++] = y1
-      output[--j4] = y2
-      output[--j4] = x2
-    }
-
+    Array.prototype.push.apply(output, array)
     return output
   }
 
