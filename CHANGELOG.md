@@ -1,3 +1,12 @@
+## [1.2.2](https://github.com/qq15725/modern-path2d/compare/v1.2.1...v1.2.2) (2025-01-07)
+
+
+### Bug Fixes
+
+* Path2D.clone ([8986cb4](https://github.com/qq15725/modern-path2d/commit/8986cb4ebdb4db8ca1ef7830d0c6f71c46823ffb))
+
+
+
 ## [1.2.1](https://github.com/qq15725/modern-path2d/compare/v1.2.0...v1.2.1) (2025-01-07)
 
 
