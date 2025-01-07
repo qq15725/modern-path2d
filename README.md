@@ -22,13 +22,11 @@
 
 - Compatible Web Path2D
 
-- Path animation
-
 - Path transform
 
-- Path triangulate
+- Path triangulate (fill、stroke)
 
-- Parse svg to Path2DSet
+- Parse SVG to Path2DSet
 
 - TypeScript
 
