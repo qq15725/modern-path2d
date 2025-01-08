@@ -1,4 +1,5 @@
 import type { Path2DCommand } from '../core'
+import type { Matrix3 } from '../math'
 import { BoundingBox, Vector2 } from '../math'
 import { Curve } from './Curve'
 
@@ -78,6 +79,11 @@ export class CompositeCurve<T extends Curve = Curve> extends Curve {
       offset = output.length - 1
     })
     return output
+  }
+
+  override applyTransform(transform: Matrix3): this {
+    this.curves.forEach(curve => curve.applyTransform(transform))
+    return this
   }
 
   override getMinMax(min = Vector2.MAX, max = Vector2.MIN): { min: Vector2, max: Vector2 } {

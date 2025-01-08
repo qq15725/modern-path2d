@@ -1,4 +1,4 @@
-import type { Matrix3, VectorLike } from '../math'
+import type { VectorLike } from '../math'
 import type { Path2DCommand } from './Path2DCommand'
 import type { Path2DData } from './Path2DData'
 import type { Path2DStyle } from './Path2DStyle'
@@ -228,11 +228,6 @@ export class Path2D extends CompositeCurve<CurvePath> {
         }
       })
     })
-    return this
-  }
-
-  applyTransform(transform: Matrix3): this {
-    this.curves.forEach(curve => curve.applyTransform(transform))
     return this
   }
 
