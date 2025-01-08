@@ -1,3 +1,12 @@
+## [1.2.5](https://github.com/qq15725/modern-path2d/compare/v1.2.4...v1.2.5) (2025-01-08)
+
+
+### Bug Fixes
+
+* svgToPath2DSet ([586badc](https://github.com/qq15725/modern-path2d/commit/586badcf226cd5ab61828095ae607bffef564e8a))
+
+
+
 ## [1.2.4](https://github.com/qq15725/modern-path2d/compare/v1.2.3...v1.2.4) (2025-01-08)
 
 
