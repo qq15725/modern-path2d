@@ -1,3 +1,12 @@
+## [1.2.4](https://github.com/qq15725/modern-path2d/compare/v1.2.3...v1.2.4) (2025-01-08)
+
+
+### Bug Fixes
+
+* Path2D.bold ([35563ee](https://github.com/qq15725/modern-path2d/commit/35563ee6b8f7d03ca4abff6e0cd84e556c0d0d44))
+
+
+
 ## [1.2.3](https://github.com/qq15725/modern-path2d/compare/v1.2.2...v1.2.3) (2025-01-07)
 
 
