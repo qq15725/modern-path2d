@@ -18,6 +18,6 @@ export function parsePolylineNode(node: SVGPolylineElement): Path2D {
     index++
     return match
   })
-  path.currentPath.autoClose = false
+  path.currentCurve.autoClose = false
   return path
 }

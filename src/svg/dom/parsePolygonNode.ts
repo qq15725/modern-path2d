@@ -18,6 +18,6 @@ export function parsePolygonNode(node: SVGPolygonElement): Path2D {
     index++
     return match
   })
-  path.currentPath.autoClose = true
+  path.currentCurve.autoClose = true
   return path
 }
