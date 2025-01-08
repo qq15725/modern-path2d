@@ -170,13 +170,11 @@ export class Path2D extends CompositeCurve<CurvePath> {
     if (b === 0) {
       return this
     }
-    const curves = this.curves
+    const curves = this.getFlatCurves()
     const _list: { start: Vector2, end: Vector2, index: number }[] = []
     const _isClockwise: boolean[] = []
     const _points: Vector2[][] = []
     curves.forEach((curve, index) => {
-      if (!curve.getLength())
-        return
       const points = curve.getControlPointRefs()
       const isClockwise = curve.isClockwise()
       _points[index] = points
@@ -193,22 +191,24 @@ export class Path2D extends CompositeCurve<CurvePath> {
     _list.forEach((itemA, indexA) => {
       list[indexA] = []
       _list.forEach((itemB, indexB) => {
-        if (indexB !== indexA
-          && itemB.start.equals(itemA.end)) {
+        if (
+          itemB.start
+          && itemA.end
+          && indexB !== indexA
+          && itemB.start?.equals(itemA.end)) {
           list[indexA].push(itemB.index)
         }
       })
     })
 
     curves.forEach((curve, index) => {
-      if (!curve.getLength())
-        return
       const isClockwise = _isClockwise[index]
-      const points = _points[index]
-      points.forEach((point) => {
-        const t = curve.getTForPoint(point)
-        const dist = curve.getNormal(t).scale(isClockwise ? b : -b)
-        point.add(dist)
+      _points[index].forEach((point) => {
+        point.add(
+          curve.getNormal(
+            curve.getTForPoint(point),
+          ).scale(isClockwise ? b : -b),
+        )
       })
     })
 

@@ -9,6 +9,15 @@ export class CompositeCurve<T extends Curve = Curve> extends Curve {
     super()
   }
 
+  getFlatCurves(): Curve[] {
+    return this.curves.flatMap((curve) => {
+      if (curve instanceof CompositeCurve) {
+        return curve.getFlatCurves()
+      }
+      return curve
+    })
+  }
+
   addCurve(curve: T): this {
     this.curves.push(curve)
     return this
