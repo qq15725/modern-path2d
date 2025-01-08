@@ -1,3 +1,12 @@
+## [1.2.6](https://github.com/qq15725/modern-path2d/compare/v1.2.5...v1.2.6) (2025-01-08)
+
+
+### Bug Fixes
+
+* applyTransform ([e9e4b96](https://github.com/qq15725/modern-path2d/commit/e9e4b96bed6da0f8d66fa2a0698aec83980e19f5))
+
+
+
 ## [1.2.5](https://github.com/qq15725/modern-path2d/compare/v1.2.4...v1.2.5) (2025-01-08)
 
 
