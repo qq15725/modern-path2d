@@ -90,15 +90,13 @@ export function parseNode(
     return paths
   }
 
-  Object.assign(style, _style)
-
   const currentTransform = new Matrix3()
   const transformStack: Matrix3[] = []
   const transform = getNodeTransform(node, currentTransform, transformStack)
   if (path) {
     path.applyTransform(currentTransform)
     paths.push(path)
-    path.style = style
+    path.style = { ..._style }
   }
 
   const childNodes = node.childNodes
@@ -106,7 +104,7 @@ export function parseNode(
     const node = childNodes[i]
     if (isDefsNode && node.nodeName !== 'style' && node.nodeName !== 'defs')
       continue
-    parseNode(node as SVGElement, style, paths, stylesheets)
+    parseNode(node as SVGElement, _style, paths, stylesheets)
   }
 
   if (transform) {
