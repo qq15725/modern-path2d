@@ -1,3 +1,12 @@
+## [1.2.7](https://github.com/qq15725/modern-path2d/compare/v1.2.6...v1.2.7) (2025-01-20)
+
+
+### Bug Fixes
+
+* parseNode ([2b28217](https://github.com/qq15725/modern-path2d/commit/2b282171ed4e3b812fef6e8f943322ee9e355cdb))
+
+
+
 ## [1.2.6](https://github.com/qq15725/modern-path2d/compare/v1.2.5...v1.2.6) (2025-01-08)
 
 
