@@ -52,9 +52,14 @@ export class Path2D extends CompositeCurve<CurvePath> {
 
   addPath(path: Path2D | CurvePath): this {
     if (path instanceof Path2D) {
-      this.curves.push(...path.curves.map(v => v.clone()))
+      this.curves.push(
+        ...path
+          .curves
+          .filter(curvePath => curvePath.curves.length)
+          .map(v => v.clone()),
+      )
     }
-    else {
+    else if (path.curves.length) {
       this.curves.push(path)
     }
     return this
@@ -64,7 +69,7 @@ export class Path2D extends CompositeCurve<CurvePath> {
     const startPoint = this.startPoint
     if (startPoint) {
       this.currentCurve.closePath()
-      if (this.currentCurve.curves.length > 0) {
+      if (this.currentCurve.curves.length) {
         this.currentCurve = new CurvePath().moveTo(startPoint.x, startPoint.y)
         this.curves.push(this.currentCurve)
       }
@@ -125,7 +130,7 @@ export class Path2D extends CompositeCurve<CurvePath> {
 
   reset(): this {
     this.currentCurve = new CurvePath()
-    this.curves.push(this.currentCurve)
+    this.curves = [this.currentCurve]
     this.style = {}
     return this
   }
