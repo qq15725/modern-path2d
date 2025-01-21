@@ -1,3 +1,12 @@
+## [1.2.9](https://github.com/qq15725/modern-path2d/compare/v1.2.8...v1.2.9) (2025-01-21)
+
+
+### Bug Fixes
+
+* addPath ([aa079cc](https://github.com/qq15725/modern-path2d/commit/aa079cca6eab22850a74bc5491636f16cc13ae7f))
+
+
+
 ## [1.2.8](https://github.com/qq15725/modern-path2d/compare/v1.2.7...v1.2.8) (2025-01-21)
 
 
