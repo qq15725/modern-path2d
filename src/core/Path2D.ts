@@ -51,6 +51,10 @@ export class Path2D extends CompositeCurve<CurvePath> {
   }
 
   addPath(path: Path2D | CurvePath): this {
+    const index = this.curves.findIndex(this.currentCurve as any)
+    if (index > -1) {
+      this.curves.splice(index, 1)
+    }
     if (path instanceof Path2D) {
       this.curves.push(
         ...path
@@ -62,6 +66,7 @@ export class Path2D extends CompositeCurve<CurvePath> {
     else if (path.curves.length) {
       this.curves.push(path)
     }
+    this.curves.push(this.currentCurve)
     return this
   }
 
