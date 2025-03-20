@@ -4,5 +4,9 @@ import { parseNode } from './parseNode'
 import { svgToDOM } from './svgToDOM'
 
 export function svgToPath2DSet(svg: string | SVGElement): Path2DSet {
-  return new Path2DSet(parseNode(svgToDOM(svg), {} as Partial<Path2DStyle>))
+  const dom = svgToDOM(svg)
+  return new Path2DSet(
+    parseNode(dom, {} as Partial<Path2DStyle>),
+    dom.getAttribute('viewBox')?.trim().split(' ').map(v => Number(v)),
+  )
 }

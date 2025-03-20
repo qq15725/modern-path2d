@@ -5,6 +5,7 @@ import { BoundingBox, Vector2 } from '../math'
 export class Path2DSet {
   constructor(
     public paths: Path2D[] = [],
+    public viewBox?: number[],
   ) {
     //
   }
