@@ -1,3 +1,12 @@
+## [1.2.11](https://github.com/qq15725/modern-path2d/compare/v1.2.10...v1.2.11) (2025-03-20)
+
+
+### Features
+
+* Path2DSet add viewBox prop ([c0f6bad](https://github.com/qq15725/modern-path2d/commit/c0f6badee720344bb70b69d85c43af1a7413ebe3))
+
+
+
 ## [1.2.10](https://github.com/qq15725/modern-path2d/compare/v1.2.9...v1.2.10) (2025-01-22)
 
 
