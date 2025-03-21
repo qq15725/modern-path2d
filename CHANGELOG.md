@@ -1,3 +1,12 @@
+## [1.2.12](https://github.com/qq15725/modern-path2d/compare/v1.2.11...v1.2.12) (2025-03-21)
+
+
+### Bug Fixes
+
+* RoundCurve.getAdaptivePointArray ([57e85c8](https://github.com/qq15725/modern-path2d/commit/57e85c85d8e250ab7296c0b603015892cd1e9a42))
+
+
+
 ## [1.2.11](https://github.com/qq15725/modern-path2d/compare/v1.2.10...v1.2.11) (2025-03-20)
 
 
