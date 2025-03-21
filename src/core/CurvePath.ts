@@ -1,9 +1,5 @@
 import type {
   Curve,
-  FillTriangulateOptions,
-  FillTriangulateResult,
-  StrokeTriangulateOptions,
-  StrokeTriangulateResult,
 } from '../curve'
 import type { VectorLike } from '../math'
 import type { Path2DCommand } from './Path2DCommand'
@@ -82,38 +78,6 @@ export class CurvePath extends CompositeCurve {
     return this._closePointArray(
       super.getAdaptivePointArray(output),
     )
-  }
-
-  override fillTriangulate(options?: FillTriangulateOptions): FillTriangulateResult {
-    const indices = options?.indices ?? []
-    const vertices = options?.vertices ?? []
-    const result: FillTriangulateResult = { vertices, indices }
-    this.curves.forEach((curve) => {
-      const { vertices, indices } = curve.fillTriangulate({
-        ...options,
-        indices: [],
-        vertices: [],
-      })
-      result.vertices = result.vertices.concat(vertices)
-      result.indices = result.indices.concat(indices)
-    })
-    return result
-  }
-
-  override strokeTriangulate(options?: StrokeTriangulateOptions): StrokeTriangulateResult {
-    const indices = options?.indices ?? []
-    const vertices = options?.vertices ?? []
-    const result: StrokeTriangulateResult = { vertices, indices }
-    this.curves.forEach((curve) => {
-      const { vertices, indices } = curve.strokeTriangulate({
-        ...options,
-        indices: [],
-        vertices: [],
-      })
-      result.vertices = result.vertices.concat(vertices)
-      result.indices = result.indices.concat(indices)
-    })
-    return result
   }
 
   protected _setCurrentPoint(point: VectorLike): this {

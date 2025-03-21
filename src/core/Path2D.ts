@@ -1,3 +1,9 @@
+import type {
+  FillTriangulateOptions,
+  FillTriangulateResult,
+  StrokeTriangulateOptions,
+  StrokeTriangulateResult,
+} from '../curve'
 import type { VectorLike } from '../math'
 import type { Path2DCommand } from './Path2DCommand'
 import type { Path2DData } from './Path2DData'
@@ -272,6 +278,32 @@ export class Path2D extends CompositeCurve<CurvePath> {
       }
     })
     return { min, max }
+  }
+
+  override fillTriangulate(options?: FillTriangulateOptions): FillTriangulateResult {
+    const indices = options?.indices ?? []
+    const vertices = options?.vertices ?? []
+    this.curves.forEach((curve) => {
+      curve.fillTriangulate({
+        ...options,
+        indices,
+        vertices,
+      })
+    })
+    return { indices, vertices }
+  }
+
+  override strokeTriangulate(options?: StrokeTriangulateOptions): StrokeTriangulateResult {
+    const indices = options?.indices ?? []
+    const vertices = options?.vertices ?? []
+    this.curves.forEach((curve) => {
+      curve.strokeTriangulate({
+        ...options,
+        indices,
+        vertices,
+      })
+    })
+    return { indices, vertices }
   }
 
   getBoundingBox(withStyle = true): BoundingBox {

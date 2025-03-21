@@ -23,8 +23,8 @@ export function fillTriangulate(
     indices = [],
     holes = [],
     verticesStride = 2,
-    verticesOffset = 0,
-    indicesOffset = 0,
+    verticesOffset = vertices.length,
+    indicesOffset = indices.length,
   } = options
 
   const triangles = earcut(points, holes, 2)
@@ -35,7 +35,7 @@ export function fillTriangulate(
       indices[indicesOffset++] = (triangles[i + 1] + verticesOffset)
       indices[indicesOffset++] = (triangles[i + 2] + verticesOffset)
     }
-    let index = verticesOffset * verticesStride
+    let index = verticesOffset
     for (let i = 0; i < points.length; i += 2) {
       vertices[index] = points[i]
       vertices[index + 1] = points[i + 1]
