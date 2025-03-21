@@ -1,3 +1,13 @@
+## [1.2.13](https://github.com/qq15725/modern-path2d/compare/v1.2.12...v1.2.13) (2025-03-21)
+
+
+### Bug Fixes
+
+* getUnevenPointArray default count ([5c630a0](https://github.com/qq15725/modern-path2d/commit/5c630a0d02ee145cc1ba2229ceb6933c91680bac))
+* triangulate ([46f4cf5](https://github.com/qq15725/modern-path2d/commit/46f4cf511681ee68bb1292e134507c57f2b88b3a))
+
+
+
 ## [1.2.12](https://github.com/qq15725/modern-path2d/compare/v1.2.11...v1.2.12) (2025-03-21)
 
 
