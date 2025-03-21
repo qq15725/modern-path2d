@@ -64,17 +64,22 @@ export class CompositeCurve<T extends Curve = Curve> extends Curve {
     return this.curves.flatMap(curve => curve.getControlPointRefs())
   }
 
+  protected _removeNextPointIfEqualPrevPoint(output: number[], offset: number): number[] {
+    if (
+      output[offset - 1] === output[offset + 1]
+      && output[offset] === output[offset + 2]
+    ) {
+      output.splice(offset + 1, 2)
+    }
+    return output
+  }
+
   override getSpacedPointArray(count = 5, output: number[] = []): number[] {
     let offset: number | undefined
     this.curves.forEach((curve) => {
       curve.getSpacedPointArray(count, output)
       if (offset) {
-        if (
-          output[offset - 1] === output[offset + 1]
-          && output[offset] === output[offset + 2]
-        ) {
-          output.splice(offset + 1, 2)
-        }
+        this._removeNextPointIfEqualPrevPoint(output, offset)
       }
       offset = output.length - 1
     })
@@ -86,12 +91,7 @@ export class CompositeCurve<T extends Curve = Curve> extends Curve {
     this.curves.forEach((curve) => {
       curve.getAdaptivePointArray(output)
       if (offset) {
-        if (
-          output[offset - 1] === output[offset + 1]
-          && output[offset] === output[offset + 2]
-        ) {
-          output.splice(offset + 1, 2)
-        }
+        this._removeNextPointIfEqualPrevPoint(output, offset)
       }
       offset = output.length - 1
     })

@@ -1,7 +1,14 @@
-import type { Curve } from '../curve'
+import type {
+  Curve,
+  FillTriangulateOptions,
+  FillTriangulateResult,
+  StrokeTriangulateOptions,
+  StrokeTriangulateResult,
+} from '../curve'
 import type { VectorLike } from '../math'
 import type { Path2DCommand } from './Path2DCommand'
-import { ArcCurve,
+import {
+  ArcCurve,
   CompositeCurve,
   CubicBezierCurve,
   EllipseCurve,
@@ -9,7 +16,8 @@ import { ArcCurve,
   QuadraticBezierCurve,
   RectangleCurve,
   RoundRectangleCurve,
-  SplineCurve } from '../curve'
+  SplineCurve,
+} from '../curve'
 import { Vector2 } from '../math'
 import { svgPathCommandsAddToPath2D, svgPathDataToCommands } from '../svg'
 
@@ -44,8 +52,7 @@ export class CurvePath extends CompositeCurve {
     return this
   }
 
-  override getUnevenPointArray(count = 40, output: number[] = []): number[] {
-    super.getUnevenPointArray(count, output)
+  protected _closePointArray(output: number[]): number[] {
     if (
       this.autoClose
       && output.length >= 4
@@ -59,19 +66,54 @@ export class CurvePath extends CompositeCurve {
     return output
   }
 
+  override getUnevenPointArray(count = 40, output: number[] = []): number[] {
+    return this._closePointArray(
+      super.getUnevenPointArray(count, output),
+    )
+  }
+
   override getSpacedPointArray(count = 40, output: number[] = []): number[] {
-    super.getSpacedPointArray(count, output)
-    if (
-      this.autoClose
-      && output.length >= 4
-      && (
-        output[0] !== output[output.length - 2]
-        && output[1] !== output[output.length - 1]
-      )
-    ) {
-      output.push(output[0], output[1])
-    }
-    return output
+    return this._closePointArray(
+      super.getSpacedPointArray(count, output),
+    )
+  }
+
+  override getAdaptivePointArray(output: number[] = []): number[] {
+    return this._closePointArray(
+      super.getAdaptivePointArray(output),
+    )
+  }
+
+  override fillTriangulate(options?: FillTriangulateOptions): FillTriangulateResult {
+    const indices = options?.indices ?? []
+    const vertices = options?.vertices ?? []
+    const result: FillTriangulateResult = { vertices, indices }
+    this.curves.forEach((curve) => {
+      const { vertices, indices } = curve.fillTriangulate({
+        ...options,
+        indices: [],
+        vertices: [],
+      })
+      result.vertices = result.vertices.concat(vertices)
+      result.indices = result.indices.concat(indices)
+    })
+    return result
+  }
+
+  override strokeTriangulate(options?: StrokeTriangulateOptions): StrokeTriangulateResult {
+    const indices = options?.indices ?? []
+    const vertices = options?.vertices ?? []
+    const result: StrokeTriangulateResult = { vertices, indices }
+    this.curves.forEach((curve) => {
+      const { vertices, indices } = curve.strokeTriangulate({
+        ...options,
+        indices: [],
+        vertices: [],
+      })
+      result.vertices = result.vertices.concat(vertices)
+      result.indices = result.indices.concat(indices)
+    })
+    return result
   }
 
   protected _setCurrentPoint(point: VectorLike): this {
