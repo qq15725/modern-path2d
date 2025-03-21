@@ -23,7 +23,7 @@ export function fillTriangulate(
     indices = [],
     holes = [],
     verticesStride = 2,
-    verticesOffset = vertices.length,
+    verticesOffset = vertices.length / verticesStride,
     indicesOffset = indices.length,
   } = options
 
@@ -35,7 +35,7 @@ export function fillTriangulate(
       indices[indicesOffset++] = (triangles[i + 1] + verticesOffset)
       indices[indicesOffset++] = (triangles[i + 2] + verticesOffset)
     }
-    let index = verticesOffset
+    let index = verticesOffset * verticesStride
     for (let i = 0; i < points.length; i += 2) {
       vertices[index] = points[i]
       vertices[index + 1] = points[i + 1]
