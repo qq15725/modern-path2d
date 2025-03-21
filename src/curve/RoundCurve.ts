@@ -40,28 +40,22 @@ export class RoundCurve extends Curve {
     return this.clockwise
   }
 
-  override getPoint(t: number, output = new Vector2()): Vector2 {
-    const twoPi = Math.PI * 2
+  protected _getDeltaAngle(): number {
+    const PI_2 = Math.PI * 2
     let deltaAngle = this.endAngle - this.startAngle
     const samePoints = Math.abs(deltaAngle) < Number.EPSILON
-    while (deltaAngle < 0) deltaAngle += twoPi
-    while (deltaAngle > twoPi) deltaAngle -= twoPi
-    if (deltaAngle < Number.EPSILON) {
-      if (samePoints) {
-        deltaAngle = 0
-      }
-      else {
-        deltaAngle = twoPi
-      }
+    deltaAngle = ((deltaAngle % PI_2) + PI_2) % PI_2
+    if (samePoints) {
+      deltaAngle = 0
     }
-    if (this.clockwise && !samePoints) {
-      if (deltaAngle === twoPi) {
-        deltaAngle = -twoPi
-      }
-      else {
-        deltaAngle = deltaAngle - twoPi
-      }
+    else if (!this.clockwise) {
+      deltaAngle = deltaAngle === 0 ? -PI_2 : deltaAngle - PI_2
     }
+    return deltaAngle
+  }
+
+  override getPoint(t: number, output = new Vector2()): Vector2 {
+    const deltaAngle = this._getDeltaAngle()
     const angle = this.startAngle + t * deltaAngle
     let _x = this.cx + this.rx * Math.cos(angle)
     let _y = this.cy + this.ry * Math.sin(angle)
@@ -136,76 +130,21 @@ export class RoundCurve extends Curve {
   }
 
   override getAdaptivePointArray(output: number[] = []): number[] {
-    const { cx, cy, rx, ry, dx, dy } = this
+    const { cx, cy, rx, ry, dx, dy, startAngle } = this
     if (!(rx >= 0 && ry >= 0 && dx >= 0 && dy >= 0)) {
       return output
     }
-    const n = Math.ceil(2.3 * Math.sqrt(rx + ry))
-    const m = (n * 8) + (dx ? 4 : 0) + (dy ? 4 : 0)
-    if (m === 0) {
-      return output
-    }
+    const PI_2 = Math.PI * 2
+    const deltaAngle = this._getDeltaAngle()
+    const arcLengthFactor = Math.abs(deltaAngle) / PI_2
+    const n = Math.ceil(2.3 * Math.sqrt(rx + ry) * arcLengthFactor)
     const array: number[] = []
-    if (n === 0) {
-      array[0] = array[6] = cx + dx
-      array[1] = array[3] = cy + dy
-      array[2] = array[4] = cx - dx
-      array[5] = array[7] = cy - dy
-    }
-    else {
-      let j1 = 0
-      let j2 = (n * 4) + (dx ? 2 : 0) + 2
-      let j3 = j2
-      let j4 = m
-      let x0 = dx + rx
-      let y0 = dy
-      let x1 = cx + x0
-      let x2 = cx - x0
-      let y1 = cy + y0
-      array[j1++] = x1
-      array[j1++] = y1
-      array[--j2] = y1
-      array[--j2] = x2
-      if (dy) {
-        const y2 = cy - y0
-        array[j3++] = x2
-        array[j3++] = y2
-        array[--j4] = y2
-        array[--j4] = x1
-      }
-      for (let i = 1; i < n; i++) {
-        const a = Math.PI / 2 * (i / n)
-        const x0 = dx + (Math.cos(a) * rx)
-        const y0 = dy + (Math.sin(a) * ry)
-        const x1 = cx + x0
-        const x2 = cx - x0
-        const y1 = cy + y0
-        const y2 = cy - y0
-        array[j1++] = x1
-        array[j1++] = y1
-        array[--j2] = y1
-        array[--j2] = x2
-        array[j3++] = x2
-        array[j3++] = y2
-        array[--j4] = y2
-        array[--j4] = x1
-      }
-      x0 = dx
-      y0 = dy + ry
-      x1 = cx + x0
-      x2 = cx - x0
-      y1 = cy + y0
-      const y2 = cy - y0
-      array[j1++] = x1
-      array[j1++] = y1
-      array[--j4] = y2
-      array[--j4] = x1
-      if (dx) {
-        array[j1++] = x2
-        array[j1++] = y1
-        array[--j4] = y2
-        array[--j4] = x2
-      }
+    for (let i = 0; i <= n; i++) {
+      const t = i / n
+      const angle = startAngle + t * deltaAngle
+      const x = cx + dx + Math.cos(angle) * rx
+      const y = cy + dy + Math.sin(angle) * ry
+      array.push(x, y)
     }
     Array.prototype.push.apply(output, array)
     return output

@@ -64,6 +64,23 @@ export class CompositeCurve<T extends Curve = Curve> extends Curve {
     return this.curves.flatMap(curve => curve.getControlPointRefs())
   }
 
+  override getSpacedPointArray(count = 5, output: number[] = []): number[] {
+    let offset: number | undefined
+    this.curves.forEach((curve) => {
+      curve.getSpacedPointArray(count, output)
+      if (offset) {
+        if (
+          output[offset - 1] === output[offset + 1]
+          && output[offset] === output[offset + 2]
+        ) {
+          output.splice(offset + 1, 2)
+        }
+      }
+      offset = output.length - 1
+    })
+    return output
+  }
+
   override getAdaptivePointArray(output: number[] = []): number[] {
     let offset: number | undefined
     this.curves.forEach((curve) => {

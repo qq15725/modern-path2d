@@ -41,7 +41,7 @@ export abstract class Curve {
     return this
   }
 
-  getUnevenPointArray(count = 5, output: number[] = []): number[] {
+  getUnevenPointArray(count = 100, output: number[] = []): number[] {
     const p = new Vector2()
     for (let i = 0, len = Math.max(1, count) - 1; i <= len; i++) {
       this.getPoint(i / len, p)

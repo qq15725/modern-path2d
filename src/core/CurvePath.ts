@@ -97,7 +97,7 @@ export class CurvePath extends CompositeCurve {
     if (start) {
       const end = this.currentPoint
       if (end && !start.equals(end)) {
-        this.curves.push(new LineCurve(end, start))
+        this.curves.push(new LineCurve(end.clone(), start.clone()))
         end.copy(start)
       }
       this.startPoint = undefined
