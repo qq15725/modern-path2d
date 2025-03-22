@@ -9,7 +9,7 @@ export interface FillTriangulateOptions {
   indicesOffset?: number
 }
 
-export interface FillTriangulateResult {
+export interface FillTriangulatedResult {
   vertices: number[]
   indices: number[]
 }
@@ -17,7 +17,7 @@ export interface FillTriangulateResult {
 export function fillTriangulate(
   points: number[],
   options: FillTriangulateOptions = {},
-): FillTriangulateResult {
+): FillTriangulatedResult {
   let {
     vertices = [],
     indices = [],

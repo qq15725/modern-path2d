@@ -1,4 +1,4 @@
-import type { FillTriangulateOptions, FillTriangulateResult } from './utils'
+import type { FillTriangulatedResult, FillTriangulateOptions } from './utils'
 import { Vector2 } from '../math'
 import { LineCurve } from './LineCurve'
 import { PloygonCurve } from './PloygonCurve'
@@ -39,7 +39,7 @@ export class RectangleCurve extends PloygonCurve {
     return this
   }
 
-  override fillTriangulate(options: FillTriangulateOptions = {}): FillTriangulateResult {
+  override fillTriangulate(options: FillTriangulateOptions = {}): FillTriangulatedResult {
     let {
       vertices = [],
       indices = [],

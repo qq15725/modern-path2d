@@ -62,6 +62,12 @@ async function testSVGFixtures(): Promise<void> {
     svg.dataset.file = key
     document.body.append(svg)
 
+    const _path = new Path2D()
+    pathSet.paths.forEach(path => _path.addPath(path))
+    const triangulatedSVG = _path.toTriangulatedSVG()
+    triangulatedSVG.dataset.file = key
+    document.body.append(triangulatedSVG)
+
     console.warn(pathSet)
   }
 }

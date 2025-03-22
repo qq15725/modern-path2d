@@ -9,7 +9,7 @@ export interface StrokeTriangulateOptions {
   closed?: boolean
 }
 
-export interface StrokeTriangulateResult {
+export interface StrokeTriangulatedResult {
   vertices: number[]
   indices: number[]
 }
@@ -28,7 +28,7 @@ const curveEps = 0.0001
 export function strokeTriangulate(
   points: number[],
   options: StrokeTriangulateOptions = {},
-): StrokeTriangulateResult {
+): StrokeTriangulatedResult {
   const {
     vertices = [],
     indices = [],

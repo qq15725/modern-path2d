@@ -1,8 +1,8 @@
 import type {
+  FillTriangulatedResult,
   FillTriangulateOptions,
-  FillTriangulateResult,
+  StrokeTriangulatedResult,
   StrokeTriangulateOptions,
-  StrokeTriangulateResult,
 } from '../curve'
 import type { VectorLike } from '../math'
 import type { Path2DCommand } from './Path2DCommand'
@@ -280,7 +280,7 @@ export class Path2D extends CompositeCurve<CurvePath> {
     return { min, max }
   }
 
-  override fillTriangulate(options?: FillTriangulateOptions): FillTriangulateResult {
+  override fillTriangulate(options?: FillTriangulateOptions): FillTriangulatedResult {
     const indices = options?.indices ?? []
     const vertices = options?.vertices ?? []
     this.curves.forEach((curve) => {
@@ -293,7 +293,7 @@ export class Path2D extends CompositeCurve<CurvePath> {
     return { indices, vertices }
   }
 
-  override strokeTriangulate(options?: StrokeTriangulateOptions): StrokeTriangulateResult {
+  override strokeTriangulate(options?: StrokeTriangulateOptions): StrokeTriangulatedResult {
     const indices = options?.indices ?? []
     const vertices = options?.vertices ?? []
     this.curves.forEach((curve) => {

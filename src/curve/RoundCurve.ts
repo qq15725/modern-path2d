@@ -1,5 +1,5 @@
 import type { Path2DCommand } from '../core'
-import type { FillTriangulateOptions, FillTriangulateResult } from './utils'
+import type { FillTriangulatedResult, FillTriangulateOptions } from './utils'
 import { Matrix3, Vector2 } from '../math'
 import { Curve } from './Curve'
 
@@ -150,7 +150,7 @@ export class RoundCurve extends Curve {
     return output
   }
 
-  override fillTriangulate(options: FillTriangulateOptions = {}): FillTriangulateResult {
+  override fillTriangulate(options: FillTriangulateOptions = {}): FillTriangulatedResult {
     let {
       vertices = [],
       indices = [],
