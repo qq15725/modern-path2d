@@ -1,3 +1,12 @@
+## [1.2.16](https://github.com/qq15725/modern-path2d/compare/v1.2.15...v1.2.16) (2025-03-22)
+
+
+### Features
+
+* add Path2D.toTriangulatedSVG ([b39ac66](https://github.com/qq15725/modern-path2d/commit/b39ac66032f2115f24f8cbd561989eca07ddd38b))
+
+
+
 ## [1.2.15](https://github.com/qq15725/modern-path2d/compare/v1.2.14...v1.2.15) (2025-03-21)
 
 
