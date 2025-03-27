@@ -21,11 +21,9 @@ export class RoundRectangleCurve extends RoundCurve {
     const cy = y + halfHeight
     const rx = Math.max(0, Math.min(radius, Math.min(halfWidth, halfHeight)))
     const ry = rx
-    const dx = halfWidth - rx
-    const dy = halfHeight - ry
     this._center = new Vector2(cx, cy)
     this._radius = new Vector2(rx, ry)
-    this._diff = new Vector2(dx, dy)
+    this._diff = new Vector2(width, height)
     return this
   }
 

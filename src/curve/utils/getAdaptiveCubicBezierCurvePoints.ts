@@ -14,7 +14,7 @@ export function getAdaptiveCubicBezierCurvePoints(
   x2: number, y2: number,
   x: number, y: number,
   smoothness = 0.5,
-  points: number[],
+  points: number[] = [],
 ): number[] {
   // TODO expose as a parameter
   const scale = 1

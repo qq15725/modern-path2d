@@ -12,7 +12,7 @@ export function getAdaptiveQuadraticBezierCurvePoints(
   x1: number, y1: number,
   x: number, y: number,
   smoothness = 0.5,
-  points: number[],
+  points: number[] = [],
 ): number[] {
   const scale = 1.0
   const smoothing = Math.min(

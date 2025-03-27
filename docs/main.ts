@@ -47,6 +47,10 @@ function testWebPath2D(): void {
   path1.style.fill = 'none'
   path1.drawTo(genCtx())
   genCtx().stroke(path2)
+
+  const _path = new Path2D()
+  _path.addPath(path1)
+  document.body.append(_path.toTriangulatedSVG())
 }
 
 async function testSVGFixtures(): Promise<void> {
@@ -92,7 +96,7 @@ function testPoints(): void {
   const path = new Path2D()
   drawPath2D(path)
   path.clone().getAdaptivePoints().forEach((p) => {
-    drawPoint(ctx, p.x, p.y)
+    drawPoint(ctx, p.x, p.y, { radius: 4 })
   })
   ctx.fillStyle = 'red'
   ctx.fill()

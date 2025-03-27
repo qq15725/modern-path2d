@@ -12,7 +12,7 @@ export class ArcCurve extends RoundCurve {
     super(
       new Vector2(cx, cy),
       new Vector2(radius, radius),
-      new Vector2(0, 0),
+      new Vector2(),
       0,
       startAngle,
       endAngle,

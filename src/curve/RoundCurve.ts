@@ -137,15 +137,62 @@ export class RoundCurve extends Curve {
     const PI_2 = Math.PI * 2
     const deltaAngle = this._getDeltaAngle()
     const arcLengthFactor = Math.abs(deltaAngle) / PI_2
-    const n = Math.ceil(2.3 * Math.sqrt(rx + ry) * arcLengthFactor)
+    let n = Math.ceil(2.3 * Math.sqrt(rx + ry) * arcLengthFactor)
     const array: number[] = []
-    for (let i = 0; i <= n; i++) {
-      const t = i / n
-      const angle = startAngle + t * deltaAngle
-      const x = cx + dx + Math.cos(angle) * rx
-      const y = cy + dy + Math.sin(angle) * ry
-      array.push(x, y)
+
+    if (dx && dy) {
+      n = Math.ceil(n / 4)
+      const x0 = cx - dx / 2
+      const y0 = cy - dy / 2
+      const x1 = cx + dx / 2
+      const y1 = cy - dy / 2
+      const x2 = cx + dx / 2
+      const y2 = cy + dy / 2
+      const x3 = cx - dx / 2
+      const y3 = cy + dy / 2
+
+      for (let i = 0; i <= n; i++) {
+        const t = i / n
+        const angle = -Math.PI / 2 + t * (Math.PI / 2)
+        const x = x1 + Math.cos(angle) * rx
+        const y = y1 + Math.sin(angle) * ry
+        output.push(x, y)
+      }
+
+      for (let i = 0; i <= n; i++) {
+        const t = i / n
+        const angle = 0 + t * (Math.PI / 2)
+        const x = x2 + Math.cos(angle) * rx
+        const y = y2 + Math.sin(angle) * ry
+        output.push(x, y)
+      }
+
+      for (let i = 0; i <= n; i++) {
+        const t = i / n
+        const angle = Math.PI / 2 + t * (Math.PI / 2)
+        const x = x3 + Math.cos(angle) * rx
+        const y = y3 + Math.sin(angle) * ry
+        output.push(x, y)
+      }
+
+      for (let i = 0; i <= n; i++) {
+        const t = i / n
+        const angle = Math.PI + t * (Math.PI / 2)
+        const x = x0 + Math.cos(angle) * rx
+        const y = y0 + Math.sin(angle) * ry
+        output.push(x, y)
+      }
     }
+    else {
+      for (let i = 0; i <= n; i++) {
+        const t = i / n
+        const angle = startAngle + t * deltaAngle
+        const x = cx + Math.cos(angle) * rx
+        const y = cy + Math.sin(angle) * ry
+        array.push(x, y)
+      }
+    }
+
     Array.prototype.push.apply(output, array)
     return output
   }
