@@ -1,4 +1,5 @@
 import type { Path2DCommand } from '../core'
+import type { FillTriangulatedResult, FillTriangulateOptions } from './utils'
 import { Vector2 } from '../math'
 import { Curve } from './Curve'
 
@@ -73,6 +74,54 @@ export class LineCurve extends Curve {
       { type: 'M', x: p1.x, y: p1.y },
       { type: 'L', x: p2.x, y: p2.y },
     ]
+  }
+
+  override fillTriangulate(options: FillTriangulateOptions = {}): FillTriangulatedResult {
+    let {
+      vertices = [],
+      indices = [],
+      verticesStride = 2,
+      verticesOffset = vertices.length / verticesStride,
+      indicesOffset = indices.length,
+    } = options
+
+    const x = this.p1.x
+    const y = this.p1.y
+    const width = (this.p2.x - this.p1.x) || 1
+    const height = (this.p2.y - this.p2.y) || 1
+
+    const points = [
+      x, y,
+      x + width, y,
+      x + width, y + height,
+      x, y + height,
+    ]
+
+    let count = 0
+    verticesOffset *= verticesStride
+    vertices[verticesOffset + count] = points[0]
+    vertices[verticesOffset + count + 1] = points[1]
+    count += verticesStride
+    vertices[verticesOffset + count] = points[2]
+    vertices[verticesOffset + count + 1] = points[3]
+    count += verticesStride
+    vertices[verticesOffset + count] = points[6]
+    vertices[verticesOffset + count + 1] = points[7]
+    count += verticesStride
+    vertices[verticesOffset + count] = points[4]
+    vertices[verticesOffset + count + 1] = points[5]
+    count += verticesStride
+    const verticesIndex = verticesOffset / verticesStride
+    // triangle 1
+    indices[indicesOffset++] = verticesIndex
+    indices[indicesOffset++] = verticesIndex + 1
+    indices[indicesOffset++] = verticesIndex + 2
+    // triangle 2
+    indices[indicesOffset++] = verticesIndex + 1
+    indices[indicesOffset++] = verticesIndex + 3
+    indices[indicesOffset++] = verticesIndex + 2
+
+    return { vertices, indices }
   }
 
   override drawTo(ctx: CanvasRenderingContext2D): this {

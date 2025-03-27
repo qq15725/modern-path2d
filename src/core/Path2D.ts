@@ -1,6 +1,4 @@
 import type {
-  FillTriangulatedResult,
-  FillTriangulateOptions,
   StrokeTriangulatedResult,
   StrokeTriangulateOptions,
 } from '../curve'
@@ -278,19 +276,6 @@ export class Path2D extends CompositeCurve<CurvePath> {
       }
     })
     return { min, max }
-  }
-
-  override fillTriangulate(options?: FillTriangulateOptions): FillTriangulatedResult {
-    const indices = options?.indices ?? []
-    const vertices = options?.vertices ?? []
-    this.curves.forEach((curve) => {
-      curve.fillTriangulate({
-        ...options,
-        indices,
-        vertices,
-      })
-    })
-    return { indices, vertices }
   }
 
   override strokeTriangulate(options?: StrokeTriangulateOptions): StrokeTriangulatedResult {

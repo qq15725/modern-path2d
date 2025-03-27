@@ -23,7 +23,7 @@ export class RoundRectangleCurve extends RoundCurve {
     const ry = rx
     this._center = new Vector2(cx, cy)
     this._radius = new Vector2(rx, ry)
-    this._diff = new Vector2(width, height)
+    this._diff = new Vector2(halfWidth - rx, halfHeight - ry)
     return this
   }
 

@@ -44,8 +44,8 @@ export class RectangleCurve extends PloygonCurve {
       vertices = [],
       indices = [],
       verticesStride = 2,
-      verticesOffset = 0,
-      indicesOffset = 0,
+      verticesOffset = vertices.length / verticesStride,
+      indicesOffset = indices.length,
     } = options
 
     const { x, y, width, height } = this

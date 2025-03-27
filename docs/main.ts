@@ -48,9 +48,7 @@ function testWebPath2D(): void {
   path1.drawTo(genCtx())
   genCtx().stroke(path2)
 
-  const _path = new Path2D()
-  _path.addPath(path1)
-  document.body.append(_path.toTriangulatedSVG())
+  document.body.append(path1.toTriangulatedSVG())
 }
 
 async function testSVGFixtures(): Promise<void> {
@@ -91,22 +89,25 @@ async function testJSONFixtures(): Promise<void> {
   }
 }
 
-function testPoints(): void {
+async function testPoints(): Promise<void> {
   const ctx = genCtx()
+  ctx.fillStyle = 'red'
   const path = new Path2D()
   drawPath2D(path)
-  path.clone().getAdaptivePoints().forEach((p) => {
+  const points = path.getAdaptivePoints()
+  for (let i = 0; i < points.length; i++) {
+    const p = points[i]
     drawPoint(ctx, p.x, p.y, { radius: 4 })
-  })
-  ctx.fillStyle = 'red'
-  ctx.fill()
+    ctx.fill()
+    await new Promise(resolve => setTimeout(resolve, 100))
+  }
 }
 
 async function main(): Promise<void> {
   testWebPath2D()
   await testJSONFixtures()
   await testSVGFixtures()
-  testPoints()
+  await testPoints()
 }
 
 main()

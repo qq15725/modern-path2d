@@ -130,70 +130,94 @@ export class RoundCurve extends Curve {
   }
 
   override getAdaptivePointArray(output: number[] = []): number[] {
-    const { cx, cy, rx, ry, dx, dy, startAngle } = this
+    // TODO startAngle, endAngle
+    const { cx, cy, rx, ry, dx, dy } = this
     if (!(rx >= 0 && ry >= 0 && dx >= 0 && dy >= 0)) {
       return output
     }
-    const PI_2 = Math.PI * 2
-    const deltaAngle = this._getDeltaAngle()
-    const arcLengthFactor = Math.abs(deltaAngle) / PI_2
-    let n = Math.ceil(2.3 * Math.sqrt(rx + ry) * arcLengthFactor)
-    const array: number[] = []
+    const n = Math.ceil(2.3 * Math.sqrt(rx + ry))
 
-    if (dx && dy) {
-      n = Math.ceil(n / 4)
-      const x0 = cx - dx / 2
-      const y0 = cy - dy / 2
-      const x1 = cx + dx / 2
-      const y1 = cy - dy / 2
-      const x2 = cx + dx / 2
-      const y2 = cy + dy / 2
-      const x3 = cx - dx / 2
-      const y3 = cy + dy / 2
+    const x = cx
+    const y = cy
+    const m = (n * 8) + (dx ? 4 : 0) + (dy ? 4 : 0)
 
-      for (let i = 0; i <= n; i++) {
-        const t = i / n
-        const angle = -Math.PI / 2 + t * (Math.PI / 2)
-        const x = x1 + Math.cos(angle) * rx
-        const y = y1 + Math.sin(angle) * ry
-        output.push(x, y)
-      }
-
-      for (let i = 0; i <= n; i++) {
-        const t = i / n
-        const angle = 0 + t * (Math.PI / 2)
-        const x = x2 + Math.cos(angle) * rx
-        const y = y2 + Math.sin(angle) * ry
-        output.push(x, y)
-      }
-
-      for (let i = 0; i <= n; i++) {
-        const t = i / n
-        const angle = Math.PI / 2 + t * (Math.PI / 2)
-        const x = x3 + Math.cos(angle) * rx
-        const y = y3 + Math.sin(angle) * ry
-        output.push(x, y)
-      }
-
-      for (let i = 0; i <= n; i++) {
-        const t = i / n
-        const angle = Math.PI + t * (Math.PI / 2)
-        const x = x0 + Math.cos(angle) * rx
-        const y = y0 + Math.sin(angle) * ry
-        output.push(x, y)
-      }
-    }
-    else {
-      for (let i = 0; i <= n; i++) {
-        const t = i / n
-        const angle = startAngle + t * deltaAngle
-        const x = cx + Math.cos(angle) * rx
-        const y = cy + Math.sin(angle) * ry
-        array.push(x, y)
-      }
+    if (m === 0) {
+      return output
     }
 
-    Array.prototype.push.apply(output, array)
+    if (n === 0) {
+      output[0] = output[6] = x + dx
+      output[1] = output[3] = y + dy
+      output[2] = output[4] = x - dx
+      output[5] = output[7] = y - dy
+
+      return output
+    }
+
+    let j1 = 0
+    let j2 = (n * 4) + (dx ? 2 : 0) + 2
+    let j3 = j2
+    let j4 = m
+
+    let x0 = dx + rx
+    let y0 = dy
+    let x1 = x + x0
+    let x2 = x - x0
+    let y1 = y + y0
+
+    output[j1++] = x1
+    output[j1++] = y1
+    output[--j2] = y1
+    output[--j2] = x2
+
+    if (dy) {
+      const y2 = y - y0
+
+      output[j3++] = x2
+      output[j3++] = y2
+      output[--j4] = y2
+      output[--j4] = x1
+    }
+
+    for (let i = 1; i < n; i++) {
+      // const a = startAngle + (endAngle - startAngle) / 4 * (i / n)
+      const a = Math.PI / 2 * (i / n)
+      const x0 = dx + (Math.cos(a) * rx)
+      const y0 = dy + (Math.sin(a) * ry)
+      const x1 = x + x0
+      const x2 = x - x0
+      const y1 = y + y0
+      const y2 = y - y0
+
+      output[j1++] = x1
+      output[j1++] = y1
+      output[--j2] = y1
+      output[--j2] = x2
+      output[j3++] = x2
+      output[j3++] = y2
+      output[--j4] = y2
+      output[--j4] = x1
+    }
+
+    x0 = dx
+    y0 = dy + ry
+    x1 = x + x0
+    x2 = x - x0
+    y1 = y + y0
+    const y2 = y - y0
+
+    output[j1++] = x1
+    output[j1++] = y1
+    output[--j4] = y2
+    output[--j4] = x1
+
+    if (dx) {
+      output[j1++] = x2
+      output[j1++] = y1
+      output[--j4] = y2
+      output[--j4] = x2
+    }
+
     return output
   }
 
@@ -202,8 +226,8 @@ export class RoundCurve extends Curve {
       vertices = [],
       indices = [],
       verticesStride = 2,
-      verticesOffset = 0,
-      indicesOffset = 0,
+      verticesOffset = vertices.length / verticesStride,
+      indicesOffset = indices.length,
     } = options
     const points = this.getAdaptivePointArray()
     if (points.length === 0) {
