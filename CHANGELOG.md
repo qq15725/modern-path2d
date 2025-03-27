@@ -1,3 +1,12 @@
+## [1.2.18](https://github.com/qq15725/modern-path2d/compare/v1.2.17...v1.2.18) (2025-03-27)
+
+
+### Bug Fixes
+
+* triangulate ([372fc2a](https://github.com/qq15725/modern-path2d/commit/372fc2abc67ccb99d783ae3b49ecd36b88a251c9))
+
+
+
 ## [1.2.17](https://github.com/qq15725/modern-path2d/compare/v1.2.16...v1.2.17) (2025-03-27)
 
 
