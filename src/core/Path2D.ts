@@ -1,13 +1,13 @@
 import type {
   StrokeTriangulatedResult,
   StrokeTriangulateOptions,
-} from '../curve'
+} from '../curves'
 import type { VectorLike } from '../math'
 import type { Path2DCommand } from './Path2DCommand'
 import type { Path2DData } from './Path2DData'
 import type { Path2DStyle } from './Path2DStyle'
 import { drawPoint, setCanvasContext } from '../canvas'
-import { CompositeCurve } from '../curve'
+import { CompositeCurve } from '../curves'
 import { BoundingBox, Vector2 } from '../math'
 import { svgPathCommandsAddToPath2D, svgPathDataToCommands } from '../svg'
 import { CurvePath } from './CurvePath'

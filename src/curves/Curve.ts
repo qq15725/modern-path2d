@@ -268,7 +268,7 @@ export abstract class Curve {
       const p1 = getPoint(indices[i])
       const p2 = getPoint(indices[i + 1])
       const p3 = getPoint(indices[i + 2])
-      polygonStr += `<polygon points="${p1.join(',')} ${p2.join(',')} ${p3.join(',')}" fill="none" stroke="black" />`
+      polygonStr += `<polygon points="${p1.join(',')} ${p2.join(',')} ${p3.join(',')}" fill="none" stroke="black" stroke-width="0.5" stroke-linecap="round" stroke-linejoin="round" />`
     }
     const viewBox = [min.x, min.y, max.x - min.x, max.y - min.y]
     return `<svg width="${viewBox[2]}" height="${viewBox[3]}" viewBox="${viewBox.join(' ')}" xmlns="http://www.w3.org/2000/svg">${polygonStr}</svg>`

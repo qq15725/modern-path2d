@@ -1,6 +1,6 @@
 import type {
   Curve,
-} from '../curve'
+} from '../curves'
 import type { VectorLike } from '../math'
 import type { Path2DCommand } from './Path2DCommand'
 import {
@@ -13,7 +13,7 @@ import {
   RectangleCurve,
   RoundRectangleCurve,
   SplineCurve,
-} from '../curve'
+} from '../curves'
 import { Vector2 } from '../math'
 import { svgPathCommandsAddToPath2D, svgPathDataToCommands } from '../svg'
 
