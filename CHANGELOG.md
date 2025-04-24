@@ -1,3 +1,12 @@
+## [1.2.19](https://github.com/qq15725/modern-path2d/compare/v1.2.18...v1.2.19) (2025-04-24)
+
+
+### Features
+
+* applyTransform supports function ([2b72eb6](https://github.com/qq15725/modern-path2d/commit/2b72eb6d5bc5bcede6d9b7679c6cf434836804b0))
+
+
+
 ## [1.2.18](https://github.com/qq15725/modern-path2d/compare/v1.2.17...v1.2.18) (2025-03-27)
 
 
