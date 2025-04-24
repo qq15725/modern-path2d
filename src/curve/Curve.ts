@@ -34,9 +34,15 @@ export abstract class Curve {
     return []
   }
 
-  applyTransform(transform: Matrix3): this {
+  applyTransform(transform: Matrix3 | ((point: Vector2) => void)): this {
+    const isFunction = typeof transform === 'function'
     this.getControlPointRefs().forEach((p) => {
-      p.applyMatrix3(transform)
+      if (isFunction) {
+        transform(p)
+      }
+      else {
+        p.applyMatrix3(transform)
+      }
     })
     return this
   }

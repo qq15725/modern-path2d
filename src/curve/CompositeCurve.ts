@@ -146,7 +146,7 @@ export class CompositeCurve<T extends Curve = Curve> extends Curve {
     return { indices, vertices }
   }
 
-  override applyTransform(transform: Matrix3): this {
+  override applyTransform(transform: Matrix3 | ((point: Vector2) => void)): this {
     this.curves.forEach(curve => curve.applyTransform(transform))
     return this
   }
