@@ -25,6 +25,12 @@ export class Vector2 {
     //
   }
 
+  finite(): this {
+    this.x = Number.isFinite(this.x) ? this.x : 0
+    this.y = Number.isFinite(this.y) ? this.y : 0
+    return this
+  }
+
   set(x: number, y: number): this {
     this.x = x
     this.y = y

@@ -225,7 +225,7 @@ export abstract class Curve {
       min.min(p)
       max.max(p)
     }
-    return { min, max }
+    return { min: min.finite(), max: max.finite() }
   }
 
   getBoundingBox(): BoundingBox {

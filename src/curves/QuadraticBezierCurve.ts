@@ -57,7 +57,7 @@ export class QuadraticBezierCurve extends Curve {
     min.y = Math.min(min.y, p1.y, p2.y, y1, y2)
     max.x = Math.max(max.x, p1.x, p2.x, x1, x2)
     max.y = Math.max(max.y, p1.y, p2.y, y1, y2)
-    return { min, max }
+    return { min: min.finite(), max: max.finite() }
   }
 
   override toCommands(): Path2DCommand[] {

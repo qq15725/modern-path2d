@@ -245,7 +245,7 @@ export class Path2D extends CompositeCurve<CurvePath> {
     return this
   }
 
-  getMinMax(min = Vector2.MAX, max = Vector2.MIN, withStyle = true): { min: Vector2, max: Vector2 } {
+  override getMinMax(min = Vector2.MAX, max = Vector2.MIN, withStyle = true): { min: Vector2, max: Vector2 } {
     const strokeWidth = this.strokeWidth
     this.curves.forEach((curve) => {
       curve.getMinMax(min, max)
@@ -275,7 +275,7 @@ export class Path2D extends CompositeCurve<CurvePath> {
         }
       }
     })
-    return { min, max }
+    return { min: min.finite(), max: max.finite() }
   }
 
   override strokeTriangulate(options?: StrokeTriangulateOptions): StrokeTriangulatedResult {

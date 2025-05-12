@@ -65,7 +65,7 @@ export class LineCurve extends Curve {
     min.y = Math.min(min.y, p1.y, p2.y)
     max.x = Math.max(max.x, p1.x, p2.x)
     max.y = Math.max(max.y, p1.y, p2.y)
-    return { min, max }
+    return { min: min.finite(), max: max.finite() }
   }
 
   override toCommands(): Path2DCommand[] {

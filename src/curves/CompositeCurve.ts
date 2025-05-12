@@ -153,7 +153,7 @@ export class CompositeCurve<T extends Curve = Curve> extends Curve {
 
   override getMinMax(min = Vector2.MAX, max = Vector2.MIN): { min: Vector2, max: Vector2 } {
     this.curves.forEach(curve => curve.getMinMax(min, max))
-    return { min, max }
+    return { min: min.finite(), max: max.finite() }
   }
 
   getBoundingBox(): BoundingBox {

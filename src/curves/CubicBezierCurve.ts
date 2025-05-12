@@ -87,7 +87,7 @@ export class CubicBezierCurve extends Curve {
       }
     }
     samplePoints(tValues, 10)
-    return { min, max }
+    return { min: min.finite(), max: max.finite() }
   }
 
   override toCommands(): Path2DCommand[] {

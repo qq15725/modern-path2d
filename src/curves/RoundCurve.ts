@@ -284,7 +284,7 @@ export class RoundCurve extends Curve {
     min.y = Math.min(min.y, cy - halfHeight)
     max.x = Math.max(max.x, cx + halfWidth)
     max.y = Math.max(max.y, cy + halfHeight)
-    return { min, max }
+    return { min: min.finite(), max: max.finite() }
   }
 
   override copy(source: RoundCurve): this {
