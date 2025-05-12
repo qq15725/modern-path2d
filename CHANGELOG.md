@@ -1,3 +1,17 @@
+# [1.3.0](https://github.com/qq15725/modern-path2d/compare/v1.2.19...v1.3.0) (2025-05-12)
+
+
+### Bug Fixes
+
+* getMinMax value sometime is infinity ([278231d](https://github.com/qq15725/modern-path2d/commit/278231d5a4d2da3b73325ab96ee9a82e22aa8a36))
+
+
+### Features
+
+* ffd ([81ea1a0](https://github.com/qq15725/modern-path2d/commit/81ea1a041824c6d07d5150075a4d67662551007b))
+
+
+
 ## [1.2.19](https://github.com/qq15725/modern-path2d/compare/v1.2.18...v1.2.19) (2025-04-24)
 
 
