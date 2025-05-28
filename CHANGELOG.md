@@ -1,3 +1,12 @@
+## [1.3.2](https://github.com/qq15725/modern-path2d/compare/v1.3.1...v1.3.2) (2025-05-28)
+
+
+### Bug Fixes
+
+* fillTriangulate ([7da863e](https://github.com/qq15725/modern-path2d/commit/7da863ee2e8fe110ff3e639a3127f6e0491eb3d0))
+
+
+
 ## [1.3.1](https://github.com/qq15725/modern-path2d/compare/v1.3.0...v1.3.1) (2025-05-28)
 
 
