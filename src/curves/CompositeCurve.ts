@@ -3,8 +3,6 @@ import type { Matrix3 } from '../math'
 import type { FillTriangulatedResult, FillTriangulateOptions } from './utils'
 import { BoundingBox, Vector2 } from '../math'
 import { Curve } from './Curve'
-import { LineCurve } from './LineCurve'
-import { fillTriangulate } from './utils'
 
 export class CompositeCurve<T extends Curve = Curve> extends Curve {
   constructor(
@@ -104,45 +102,13 @@ export class CompositeCurve<T extends Curve = Curve> extends Curve {
   override fillTriangulate(options?: FillTriangulateOptions): FillTriangulatedResult {
     const indices = options?.indices ?? []
     const vertices = options?.vertices ?? []
-    const lines: LineCurve[] = []
-    const fillLines = (): void => {
-      if (lines.length) {
-        const pointArray: number[] = []
-        lines.forEach((line) => {
-          const x = line.p1.x
-          const y = line.p1.y
-          if (
-            pointArray[pointArray.length - 2] !== x
-            || pointArray[pointArray.length - 1] !== y
-          ) {
-            pointArray.push(x, y)
-          }
-          pointArray.push(line.p2.x, line.p2.y)
-        })
-        fillTriangulate(pointArray, {
-          ...options,
-          indices,
-          vertices,
-        })
-        lines.length = 0
-      }
-    }
     this.curves.forEach((curve) => {
-      if (
-        curve instanceof LineCurve
-      ) {
-        lines.push(curve)
-      }
-      else {
-        fillLines()
-        curve.fillTriangulate({
-          ...options,
-          indices,
-          vertices,
-        })
-      }
+      curve.fillTriangulate({
+        ...options,
+        indices,
+        vertices,
+      })
     })
-    fillLines()
     return { indices, vertices }
   }
 

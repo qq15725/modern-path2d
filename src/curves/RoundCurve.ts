@@ -130,94 +130,26 @@ export class RoundCurve extends Curve {
   }
 
   override getAdaptivePointArray(output: number[] = []): number[] {
-    // TODO startAngle, endAngle
-    const { cx, cy, rx, ry, dx, dy } = this
-    if (!(rx >= 0 && ry >= 0 && dx >= 0 && dy >= 0)) {
+    const { cx, cy, rx, ry, startAngle, endAngle, clockwise } = this
+    if (!(rx >= 0 && ry >= 0)) {
       return output
     }
-    const n = Math.ceil(2.3 * Math.sqrt(rx + ry))
-
-    const x = cx
-    const y = cy
-    const m = (n * 8) + (dx ? 4 : 0) + (dy ? 4 : 0)
-
-    if (m === 0) {
-      return output
+    let deltaAngle = endAngle - startAngle
+    if (!clockwise && deltaAngle > 0) {
+      deltaAngle -= 2 * Math.PI
     }
-
-    if (n === 0) {
-      output[0] = output[6] = x + dx
-      output[1] = output[3] = y + dy
-      output[2] = output[4] = x - dx
-      output[5] = output[7] = y - dy
-
-      return output
+    else if (clockwise && deltaAngle < 0) {
+      deltaAngle += 2 * Math.PI
     }
-
-    let j1 = 0
-    let j2 = (n * 4) + (dx ? 2 : 0) + 2
-    let j3 = j2
-    let j4 = m
-
-    let x0 = dx + rx
-    let y0 = dy
-    let x1 = x + x0
-    let x2 = x - x0
-    let y1 = y + y0
-
-    output[j1++] = x1
-    output[j1++] = y1
-    output[--j2] = y1
-    output[--j2] = x2
-
-    if (dy) {
-      const y2 = y - y0
-
-      output[j3++] = x2
-      output[j3++] = y2
-      output[--j4] = y2
-      output[--j4] = x1
+    const arcLength = Math.abs(deltaAngle)
+    const n = Math.max(1, Math.ceil(arcLength / (Math.PI / 16)))
+    for (let i = 0; i <= n; i++) {
+      const t = i / n
+      const angle = startAngle + deltaAngle * t
+      const x = cx + Math.cos(angle) * rx
+      const y = cy + Math.sin(angle) * ry
+      output.push(x, y)
     }
-
-    for (let i = 1; i < n; i++) {
-      // const a = startAngle + (endAngle - startAngle) / 4 * (i / n)
-      const a = Math.PI / 2 * (i / n)
-      const x0 = dx + (Math.cos(a) * rx)
-      const y0 = dy + (Math.sin(a) * ry)
-      const x1 = x + x0
-      const x2 = x - x0
-      const y1 = y + y0
-      const y2 = y - y0
-
-      output[j1++] = x1
-      output[j1++] = y1
-      output[--j2] = y1
-      output[--j2] = x2
-      output[j3++] = x2
-      output[j3++] = y2
-      output[--j4] = y2
-      output[--j4] = x1
-    }
-
-    x0 = dx
-    y0 = dy + ry
-    x1 = x + x0
-    x2 = x - x0
-    y1 = y + y0
-    const y2 = y - y0
-
-    output[j1++] = x1
-    output[j1++] = y1
-    output[--j4] = y2
-    output[--j4] = x1
-
-    if (dx) {
-      output[j1++] = x2
-      output[j1++] = y1
-      output[--j4] = y2
-      output[--j4] = x2
-    }
-
     return output
   }
 

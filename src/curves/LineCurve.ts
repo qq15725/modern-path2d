@@ -85,10 +85,15 @@ export class LineCurve extends Curve {
       indicesOffset = indices.length,
     } = options
 
-    const x = this.p1.x
-    const y = this.p1.y
-    const width = (this.p2.x - this.p1.x) || 1
-    const height = (this.p2.y - this.p2.y) || 1
+    const minX = Math.min(this.p1.x, this.p2.x)
+    const maxX = Math.max(this.p1.x, this.p2.x)
+    const minY = Math.min(this.p1.y, this.p2.y)
+    const maxY = Math.max(this.p1.y, this.p2.y)
+
+    const x = minX
+    const y = minY
+    const width = (maxX - minX)
+    const height = (maxY - minY)
 
     const points = [
       x, y,
