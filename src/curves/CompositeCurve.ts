@@ -1,6 +1,11 @@
 import type { Path2DCommand } from '../core'
 import type { Matrix3 } from '../math'
-import type { FillTriangulatedResult, FillTriangulateOptions } from './utils'
+import type {
+  FillTriangulatedResult,
+  FillTriangulateOptions,
+  StrokeTriangulatedResult,
+  StrokeTriangulateOptions,
+} from './utils'
 import { BoundingBox, Vector2 } from '../math'
 import { Curve } from './Curve'
 
@@ -66,10 +71,9 @@ export class CompositeCurve<T extends Curve = Curve> extends Curve {
   }
 
   protected _removeNextPointIfEqualPrevPoint(output: number[], offset: number): number[] {
-    if (
-      output[offset - 1] === output[offset + 1]
-      && output[offset] === output[offset + 2]
-    ) {
+    const p1 = [output[offset - 1], output[offset]]
+    const p2 = [output[offset + 1], output[offset + 2]]
+    if (p1[0] === p2[0] && p1[1] === p2[1]) {
       output.splice(offset + 1, 2)
     }
     return output
@@ -99,17 +103,22 @@ export class CompositeCurve<T extends Curve = Curve> extends Curve {
     return output
   }
 
+  override strokeTriangulate(options?: StrokeTriangulateOptions): StrokeTriangulatedResult {
+    if (this.curves.length === 1) {
+      return this.curves[0].strokeTriangulate(options)
+    }
+    else {
+      return super.strokeTriangulate(options)
+    }
+  }
+
   override fillTriangulate(options?: FillTriangulateOptions): FillTriangulatedResult {
-    const indices = options?.indices ?? []
-    const vertices = options?.vertices ?? []
-    this.curves.forEach((curve) => {
-      curve.fillTriangulate({
-        ...options,
-        indices,
-        vertices,
-      })
-    })
-    return { indices, vertices }
+    if (this.curves.length === 1) {
+      return this.curves[0].fillTriangulate(options)
+    }
+    else {
+      return super.fillTriangulate(options)
+    }
   }
 
   override applyTransform(transform: Matrix3 | ((point: Vector2) => void)): this {

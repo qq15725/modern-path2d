@@ -1,3 +1,4 @@
+import type { Path2DStyle } from '../../core'
 import earcut from 'earcut'
 
 export interface FillTriangulateOptions {
@@ -7,6 +8,7 @@ export interface FillTriangulateOptions {
   verticesStride?: number
   verticesOffset?: number
   indicesOffset?: number
+  style?: Partial<Path2DStyle>
 }
 
 export interface FillTriangulatedResult {

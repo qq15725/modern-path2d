@@ -247,42 +247,6 @@ export abstract class Curve {
     )
   }
 
-  toTriangulatedSVGString(
-    result: FillTriangulatedResult | StrokeTriangulatedResult = this.fillTriangulate(),
-    padding = 0,
-  ): string {
-    const { vertices, indices } = result
-    const min = { x: -padding, y: -padding }
-    const max = { x: padding, y: padding }
-    const getPoint = (indice: number): number[] => {
-      const x = vertices[indice * 2]
-      const y = vertices[indice * 2 + 1]
-      min.x = Math.min(min.x, x + padding)
-      max.x = Math.max(max.x, x + padding)
-      min.y = Math.min(min.y, y + padding)
-      max.y = Math.max(max.y, y + padding)
-      return [x, y]
-    }
-    let polygonStr = ''
-    for (let i = 0, len = indices.length; i < len; i += 3) {
-      const p1 = getPoint(indices[i])
-      const p2 = getPoint(indices[i + 1])
-      const p3 = getPoint(indices[i + 2])
-      polygonStr += `<polygon points="${p1.join(',')} ${p2.join(',')} ${p3.join(',')}" fill="none" stroke="black" stroke-width="0.5" stroke-linecap="round" stroke-linejoin="round" />`
-    }
-    const viewBox = [min.x, min.y, max.x - min.x, max.y - min.y]
-    return `<svg width="${viewBox[2]}" height="${viewBox[3]}" viewBox="${viewBox.join(' ')}" xmlns="http://www.w3.org/2000/svg">${polygonStr}</svg>`
-  }
-
-  toTriangulatedSVG(
-    result?: FillTriangulatedResult | StrokeTriangulatedResult,
-    padding?: number,
-  ): SVGElement {
-    return new DOMParser()
-      .parseFromString(this.toTriangulatedSVGString(result, padding), 'image/svg+xml')
-      .documentElement as unknown as SVGElement
-  }
-
   toCommands(): Path2DCommand[] {
     const comds: Path2DCommand[] = []
     const potins = this.getPoints()

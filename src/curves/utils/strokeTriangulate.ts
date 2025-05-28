@@ -1,3 +1,5 @@
+import type { Path2DStyle } from '../../core'
+
 export type LineCap = 'butt' | 'round' | 'square'
 export type LineJoin = 'round' | 'bevel' | 'miter'
 
@@ -7,6 +9,7 @@ export interface StrokeTriangulateOptions {
   lineStyle?: LineStyle
   flipAlignment?: boolean
   closed?: boolean
+  style?: Partial<Path2DStyle>
 }
 
 export interface StrokeTriangulatedResult {

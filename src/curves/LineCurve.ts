@@ -92,8 +92,8 @@ export class LineCurve extends Curve {
 
     const x = minX
     const y = minY
-    const width = (maxX - minX)
-    const height = (maxY - minY)
+    const width = (maxX - minX) || options.style?.strokeWidth || 1
+    const height = (maxY - minY) || options.style?.strokeWidth || 1
 
     const points = [
       x, y,

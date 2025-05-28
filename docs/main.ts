@@ -48,7 +48,7 @@ function testWebPath2D(): void {
   path1.drawTo(genCtx())
   genCtx().stroke(path2)
 
-  document.body.append(path1.toTriangulatedSVG(
+  document.body.append(new Path2DSet([path1]).toTriangulatedSVG(
     path1.fillTriangulate(),
   ))
 }
@@ -66,10 +66,8 @@ async function testSVGFixtures(): Promise<void> {
     svg.dataset.file = key
     document.body.append(svg)
 
-    const _path = new Path2D()
-    pathSet.paths.forEach(path => _path.addPath(path))
-    const triangulatedSVG = _path.toTriangulatedSVG(
-      _path.fillTriangulate(),
+    const triangulatedSVG = pathSet.toTriangulatedSVG(
+      pathSet.paths.map(p => p.fillTriangulate()),
     )
     triangulatedSVG.dataset.file = key
     document.body.append(triangulatedSVG)
