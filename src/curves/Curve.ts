@@ -4,11 +4,11 @@ import type {
   FillTriangulatedResult,
   FillTriangulateOptions,
   StrokeTriangulatedResult,
-  StrokeTriangulateOptions,
-} from './utils'
+  StrokeTriangulateOptions } from './utils'
 import { BoundingBox, Vector2 } from '../math'
 import { svgPathCommandsToData } from '../svg'
-import { fillTriangulate, strokeTriangulate } from './utils'
+import { fillTriangulate, strokeTriangulate,
+} from './utils'
 
 export abstract class Curve {
   arcLengthDivision = 200
@@ -21,6 +21,8 @@ export abstract class Curve {
   }
 
   isClockwise(): boolean {
+    // TODO
+    // return getDirectedArea(this.getAdaptiveVertices()) < 0
     const prev = this.getPoint(1)
     const cur = this.getPoint(0.5)
     const next = this.getPoint(1)
@@ -47,7 +49,7 @@ export abstract class Curve {
     return this
   }
 
-  getUnevenPointArray(count = 5, output: number[] = []): number[] {
+  getUnevenVertices(count = 5, output: number[] = []): number[] {
     const p = new Vector2()
     for (let i = 0, len = Math.max(1, count) - 1; i <= len; i++) {
       this.getPoint(i / len, p)
@@ -56,7 +58,7 @@ export abstract class Curve {
     return output
   }
 
-  getSpacedPointArray(count = 5, output: number[] = []): number[] {
+  getSpacedVertices(count = 5, output: number[] = []): number[] {
     const p = new Vector2()
     for (let i = 0, len = Math.max(1, count) - 1; i <= len; i++) {
       this.getPointAt(i / len, p)
@@ -65,46 +67,46 @@ export abstract class Curve {
     return output
   }
 
-  getAdaptivePointArray(output: number[] = []): number[] {
-    return this.getUnevenPointArray(5, output)
+  getAdaptiveVertices(output: number[] = []): number[] {
+    return this.getUnevenVertices(5, output)
   }
 
-  protected _pointArrayToPoint(array: number[], output: Vector2[] = []): Vector2[] {
-    for (let i = 0, len = array.length; i < len; i += 2) {
-      const x = array[i]
-      const y = array[i + 1]
+  protected _verticesToPoints(vertices: number[], output: Vector2[] = []): Vector2[] {
+    for (let i = 0, len = vertices.length; i < len; i += 2) {
+      const x = vertices[i]
+      const y = vertices[i + 1]
       output.push(new Vector2(x, y))
     }
     return output
   }
 
   getSpacedPoints(count?: number, output: Vector2[] = []): Vector2[] {
-    const array = this.getSpacedPointArray(count)
-    this._pointArrayToPoint(array, output)
+    const array = this.getSpacedVertices(count)
+    this._verticesToPoints(array, output)
     return output
   }
 
   getUnevenPoints(count?: number, output: Vector2[] = []): Vector2[] {
-    const array = this.getUnevenPointArray(count)
-    this._pointArrayToPoint(array, output)
+    const array = this.getUnevenVertices(count)
+    this._verticesToPoints(array, output)
     return output
   }
 
   getAdaptivePoints(output: Vector2[] = []): Vector2[] {
-    const array = this.getAdaptivePointArray()
-    this._pointArrayToPoint(array, output)
+    const array = this.getAdaptiveVertices()
+    this._verticesToPoints(array, output)
     return output
   }
 
   getPoints(count?: number, output: Vector2[] = []): Vector2[] {
     let array
     if (count) {
-      array = this.getUnevenPointArray(count)
+      array = this.getUnevenVertices(count)
     }
     else {
-      array = this.getAdaptivePointArray()
+      array = this.getAdaptiveVertices()
     }
-    this._pointArrayToPoint(array, output)
+    this._verticesToPoints(array, output)
     return output
   }
 
@@ -233,16 +235,20 @@ export abstract class Curve {
     return new BoundingBox(min.x, min.y, max.x - min.x, max.y - min.y)
   }
 
+  getFillVertices(_options?: FillTriangulateOptions): number[] {
+    return this.getAdaptiveVertices()
+  }
+
   fillTriangulate(options?: FillTriangulateOptions): FillTriangulatedResult {
     return fillTriangulate(
-      this.getAdaptivePointArray(),
+      this.getFillVertices(options),
       options,
     )
   }
 
   strokeTriangulate(options?: StrokeTriangulateOptions): StrokeTriangulatedResult {
     return strokeTriangulate(
-      this.getAdaptivePointArray(),
+      this.getAdaptiveVertices(),
       options,
     )
   }

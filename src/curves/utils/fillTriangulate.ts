@@ -17,7 +17,7 @@ export interface FillTriangulatedResult {
 }
 
 export function fillTriangulate(
-  points: number[],
+  pointArray: number[],
   options: FillTriangulateOptions = {},
 ): FillTriangulatedResult {
   let {
@@ -29,18 +29,18 @@ export function fillTriangulate(
     indicesOffset = indices.length,
   } = options
 
-  const triangles = earcut(points, holes, 2)
+  const triangles = earcut(pointArray, holes, 2)
 
-  if (triangles) {
+  if (triangles.length) {
     for (let i = 0; i < triangles.length; i += 3) {
       indices[indicesOffset++] = (triangles[i] + verticesOffset)
       indices[indicesOffset++] = (triangles[i + 1] + verticesOffset)
       indices[indicesOffset++] = (triangles[i + 2] + verticesOffset)
     }
     let index = verticesOffset * verticesStride
-    for (let i = 0; i < points.length; i += 2) {
-      vertices[index] = points[i]
-      vertices[index + 1] = points[i + 1]
+    for (let i = 0; i < pointArray.length; i += 2) {
+      vertices[index] = pointArray[i]
+      vertices[index + 1] = pointArray[i + 1]
       index += verticesStride
     }
   }

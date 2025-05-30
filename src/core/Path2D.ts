@@ -2,14 +2,14 @@ import type {
   FillTriangulatedResult,
   FillTriangulateOptions,
   StrokeTriangulatedResult,
-  StrokeTriangulateOptions,
-} from '../curves'
+  StrokeTriangulateOptions } from '../curves'
 import type { VectorLike } from '../math'
 import type { Path2DCommand } from './Path2DCommand'
 import type { Path2DData } from './Path2DData'
 import type { Path2DStyle } from './Path2DStyle'
 import { drawPoint, setCanvasContext } from '../canvas'
-import { CompositeCurve } from '../curves'
+import { CompositeCurve, fillTriangulate, pointInPolygon,
+} from '../curves'
 import { BoundingBox, Vector2 } from '../math'
 import { svgPathCommandsAddToPath2D, svgPathDataToCommands } from '../svg'
 import { CurvePath } from './CurvePath'
@@ -17,6 +17,13 @@ import { getIntersectionPoint, toKebabCase } from './utils'
 
 /**
  * @link https://developer.mozilla.org/zh-CN/docs/Web/API/Path2D
+ *
+ * Path2D
+ * --CurvePath
+ * ----LineCurve
+ * ----EllipseCurve
+ * ----CubicBezierCurve
+ * ----...
  */
 export class Path2D extends CompositeCurve<CurvePath> {
   currentCurve = new CurvePath()
@@ -295,16 +302,70 @@ export class Path2D extends CompositeCurve<CurvePath> {
   }
 
   override fillTriangulate(options?: FillTriangulateOptions): FillTriangulatedResult {
-    const indices = options?.indices ?? []
-    const vertices = options?.vertices ?? []
-    this.curves.forEach((curve) => {
-      curve.fillTriangulate({
-        ...options,
-        indices,
-        vertices,
-        style: { ...this.style },
+    const _options: FillTriangulateOptions = {
+      ...options,
+      style: {
+        ...this.style,
+        ...options?.style,
+      },
+    }
+    const indices = _options.indices ?? []
+    const vertices = _options.vertices ?? []
+    const fillRule = _options.style!.fillRule ?? 'nonzero'
+    if (fillRule === 'nonzero') {
+      const pointArrays = this.curves.map(curve => curve.getFillVertices(_options))
+      const parentMap = new Map<number, Set<number>>()
+      const parentd = new Set<number>()
+      for (let i = 0; i < pointArrays.length; i++) {
+        const parents = []
+        for (let j = 0; j < pointArrays.length; j++) {
+          if (i === j)
+            continue
+          if (pointInPolygon([pointArrays[i][0], pointArrays[i][1]], pointArrays[j])) {
+            parents.push(j)
+          }
+        }
+        if (parents.length) {
+          parents.forEach((pi) => {
+            let set = parentMap.get(pi)
+            if (!set) {
+              set = new Set<number>()
+              parentMap.set(pi, set)
+            }
+            set.add(i)
+          })
+          parentd.add(i)
+        }
+      }
+      pointArrays.forEach((pointArray, i) => {
+        if (parentd.has(i) || !pointArray.length) {
+          return
+        }
+        const _pointArray = pointArray.slice()
+        const holes: number[] = []
+        parentMap.get(i)?.forEach((ci) => {
+          holes.push(_pointArray.length / 2)
+          _pointArray.push(...pointArrays[ci])
+        })
+        fillTriangulate(_pointArray, {
+          ...options,
+          indices,
+          vertices,
+          holes,
+          style: { ...this.style },
+        })
       })
-    })
+    }
+    else {
+      this.curves.forEach((curve) => {
+        curve.fillTriangulate({
+          ...options,
+          indices,
+          vertices,
+          style: { ...this.style },
+        })
+      })
+    }
     return { indices, vertices }
   }
 

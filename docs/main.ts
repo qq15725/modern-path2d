@@ -2,10 +2,14 @@ import { drawPoint, Path2D, Path2DSet, svgToPath2DSet } from '../src'
 
 function genCtx(): CanvasRenderingContext2D {
   const canvas = document.createElement('canvas')
-  canvas.width = 200
-  canvas.height = 200
+  canvas.style.width = '100px'
+  canvas.style.height = '100px'
+  canvas.width = 2000
+  canvas.height = 2000
   document.body.append(canvas)
-  return canvas.getContext('2d')!
+  const ctx = canvas.getContext('2d')!
+  ctx.scale(10, 10)
+  return ctx
 }
 
 function drawPath2D(path: Path2D): void {
@@ -49,7 +53,7 @@ function testWebPath2D(): void {
   genCtx().stroke(path2)
 
   document.body.append(new Path2DSet([path1]).toTriangulatedSVG(
-    path1.fillTriangulate(),
+    path1.strokeTriangulate(),
   ))
 }
 
@@ -73,6 +77,20 @@ async function testSVGFixtures(): Promise<void> {
     document.body.append(triangulatedSVG)
 
     console.warn(pathSet)
+
+    const ctx = genCtx()
+    ctx.fillStyle = 'red'
+    for (const path of pathSet.paths) {
+      const { vertices } = path.fillTriangulate()
+      for (let i = 0; i < vertices.length; i += 2) {
+        const p = {
+          x: vertices[i],
+          y: vertices[i + 1],
+        }
+        drawPoint(ctx, p.x + 10, p.y + 10, { radius: 0.3 })
+        ctx.fill()
+      }
+    }
   }
 }
 

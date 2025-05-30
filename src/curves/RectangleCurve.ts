@@ -1,4 +1,4 @@
-import type { FillTriangulatedResult, FillTriangulateOptions } from './utils'
+import type { FillTriangulateOptions } from './utils'
 import { Vector2 } from '../math'
 import { LineCurve } from './LineCurve'
 import { PloygonCurve } from './PloygonCurve'
@@ -39,49 +39,15 @@ export class RectangleCurve extends PloygonCurve {
     return this
   }
 
-  override fillTriangulate(options: FillTriangulateOptions = {}): FillTriangulatedResult {
-    let {
-      vertices = [],
-      indices = [],
-      verticesStride = 2,
-      verticesOffset = vertices.length / verticesStride,
-      indicesOffset = indices.length,
-    } = options
-
+  override getFillVertices(_options: FillTriangulateOptions = {}): number[] {
     const { x, y, width, height } = this
 
-    const points = [
+    return [
       x, y,
       x + width, y,
       x + width, y + height,
       x, y + height,
     ]
-
-    let count = 0
-    verticesOffset *= verticesStride
-    vertices[verticesOffset + count] = points[0]
-    vertices[verticesOffset + count + 1] = points[1]
-    count += verticesStride
-    vertices[verticesOffset + count] = points[2]
-    vertices[verticesOffset + count + 1] = points[3]
-    count += verticesStride
-    vertices[verticesOffset + count] = points[6]
-    vertices[verticesOffset + count + 1] = points[7]
-    count += verticesStride
-    vertices[verticesOffset + count] = points[4]
-    vertices[verticesOffset + count + 1] = points[5]
-    count += verticesStride
-    const verticesIndex = verticesOffset / verticesStride
-    // triangle 1
-    indices[indicesOffset++] = verticesIndex
-    indices[indicesOffset++] = verticesIndex + 1
-    indices[indicesOffset++] = verticesIndex + 2
-    // triangle 2
-    indices[indicesOffset++] = verticesIndex + 1
-    indices[indicesOffset++] = verticesIndex + 3
-    indices[indicesOffset++] = verticesIndex + 2
-
-    return { vertices, indices }
   }
 
   override copy(source: RectangleCurve): this {

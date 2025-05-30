@@ -35,7 +35,7 @@ export class CubicBezierCurve extends Curve {
     )
   }
 
-  override getAdaptivePointArray(output: number[] = []): number[] {
+  override getAdaptiveVertices(output: number[] = []): number[] {
     return getAdaptiveCubicBezierCurvePoints(
       this.p1.x, this.p1.y,
       this.cp1.x, this.cp1.y,

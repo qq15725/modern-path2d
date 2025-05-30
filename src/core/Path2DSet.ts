@@ -49,7 +49,7 @@ export class Path2DSet {
         const p1 = getPoint(indices[i])
         const p2 = getPoint(indices[i + 1])
         const p3 = getPoint(indices[i + 2])
-        polygonStr += `<polygon points="${p1.join(',')} ${p2.join(',')} ${p3.join(',')}" fill="none" stroke="black" stroke-width="0.5" stroke-linecap="round" stroke-linejoin="round" />`
+        polygonStr += `<polygon points="${p1.join(',')} ${p2.join(',')} ${p3.join(',')}" fill="black" />`
       }
     })
     const viewBox = [min.x, min.y, max.x - min.x, max.y - min.y]

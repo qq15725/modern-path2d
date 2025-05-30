@@ -1,5 +1,5 @@
 import type {
-  Curve,
+  Curve, FillTriangulateOptions,
 } from '../curves'
 import type { VectorLike } from '../math'
 import type { Path2DCommand } from './Path2DCommand'
@@ -48,7 +48,7 @@ export class CurvePath extends CompositeCurve {
     return this
   }
 
-  protected _closePointArray(output: number[]): number[] {
+  protected _closeVertices(output: number[]): number[] {
     if (
       this.autoClose
       && output.length >= 4
@@ -62,21 +62,27 @@ export class CurvePath extends CompositeCurve {
     return output
   }
 
-  override getUnevenPointArray(count = 40, output: number[] = []): number[] {
-    return this._closePointArray(
-      super.getUnevenPointArray(count, output),
+  override getUnevenVertices(count = 40, output: number[] = []): number[] {
+    return this._closeVertices(
+      super.getUnevenVertices(count, output),
     )
   }
 
-  override getSpacedPointArray(count = 40, output: number[] = []): number[] {
-    return this._closePointArray(
-      super.getSpacedPointArray(count, output),
+  override getSpacedVertices(count = 40, output: number[] = []): number[] {
+    return this._closeVertices(
+      super.getSpacedVertices(count, output),
     )
   }
 
-  override getAdaptivePointArray(output: number[] = []): number[] {
-    return this._closePointArray(
-      super.getAdaptivePointArray(output),
+  override getAdaptiveVertices(output: number[] = []): number[] {
+    return this._closeVertices(
+      super.getAdaptiveVertices(output),
+    )
+  }
+
+  override getFillVertices(options?: FillTriangulateOptions): number[] {
+    return this._closeVertices(
+      super.getFillVertices(options),
     )
   }
 

@@ -1,5 +1,5 @@
 import type { Path2DCommand } from '../core'
-import type { FillTriangulatedResult, FillTriangulateOptions } from './utils'
+import type { FillTriangulateOptions } from './utils'
 import { Vector2 } from '../math'
 import { Curve } from './Curve'
 
@@ -51,7 +51,7 @@ export class LineCurve extends Curve {
     return [this.p1, this.p2]
   }
 
-  override getAdaptivePointArray(output: number[] = []): number[] {
+  override getAdaptiveVertices(output: number[] = []): number[] {
     output.push(
       this.p1.x, this.p1.y,
       this.p2.x, this.p2.y,
@@ -76,15 +76,7 @@ export class LineCurve extends Curve {
     ]
   }
 
-  override fillTriangulate(options: FillTriangulateOptions = {}): FillTriangulatedResult {
-    let {
-      vertices = [],
-      indices = [],
-      verticesStride = 2,
-      verticesOffset = vertices.length / verticesStride,
-      indicesOffset = indices.length,
-    } = options
-
+  override getFillVertices(options: FillTriangulateOptions = {}): number[] {
     const minX = Math.min(this.p1.x, this.p2.x)
     const maxX = Math.max(this.p1.x, this.p2.x)
     const minY = Math.min(this.p1.y, this.p2.y)
@@ -92,41 +84,15 @@ export class LineCurve extends Curve {
 
     const x = minX
     const y = minY
-    const width = (maxX - minX) || options.style?.strokeWidth || 1
-    const height = (maxY - minY) || options.style?.strokeWidth || 1
+    const width = (maxX - minX) || options.style?.strokeWidth || 0
+    const height = (maxY - minY) || options.style?.strokeWidth || 0
 
-    const points = [
+    return [
       x, y,
       x + width, y,
       x + width, y + height,
       x, y + height,
     ]
-
-    let count = 0
-    verticesOffset *= verticesStride
-    vertices[verticesOffset + count] = points[0]
-    vertices[verticesOffset + count + 1] = points[1]
-    count += verticesStride
-    vertices[verticesOffset + count] = points[2]
-    vertices[verticesOffset + count + 1] = points[3]
-    count += verticesStride
-    vertices[verticesOffset + count] = points[6]
-    vertices[verticesOffset + count + 1] = points[7]
-    count += verticesStride
-    vertices[verticesOffset + count] = points[4]
-    vertices[verticesOffset + count + 1] = points[5]
-    count += verticesStride
-    const verticesIndex = verticesOffset / verticesStride
-    // triangle 1
-    indices[indicesOffset++] = verticesIndex
-    indices[indicesOffset++] = verticesIndex + 1
-    indices[indicesOffset++] = verticesIndex + 2
-    // triangle 2
-    indices[indicesOffset++] = verticesIndex + 1
-    indices[indicesOffset++] = verticesIndex + 3
-    indices[indicesOffset++] = verticesIndex + 2
-
-    return { vertices, indices }
   }
 
   override drawTo(ctx: CanvasRenderingContext2D): this {

@@ -1,13 +1,13 @@
 import type { Path2DCommand } from '../core'
 import type { Matrix3 } from '../math'
 import type {
-  FillTriangulatedResult,
   FillTriangulateOptions,
   StrokeTriangulatedResult,
   StrokeTriangulateOptions,
 } from './utils'
 import { BoundingBox, Vector2 } from '../math'
 import { Curve } from './Curve'
+import { LineCurve } from './LineCurve'
 
 export class CompositeCurve<T extends Curve = Curve> extends Curve {
   constructor(
@@ -79,10 +79,10 @@ export class CompositeCurve<T extends Curve = Curve> extends Curve {
     return output
   }
 
-  override getSpacedPointArray(count = 5, output: number[] = []): number[] {
+  override getSpacedVertices(count = 5, output: number[] = []): number[] {
     let offset: number | undefined
     this.curves.forEach((curve) => {
-      curve.getSpacedPointArray(count, output)
+      curve.getSpacedVertices(count, output)
       if (offset) {
         this._removeNextPointIfEqualPrevPoint(output, offset)
       }
@@ -91,10 +91,10 @@ export class CompositeCurve<T extends Curve = Curve> extends Curve {
     return output
   }
 
-  override getAdaptivePointArray(output: number[] = []): number[] {
+  override getAdaptiveVertices(output: number[] = []): number[] {
     let offset: number | undefined
     this.curves.forEach((curve) => {
-      curve.getAdaptivePointArray(output)
+      curve.getAdaptiveVertices(output)
       if (offset) {
         this._removeNextPointIfEqualPrevPoint(output, offset)
       }
@@ -112,12 +112,28 @@ export class CompositeCurve<T extends Curve = Curve> extends Curve {
     }
   }
 
-  override fillTriangulate(options?: FillTriangulateOptions): FillTriangulatedResult {
+  override getFillVertices(options?: FillTriangulateOptions): number[] {
     if (this.curves.length === 1) {
-      return this.curves[0].fillTriangulate(options)
+      return this.curves[0].getFillVertices(options)
     }
     else {
-      return super.fillTriangulate(options)
+      const output: number[] = []
+      let offset: number | undefined
+      this.curves.forEach((curve) => {
+        let arr
+        if (curve instanceof LineCurve) {
+          arr = curve.getAdaptiveVertices()
+        }
+        else {
+          arr = curve.getFillVertices(options)
+        }
+        output.push(...arr)
+        if (offset) {
+          this._removeNextPointIfEqualPrevPoint(output, offset)
+        }
+        offset = output.length - 1
+      })
+      return output
     }
   }
 

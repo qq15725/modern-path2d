@@ -32,7 +32,7 @@ export class ArcCurve extends RoundCurve {
     return this
   }
 
-  override getAdaptivePointArray(output: number[] = []): number[] {
+  override getAdaptiveVertices(output: number[] = []): number[] {
     const { cx, cy, rx, startAngle, endAngle, clockwise } = this
     let dist = Math.abs(startAngle - endAngle)
     if (!clockwise && startAngle > endAngle) {
