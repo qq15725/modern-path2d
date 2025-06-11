@@ -54,7 +54,7 @@ const unitConversion = {
 export function parseFloatWithUnits(string: any): number {
   let theUnit: keyof typeof unitConversion = 'px'
 
-  if (typeof string === 'string' || string instanceof String) {
+  if (typeof string === 'string') {
     for (let i = 0, n = units.length; i < n; i++) {
       const u = units[i] as keyof typeof unitConversion
       if (string.endsWith(u)) {

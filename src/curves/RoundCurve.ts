@@ -153,6 +153,8 @@ export class RoundCurve extends Curve {
     // ensure we have at least 3 steps..
     steps = Math.max(steps, 3)
 
+    steps *= 3
+
     let f = dist / (steps)
     let t = start
 

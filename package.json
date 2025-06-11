@@ -59,18 +59,18 @@
     "earcut": "^3.0.1"
   },
   "devDependencies": {
-    "@antfu/eslint-config": "^3.14.0",
+    "@antfu/eslint-config": "^4.14.1",
     "@types/earcut": "^3.0.0",
-    "@types/node": "^22.10.7",
-    "bumpp": "^9.10.1",
+    "@types/node": "^24.0.0",
+    "bumpp": "^10.1.1",
     "conventional-changelog-cli": "^5.0.0",
-    "eslint": "^9.18.0",
-    "lint-staged": "^15.4.1",
-    "simple-git-hooks": "^2.11.1",
-    "typescript": "^5.7.3",
-    "unbuild": "^3.3.1",
-    "vite": "^6.0.8",
-    "vitest": "^3.0.2"
+    "eslint": "^9.28.0",
+    "lint-staged": "^16.1.0",
+    "simple-git-hooks": "^2.13.0",
+    "typescript": "^5.8.3",
+    "unbuild": "^3.5.0",
+    "vite": "^6.3.5",
+    "vitest": "^3.2.3"
   },
   "simple-git-hooks": {
     "pre-commit": "pnpm lint-staged"
