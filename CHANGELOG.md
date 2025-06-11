@@ -1,3 +1,12 @@
+## [1.3.4](https://github.com/qq15725/modern-path2d/compare/v1.3.3...v1.3.4) (2025-06-11)
+
+
+### Bug Fixes
+
+* arc steps ([09eb281](https://github.com/qq15725/modern-path2d/commit/09eb2810853d6df09f0d38971e9937c312949c6b))
+
+
+
 ## [1.3.3](https://github.com/qq15725/modern-path2d/compare/v1.3.2...v1.3.3) (2025-05-30)
 
 
