@@ -129,47 +129,38 @@ export class RoundCurve extends Curve {
   }
 
   protected _getAdaptiveVerticesByArc(output: number[] = []): number[] {
-    const { cx, cy, rx, ry, dx, dy, startAngle, endAngle, clockwise: _clockwise } = this
+    const { cx, cy, rx, ry, dx, dy, startAngle, endAngle, clockwise, rotate } = this
 
-    const clockwise = !_clockwise
-    const x = cx
-    const y = cy
-    const start = startAngle
-    const end = endAngle
+    const counterclockwise = !clockwise
 
     // determine distance between the two angles
     // ...probably a nicer way of writing this
-    let dist = Math.abs(start - end)
-    if (!clockwise && start > end) {
+    let dist = Math.abs(startAngle - endAngle)
+    if (!counterclockwise && startAngle > endAngle) {
       dist = (2 * Math.PI) - dist
     }
-    else if (clockwise && end > start) {
+    else if (counterclockwise && endAngle > startAngle) {
       dist = (2 * Math.PI) - dist
     }
 
     // approximate the # of steps using the cube root of the radius
-    let steps = Math.max(6, Math.floor(6 * rx ** (1 / 3) * (dist / (Math.PI))))
-
-    // ensure we have at least 3 steps..
-    steps = Math.max(steps, 3)
-
-    steps *= 3
+    const steps = Math.max(12, Math.floor(12 * rx ** (1 / 3) * (dist / (Math.PI))))
 
     let f = dist / (steps)
-    let t = start
+    let t = startAngle
 
     // modify direction
-    f *= clockwise ? -1 : 1
+    f *= counterclockwise ? -1 : 1
+
+    const cos = Math.cos(counterclockwise ? rotate : -rotate)
+    const sin = Math.sin(counterclockwise ? rotate : -rotate)
 
     for (let i = 0; i < steps + 1; i++) {
-      const cs = Math.cos(t)
-      const sn = Math.sin(t)
-
-      const nx = x + dx + (cs * rx)
-      const ny = y + dy + (sn * ry)
-
-      output.push(nx, ny)
-
+      const _dx = dx + (Math.cos(t) * rx)
+      const _dy = dy + (Math.sin(t) * ry)
+      const __dx = _dx * cos - _dy * sin
+      const __dy = _dx * sin + _dy * cos
+      output.push(cx + __dx, cy + __dy)
       t += f
     }
 
@@ -177,92 +168,105 @@ export class RoundCurve extends Curve {
   }
 
   protected _getAdaptiveVerticesByCircle(output: number[] = []): number[] {
-    const { cx, cy, rx, ry, dx, dy } = this
+    const { cx, cy, rx, ry, dx, dy, rotate, clockwise } = this
 
     if (!(rx >= 0 && ry >= 0 && dx >= 0 && dy >= 0)) {
       return output
     }
 
     const n = Math.ceil(2.3 * Math.sqrt(rx + ry))
-    const x = cx
-    const y = cy
     const m = (n * 8) + (dx ? 4 : 0) + (dy ? 4 : 0)
+    const array: number[] = []
 
     if (m === 0) {
       return output
     }
+    else {
+      const start = array.length
+      if (n === 0) {
+        array[start] = array[start + 6] = cx + dx
+        array[start + 1] = array[start + 3] = cy + dy
+        array[start + 2] = array[start + 4] = cx - dx
+        array[start + 5] = array[start + 7] = cy - dy
+      }
+      else {
+        let j1 = start
+        let j2 = start + (n * 4) + (dx ? 2 : 0) + 2
+        let j3 = j2
+        let j4 = m
 
-    const start = output.length
+        let _dx = dx + rx
+        let _dy = dy
+        let x1 = cx + _dx
+        let x2 = cx - _dx
+        let y1 = cy + _dy
 
-    if (n === 0) {
-      output[start] = output[start + 6] = x + dx
-      output[start + 1] = output[start + 3] = y + dy
-      output[start + 2] = output[start + 4] = x - dx
-      output[start + 5] = output[start + 7] = y - dy
-      return output
+        array[j1++] = x1
+        array[j1++] = y1
+        array[--j2] = y1
+        array[--j2] = x2
+
+        if (dy) {
+          const y2 = cy - _dy
+          array[j3++] = x2
+          array[j3++] = y2
+          array[--j4] = y2
+          array[--j4] = x1
+        }
+
+        for (let i = 1; i < n; i++) {
+          const t = (Math.PI / 2) * (i / n)
+          const _dx = dx + (Math.cos(t) * rx)
+          const _dy = dy + (Math.sin(t) * ry)
+          const x1 = cx + _dx
+          const x2 = cx - _dx
+          const y1 = cy + _dy
+          const y2 = cy - _dy
+
+          array[j1++] = x1
+          array[j1++] = y1
+          array[--j2] = y1
+          array[--j2] = x2
+          array[j3++] = x2
+          array[j3++] = y2
+          array[--j4] = y2
+          array[--j4] = x1
+        }
+
+        _dx = dx
+        _dy = dy + ry
+        x1 = cx + _dx
+        x2 = cx - _dx
+        y1 = cy + _dy
+        const y2 = cy - _dy
+
+        array[j1++] = x1
+        array[j1++] = y1
+        array[--j4] = y2
+        array[--j4] = x1
+
+        if (dx) {
+          array[j1++] = x2
+          array[j1++] = y1
+          array[--j4] = y2
+          array[--j4] = x2
+        }
+      }
     }
 
-    let j1 = start
-    let j2 = start + (n * 4) + (dx ? 2 : 0) + 2
-    let j3 = j2
-    let j4 = m
-
-    let x0 = dx + rx
-    let y0 = dy
-    let x1 = x + x0
-    let x2 = x - x0
-    let y1 = y + y0
-
-    output[j1++] = x1
-    output[j1++] = y1
-    output[--j2] = y1
-    output[--j2] = x2
-
-    if (dy) {
-      const y2 = y - y0
-
-      output[j3++] = x2
-      output[j3++] = y2
-      output[--j4] = y2
-      output[--j4] = x1
-    }
-
-    for (let i = 1; i < n; i++) {
-      const a = (Math.PI / 2) * (i / n)
-      const x0 = dx + (Math.cos(a) * rx)
-      const y0 = dy + (Math.sin(a) * ry)
-      const x1 = x + x0
-      const x2 = x - x0
-      const y1 = y + y0
-      const y2 = y - y0
-
-      output[j1++] = x1
-      output[j1++] = y1
-      output[--j2] = y1
-      output[--j2] = x2
-      output[j3++] = x2
-      output[j3++] = y2
-      output[--j4] = y2
-      output[--j4] = x1
-    }
-
-    x0 = dx
-    y0 = dy + ry
-    x1 = x + x0
-    x2 = x - x0
-    y1 = y + y0
-    const y2 = y - y0
-
-    output[j1++] = x1
-    output[j1++] = y1
-    output[--j4] = y2
-    output[--j4] = x1
-
-    if (dx) {
-      output[j1++] = x2
-      output[j1++] = y1
-      output[--j4] = y2
-      output[--j4] = x2
+    const cos = Math.cos(clockwise ? -rotate : rotate)
+    const sin = Math.sin(clockwise ? -rotate : rotate)
+    for (let i = 0; i < array.length; i += 2) {
+      const x = array[i]
+      const y = array[i + 1]
+      const _dx = x - cx
+      const _dy = y - cy
+      const __dx = _dx * cos - _dy * sin
+      const __dy = _dx * sin + _dy * cos
+      output.push(
+        cx + __dx,
+        cy + __dy,
+      )
     }
 
     return output
@@ -273,25 +277,6 @@ export class RoundCurve extends Curve {
       return this._getAdaptiveVerticesByCircle(output)
     }
     return this._getAdaptiveVerticesByArc(output)
-  }
-
-  override getMinMax(min: Vector2 = Vector2.MAX, max: Vector2 = Vector2.MIN): { min: Vector2, max: Vector2 } {
-    const { cx, cy, rx, ry, rotate } = this
-    const cosTheta = Math.cos(rotate)
-    const sinTheta = Math.sin(rotate)
-    const halfWidth = Math.sqrt(
-      rx * rx * cosTheta * cosTheta
-      + ry * ry * sinTheta * sinTheta,
-    )
-    const halfHeight = Math.sqrt(
-      rx * rx * sinTheta * sinTheta
-      + ry * ry * cosTheta * cosTheta,
-    )
-    min.x = Math.min(min.x, cx - halfWidth)
-    min.y = Math.min(min.y, cy - halfHeight)
-    max.x = Math.max(max.x, cx + halfWidth)
-    max.y = Math.max(max.y, cy + halfHeight)
-    return { min: min.finite(), max: max.finite() }
   }
 
   override copy(source: RoundCurve): this {
