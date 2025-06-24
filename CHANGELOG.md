@@ -1,3 +1,12 @@
+## [1.3.5](https://github.com/qq15725/modern-path2d/compare/v1.3.4...v1.3.5) (2025-06-24)
+
+
+### Bug Fixes
+
+* RoundCurve ([4ebfa30](https://github.com/qq15725/modern-path2d/commit/4ebfa3070330a5e5a44ace67955de30cce1539e1))
+
+
+
 ## [1.3.4](https://github.com/qq15725/modern-path2d/compare/v1.3.3...v1.3.4) (2025-06-11)
 
 
