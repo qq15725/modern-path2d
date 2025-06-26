@@ -1,3 +1,12 @@
+## [1.4.1](https://github.com/qq15725/modern-path2d/compare/v1.4.0...v1.4.1) (2025-06-26)
+
+
+### Features
+
+* rename `svgToDOM` to `svgToDom` etc ([1dde3ab](https://github.com/qq15725/modern-path2d/commit/1dde3ab585b88a155fafe6aee45f5f28aa7d2cd3))
+
+
+
 # [1.4.0](https://github.com/qq15725/modern-path2d/compare/v1.3.5...v1.4.0) (2025-06-26)
 
 
