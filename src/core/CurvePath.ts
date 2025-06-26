@@ -1,6 +1,4 @@
-import type {
-  Curve, FillTriangulateOptions,
-} from '../curves'
+import type { Curve, FillTriangulateOptions } from '../curves'
 import type { VectorLike } from '../math'
 import type { Path2DCommand } from './Path2DCommand'
 import {
@@ -15,7 +13,7 @@ import {
   SplineCurve,
 } from '../curves'
 import { Vector2 } from '../math'
-import { svgPathCommandsAddToPath2D, svgPathDataToCommands } from '../svg'
+import { svgPathCommandsAddToPath2D, svgPathDataToCommands } from '../methods'
 
 export class CurvePath extends CompositeCurve {
   startPoint?: Vector2

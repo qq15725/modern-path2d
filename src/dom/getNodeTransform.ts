@@ -1,5 +1,5 @@
-import { Matrix3 } from '../../math'
-import { parsePathDataArgs } from '../parsePathDataArgs'
+import { Matrix3 } from '../math'
+import { parsePathDataArgs } from '../methods/parsePathDataArgs'
 import { parseFloatWithUnits } from './parseFloatWithUnits'
 
 const tempTransform0 = new Matrix3()

@@ -6,9 +6,8 @@ import type {
   StrokeTriangulatedResult,
   StrokeTriangulateOptions } from './utils'
 import { BoundingBox, Vector2 } from '../math'
-import { svgPathCommandsToData } from '../svg'
-import { fillTriangulate, strokeTriangulate,
-} from './utils'
+import { svgPathCommandsToData } from '../methods'
+import { fillTriangulate, strokeTriangulate } from './utils'
 
 export abstract class Curve {
   arcLengthDivision = 200

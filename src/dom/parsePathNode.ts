@@ -1,4 +1,4 @@
-import { Path2D } from '../../core'
+import { Path2D } from '../core'
 
 /**
  * @link http://www.w3.org/TR/SVG11/implnote.html#PathElementImplementationNotes

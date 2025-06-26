@@ -1,4 +1,4 @@
-import { Path2D } from '../../core'
+import { Path2D } from '../core'
 import { parseFloatWithUnits } from './parseFloatWithUnits'
 
 const RE = /([+-]?(?:\d+(?:\.\d+)?|\.\d+)(?:e[+-]?\d+)?)(?:,|\s)([+-]?\d*\.?\d+(?:e[+-]?\d+)?)/g

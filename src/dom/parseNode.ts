@@ -1,5 +1,5 @@
-import type { Path2D } from '../../core'
-import { Matrix3 } from '../../math'
+import type { Path2D } from '../core'
+import { Matrix3 } from '../math'
 import { getNodeTransform } from './getNodeTransform'
 import { parseCircleNode } from './parseCircleNode'
 import { parseCSSStylesheet } from './parseCSSStylesheet'

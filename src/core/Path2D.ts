@@ -11,7 +11,7 @@ import { drawPoint, setCanvasContext } from '../canvas'
 import { CompositeCurve, fillTriangulate, pointInPolygon,
 } from '../curves'
 import { BoundingBox, Vector2 } from '../math'
-import { svgPathCommandsAddToPath2D, svgPathDataToCommands } from '../svg'
+import { svgPathCommandsAddToPath2D, svgPathDataToCommands } from '../methods'
 import { CurvePath } from './CurvePath'
 import { getIntersectionPoint, toKebabCase } from './utils'
 
