@@ -21,7 +21,7 @@ export class Path2DSet {
     return new BoundingBox(min.x, min.y, max.x - min.x, max.y - min.y)
   }
 
-  toTriangulatedSVGString(
+  toTriangulatedSvgString(
     result:
       | FillTriangulatedResult
       | StrokeTriangulatedResult
@@ -56,7 +56,7 @@ export class Path2DSet {
     return `<svg width="${viewBox[2]}" height="${viewBox[3]}" viewBox="${viewBox.join(' ')}" xmlns="http://www.w3.org/2000/svg">${polygonStr}</svg>`
   }
 
-  toTriangulatedSVG(
+  toTriangulatedSvg(
     result?:
       | FillTriangulatedResult
       | StrokeTriangulatedResult
@@ -67,23 +67,23 @@ export class Path2DSet {
     padding?: number,
   ): SVGElement {
     return new DOMParser()
-      .parseFromString(this.toTriangulatedSVGString(result, padding), 'image/svg+xml')
+      .parseFromString(this.toTriangulatedSvgString(result, padding), 'image/svg+xml')
       .documentElement as unknown as SVGElement
   }
 
-  toSVGString(): string {
+  toSvgString(): string {
     const { x, y, width, height } = this.getBoundingBox()!
-    const content = this.paths.map(path => path.toSVGPathString()).join('')
+    const content = this.paths.map(path => path.toSvgPathString()).join('')
     return `<svg viewBox="${x} ${y} ${width} ${height}" width="${width}px" height="${height}px" xmlns="http://www.w3.org/2000/svg">${content}</svg>`
   }
 
-  toSVGUrl(): string {
-    return `data:image/svg+xml;base64,${btoa(this.toSVGString())}`
+  toSvgUrl(): string {
+    return `data:image/svg+xml;base64,${btoa(this.toSvgString())}`
   }
 
-  toSVG(): SVGElement {
+  toSvg(): SVGElement {
     return new DOMParser()
-      .parseFromString(this.toSVGString(), 'image/svg+xml')
+      .parseFromString(this.toSvgString(), 'image/svg+xml')
       .documentElement as unknown as SVGElement
   }
 

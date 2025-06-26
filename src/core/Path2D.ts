@@ -420,7 +420,7 @@ export class Path2D extends CompositeCurve<CurvePath> {
     return this.curves.filter(v => v.curves.length).map(v => v.toData()).join(' ')
   }
 
-  toSVGPathString(): string {
+  toSvgPathString(): string {
     const style: Record<string, any> = {
       ...this.style,
       fill: this.style.fill ?? '#000',

@@ -86,7 +86,7 @@ path.drawTo(document.getElementById('canvas').getContext('2d'))
 document.body.append(new Path2DSet([path]).toCanvas())
 
 // export to SVG DOM
-document.body.append(new Path2DSet([path]).toSVG())
+document.body.append(new Path2DSet([path]).toSvg())
 
 /**
  * Triangulate
