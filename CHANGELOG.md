@@ -1,3 +1,12 @@
+## [1.4.3](https://github.com/qq15725/modern-path2d/compare/v1.4.2...v1.4.3) (2025-07-09)
+
+
+### Bug Fixes
+
+* nonzero fill ([2397514](https://github.com/qq15725/modern-path2d/commit/239751415434eb9f71ff8a7aaff20f3e9040439f))
+
+
+
 ## [1.4.2](https://github.com/qq15725/modern-path2d/compare/v1.4.1...v1.4.2) (2025-07-09)
 
 
