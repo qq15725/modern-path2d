@@ -309,6 +309,25 @@ export class Path2D extends CompositeCurve<CurvePath> {
         ...options?.style,
       },
     }
+
+    function signedArea(pts: number[]): number {
+      let sum = 0
+      const len = pts.length / 2
+      for (let i = 0; i < len; i++) {
+        const xi = pts[2 * i]
+        const yi = pts[2 * i + 1]
+        const j = (i + 1) % len
+        const xj = pts[2 * j]
+        const yj = pts[2 * j + 1]
+        sum += (xj - xi) * (yj + yi)
+      }
+      return sum
+    }
+
+    function isHoleFlat(pts: number[]): boolean {
+      return signedArea(pts) > 0
+    }
+
     const indices = _options.indices ?? []
     const vertices = _options.vertices ?? []
     const fillRule = _options.style!.fillRule ?? 'nonzero'
@@ -317,18 +336,29 @@ export class Path2D extends CompositeCurve<CurvePath> {
       const parentMap = new Map<number, Set<number>>()
       const parentd = new Set<number>()
       for (let i = 0; i < pointArrays.length; i++) {
+        if (!isHoleFlat(pointArrays[i])) {
+          continue
+        }
         const parents = []
         for (let j = 0; j < pointArrays.length; j++) {
-          if (i === j)
+          if (i === j || isHoleFlat(pointArrays[j]))
             continue
+
           let flag = false
           for (let k = 0; k < pointArrays[i].length; k += 2) {
-            flag = flag || pointInPolygonNonZero([pointArrays[i][k], pointArrays[i][k + 1]], pointArrays[j])
+            flag = flag || pointInPolygonNonZero(
+              [pointArrays[i][k], pointArrays[i][k + 1]],
+              pointArrays[j],
+            )
+            if (flag) {
+              break
+            }
           }
           if (flag) {
             parents.push(j)
           }
         }
+
         if (parents.length) {
           parents.forEach((pi) => {
             let set = parentMap.get(pi)
