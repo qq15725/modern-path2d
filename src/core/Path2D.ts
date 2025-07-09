@@ -8,8 +8,7 @@ import type { Path2DCommand } from './Path2DCommand'
 import type { Path2DData } from './Path2DData'
 import type { Path2DStyle } from './Path2DStyle'
 import { drawPoint, setCanvasContext } from '../canvas'
-import { CompositeCurve, fillTriangulate, pointInPolygon,
-} from '../curves'
+import { CompositeCurve, fillTriangulate, pointInPolygonNonZero } from '../curves'
 import { BoundingBox, Vector2 } from '../math'
 import { svgPathCommandsAddToPath2D, svgPathDataToCommands } from '../methods'
 import { CurvePath } from './CurvePath'
@@ -193,6 +192,7 @@ export class Path2D extends CompositeCurve<CurvePath> {
     if (b === 0) {
       return this
     }
+
     const curves = this.getFlatCurves()
     const _list: { start: Vector2, end: Vector2, index: number }[] = []
     const _isClockwise: boolean[] = []
@@ -321,7 +321,11 @@ export class Path2D extends CompositeCurve<CurvePath> {
         for (let j = 0; j < pointArrays.length; j++) {
           if (i === j)
             continue
-          if (pointInPolygon([pointArrays[i][0], pointArrays[i][1]], pointArrays[j])) {
+          let flag = false
+          for (let k = 0; k < pointArrays[i].length; k += 2) {
+            flag = flag || pointInPolygonNonZero([pointArrays[i][k], pointArrays[i][k + 1]], pointArrays[j])
+          }
+          if (flag) {
             parents.push(j)
           }
         }
@@ -357,6 +361,7 @@ export class Path2D extends CompositeCurve<CurvePath> {
       })
     }
     else {
+      // pointInPolygonEvenOdd
       this.curves.forEach((curve) => {
         curve.fillTriangulate({
           ...options,

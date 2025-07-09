@@ -20,15 +20,7 @@ export abstract class Curve {
   }
 
   isClockwise(): boolean {
-    // TODO
-    // return getDirectedArea(this.getAdaptiveVertices()) < 0
-    const prev = this.getPoint(1)
-    const cur = this.getPoint(0.5)
-    const next = this.getPoint(1)
-    return (
-      (cur.x - prev.x) * (next.y - cur.y)
-      - (cur.y - prev.y) * (next.x - cur.x)
-    ) < 0
+    return false
   }
 
   getControlPointRefs(): Vector2[] {
