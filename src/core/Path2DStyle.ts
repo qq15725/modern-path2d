@@ -3,8 +3,8 @@ export type StrokeLinecap = 'butt' | 'round' | 'square'
 export type StrokeLinejoin = 'arcs' | 'bevel' | 'miter' | 'miter-clip' | 'round'
 
 export interface Path2DDrawStyle {
-  fill: string | CanvasGradient | CanvasPattern
-  stroke: string | CanvasGradient | CanvasPattern
+  fill: string | any // CustomFillObject | CanvasGradient | CanvasPattern
+  stroke: string | any // CustomStrokeObject | CanvasGradient | CanvasPattern
   shadowColor: string
   shadowOffsetX: number
   shadowOffsetY: number
