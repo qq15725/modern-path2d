@@ -31,29 +31,4 @@ export class ArcCurve extends RoundCurve {
     )
     return this
   }
-
-  override getAdaptiveVertices(output: number[] = []): number[] {
-    const { cx, cy, rx, startAngle, endAngle, clockwise } = this
-    let dist = Math.abs(startAngle - endAngle)
-    if (!clockwise && startAngle > endAngle) {
-      dist = (2 * Math.PI) - dist
-    }
-    else if (clockwise && endAngle > startAngle) {
-      dist = (2 * Math.PI) - dist
-    }
-    let steps = Math.max(6, Math.floor(6 * rx ** (1 / 3) * (dist / (Math.PI))))
-    steps = Math.max(steps, 3)
-    let f = dist / (steps)
-    let t = startAngle
-    f *= !clockwise ? -1 : 1
-    for (let i = 0; i < steps + 1; i++) {
-      const cs = Math.cos(t)
-      const sn = Math.sin(t)
-      const nx = cx + (cs * rx)
-      const ny = cy + (sn * rx)
-      output.push(nx, ny)
-      t += f
-    }
-    return output
-  }
 }
