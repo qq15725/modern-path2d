@@ -1,3 +1,12 @@
+## [1.4.5](https://github.com/qq15725/modern-path2d/compare/v1.4.4...v1.4.5) (2025-07-10)
+
+
+### Bug Fixes
+
+* ArcCurve ([be2f959](https://github.com/qq15725/modern-path2d/commit/be2f95925b0d5c4f337629c6e549eb19b5cb6cb6))
+
+
+
 ## [1.4.4](https://github.com/qq15725/modern-path2d/compare/v1.4.3...v1.4.4) (2025-07-10)
 
 
