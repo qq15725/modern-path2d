@@ -1,12 +1,12 @@
-import type { Path2DCommand } from '../core'
 import type { Matrix3 } from '../math'
+import type { Path2DCommand } from '../types'
 import type {
   FillTriangulateOptions,
   StrokeTriangulatedResult,
   StrokeTriangulateOptions,
-} from './utils'
+} from '../utils'
+import { Curve } from '../core/Curve'
 import { BoundingBox, Vector2 } from '../math'
-import { Curve } from './Curve'
 import { LineCurve } from './LineCurve'
 
 export class CompositeCurve<T extends Curve = Curve> extends Curve {

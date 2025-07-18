@@ -1,4 +1,4 @@
-import type { Path2DStyle } from '../../core'
+import type { Path2DStyle } from '../types'
 
 export type LineCap = 'butt' | 'round' | 'square'
 export type LineJoin = 'round' | 'bevel' | 'miter'

@@ -1,6 +1,6 @@
-import type { FillTriangulatedResult, StrokeTriangulatedResult } from '../curves'
+import type { Path2DStyle } from '../types'
+import type { FillTriangulatedResult, StrokeTriangulatedResult } from '../utils'
 import type { Path2D } from './Path2D'
-import type { Path2DStyle } from './Path2DStyle'
 import { BoundingBox, Vector2 } from '../math'
 
 export class Path2DSet {

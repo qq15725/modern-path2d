@@ -1,4 +1,4 @@
-import type { Path2DStyle } from '../core'
+import type { Path2DStyle } from '../types'
 import { Path2DSet } from '../core'
 import { parseNode } from '../dom/parseNode'
 import { svgToDom } from './svgToDom'

@@ -1,4 +1,5 @@
-import type { CurvePath, Path2D, Path2DCommand } from '../core'
+import type { CurvePath, Path2D } from '../core'
+import type { Path2DCommand } from '../types'
 import { Vector2 } from '../math'
 import { parseArcCommand } from './parseArcCommand'
 

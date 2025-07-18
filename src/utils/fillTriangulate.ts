@@ -1,4 +1,4 @@
-import type { Path2DStyle } from '../../core'
+import type { Path2DStyle } from '../types'
 import earcut from 'earcut'
 
 export interface FillTriangulateOptions {

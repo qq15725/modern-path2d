@@ -1,6 +1,6 @@
-import type { Path2DCommand } from '../core'
+import type { Path2DCommand } from '../types'
+import { Curve } from '../core/Curve'
 import { Matrix3, Vector2 } from '../math'
-import { Curve } from './Curve'
 
 const tempTransform0 = new Matrix3()
 const tempTransform1 = new Matrix3()

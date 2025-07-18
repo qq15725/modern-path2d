@@ -1,13 +1,14 @@
-import type { Path2DCommand, Path2DData } from '../core'
 import type { Matrix3, VectorLike } from '../math'
+import type { Path2DCommand, Path2DData } from '../types'
 import type {
   FillTriangulatedResult,
   FillTriangulateOptions,
   StrokeTriangulatedResult,
-  StrokeTriangulateOptions } from './utils'
+  StrokeTriangulateOptions,
+} from '../utils'
 import { BoundingBox, Vector2 } from '../math'
 import { svgPathCommandsToData } from '../methods'
-import { fillTriangulate, strokeTriangulate } from './utils'
+import { fillTriangulate, strokeTriangulate } from '../utils'
 
 export abstract class Curve {
   arcLengthDivision = 200

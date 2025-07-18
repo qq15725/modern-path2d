@@ -1,4 +1,4 @@
-import type { Path2DStyle, StrokeLinejoin } from '../core'
+import type { Path2DStyle, StrokeLinejoin } from '../types'
 
 const lineJoinMap: Record<StrokeLinejoin, CanvasLineJoin> = {
   'arcs': 'bevel',

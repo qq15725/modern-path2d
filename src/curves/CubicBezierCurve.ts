@@ -1,7 +1,7 @@
-import type { Path2DCommand } from '../core'
+import type { Path2DCommand } from '../types'
+import { Curve } from '../core/Curve'
 import { Vector2 } from '../math'
-import { Curve } from './Curve'
-import { cubicBezier, getAdaptiveCubicBezierCurvePoints } from './utils'
+import { cubicBezier, getAdaptiveCubicBezierCurvePoints } from '../utils'
 
 export class CubicBezierCurve extends Curve {
   static from(

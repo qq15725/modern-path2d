@@ -1,6 +1,7 @@
-import type { Curve, FillTriangulateOptions } from '../curves'
 import type { VectorLike } from '../math'
-import type { Path2DCommand } from './Path2DCommand'
+import type { Path2DCommand } from '../types'
+import type { FillTriangulateOptions } from '../utils'
+import type { Curve } from './Curve'
 import {
   ArcCurve,
   CompositeCurve,

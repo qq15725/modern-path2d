@@ -1,4 +1,4 @@
-import type { Path2DCommand, Path2DData } from '../core'
+import type { Path2DCommand, Path2DData } from '../types'
 
 export function svgPathCommandsToData(commands: Path2DCommand[]): Path2DData {
   let first: { x: number, y: number } | undefined

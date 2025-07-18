@@ -1,7 +1,7 @@
-import type { Path2DCommand } from '../core'
-import type { FillTriangulateOptions } from './utils'
+import type { Path2DCommand } from '../types'
+import type { FillTriangulateOptions } from '../utils'
+import { Curve } from '../core/Curve'
 import { Vector2 } from '../math'
-import { Curve } from './Curve'
 
 export class LineCurve extends Curve {
   static from(

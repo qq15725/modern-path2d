@@ -1,6 +1,6 @@
+import { Curve } from '../core/Curve'
 import { Vector2 } from '../math'
-import { Curve } from './Curve'
-import { catmullRom } from './utils'
+import { catmullRom } from '../utils'
 
 export class SplineCurve extends Curve {
   constructor(

@@ -1,4 +1,4 @@
-import type { FillTriangulateOptions } from './utils'
+import type { FillTriangulateOptions } from '../utils'
 import { Vector2 } from '../math'
 import { LineCurve } from './LineCurve'
 import { PloygonCurve } from './PloygonCurve'
