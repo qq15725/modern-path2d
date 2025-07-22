@@ -1,3 +1,17 @@
+## [1.4.6](https://github.com/qq15725/modern-path2d/compare/v1.4.5...v1.4.6) (2025-07-22)
+
+
+### Bug Fixes
+
+* nonzeroFillRule ([51b80af](https://github.com/qq15725/modern-path2d/commit/51b80af91c036062eaa5ec22179da3494b2d4a71))
+
+
+### Features
+
+* up deps / change dir layout ([c35cadf](https://github.com/qq15725/modern-path2d/commit/c35cadf8e3ad576ae0c3ee30e47faa4feac166b8))
+
+
+
 ## [1.4.5](https://github.com/qq15725/modern-path2d/compare/v1.4.4...v1.4.5) (2025-07-10)
 
 
