@@ -1,8 +1,9 @@
 function centroid(path: number[]): [number, number] {
+  const pathsLen = path.length
   let sx = 0
   let sy = 0
-  const n = path.length / 2
-  for (let i = 0; i < path.length; i += 2) {
+  const n = pathsLen / 2
+  for (let i = 0; i < pathsLen; i += 2) {
     sx += path[i]
     sy += path[i + 1]
   }
@@ -28,8 +29,9 @@ function cross(ax: number, ay: number, bx: number, by: number, cx: number, cy: n
 }
 
 function windingNumber(px: number, py: number, path: number[]): number {
+  const pathsLen = path.length
   let wn = 0
-  for (let i = 0, j = path.length - 2; i < path.length; j = i, i += 2) {
+  for (let i = 0, j = pathsLen - 2; i < pathsLen; j = i, i += 2) {
     const xi = path[i]
     const yi = path[i + 1]
     const xj = path[j]
@@ -49,17 +51,17 @@ function windingNumber(px: number, py: number, path: number[]): number {
 interface Grouping { index: number, parentIndex: number | null, wn: number }
 
 export function nonzeroFillRule(paths: number[][]): Grouping[] {
+  const pathsLen = paths.length
   const results: Grouping[] = paths.map((_, i) => ({ index: i, parentIndex: null, wn: 0 }))
-  for (let i = 0; i < paths.length; i++) {
+  for (let i = 0; i < pathsLen; i++) {
     let best: { idx: number, wn: number } | null = null
     if (signedArea(paths[i]) < 0) {
       continue
     }
     const points = [
-      paths[i][0], paths[i][1],
       ...centroid(paths[i]),
     ]
-    for (let j = 0; j < paths.length; j++) {
+    for (let j = 0; j < pathsLen; j++) {
       if (i === j) {
         continue
       }

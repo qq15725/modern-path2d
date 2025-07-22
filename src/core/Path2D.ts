@@ -315,18 +315,21 @@ export class Path2D extends CompositeCurve<CurvePath> {
     if (fillRule === 'nonzero') {
       const paths = this.curves.map(curve => curve.getFillVertices(_options))
       const groups = nonzeroFillRule(paths)
-      for (let i = 0; i < groups.length; i++) {
-        const group = groups[i]
+      const groupsLen = groups.length
+      for (let i = 0; i < groupsLen; i++) {
+        const groupA = groups[i]
         const pointArray = paths[i]
-        if (group.wn || !pointArray.length) {
+        if (groupA.wn || !pointArray.length) {
           continue
         }
         const _pointArray = pointArray.slice()
         const holes: number[] = []
-        const child = groups.find(v => v.parentIndex === i)
-        if (child) {
-          holes.push(_pointArray.length / 2)
-          _pointArray.push(...paths[child.index])
+        for (let j = 0; j < groupsLen; j++) {
+          const groupB = groups[j]
+          if (groupB.parentIndex === i) {
+            holes.push(_pointArray.length / 2)
+            _pointArray.push(...paths[groupB.index])
+          }
         }
         fillTriangulate(_pointArray, {
           ...options,
