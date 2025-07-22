@@ -61,7 +61,7 @@
   "devDependencies": {
     "@antfu/eslint-config": "^4.17.0",
     "@types/earcut": "^3.0.0",
-    "@types/node": "^24.0.14",
+    "@types/node": "^24.1.0",
     "bumpp": "^10.2.0",
     "conventional-changelog-cli": "^5.0.0",
     "eslint": "^9.31.0",

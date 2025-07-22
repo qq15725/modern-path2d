@@ -10,7 +10,7 @@ import { drawPoint, setCanvasContext } from '../canvas'
 import { CompositeCurve } from '../curves'
 import { BoundingBox, Vector2 } from '../math'
 import { svgPathCommandsAddToPath2D, svgPathDataToCommands } from '../methods'
-import { fillTriangulate, getIntersectionPoint, pointInPolygonNonZero, toKebabCase } from '../utils'
+import { fillTriangulate, getIntersectionPoint, nonzeroFillRule, toKebabCase } from '../utils'
 import { CurvePath } from './CurvePath'
 
 /**
@@ -309,77 +309,25 @@ export class Path2D extends CompositeCurve<CurvePath> {
       },
     }
 
-    function signedArea(pts: number[]): number {
-      let sum = 0
-      const len = pts.length / 2
-      for (let i = 0; i < len; i++) {
-        const xi = pts[2 * i]
-        const yi = pts[2 * i + 1]
-        const j = (i + 1) % len
-        const xj = pts[2 * j]
-        const yj = pts[2 * j + 1]
-        sum += (xj - xi) * (yj + yi)
-      }
-      return sum
-    }
-
-    function isHoleFlat(pts: number[]): boolean {
-      return signedArea(pts) > 0
-    }
-
     const indices = _options.indices ?? []
     const vertices = _options.vertices ?? []
     const fillRule = _options.style!.fillRule ?? 'nonzero'
     if (fillRule === 'nonzero') {
-      const pointArrays = this.curves.map(curve => curve.getFillVertices(_options))
-      const parentMap = new Map<number, Set<number>>()
-      const parentd = new Set<number>()
-      for (let i = 0; i < pointArrays.length; i++) {
-        if (!isHoleFlat(pointArrays[i])) {
+      const paths = this.curves.map(curve => curve.getFillVertices(_options))
+      const groups = nonzeroFillRule(paths)
+      for (let i = 0; i < groups.length; i++) {
+        const group = groups[i]
+        const pointArray = paths[i]
+        if (group.wn || !pointArray.length) {
           continue
-        }
-        const parents = []
-        for (let j = 0; j < pointArrays.length; j++) {
-          if (i === j || isHoleFlat(pointArrays[j]))
-            continue
-
-          let flag = false
-          for (let k = 0; k < pointArrays[i].length; k += 2) {
-            flag = flag || pointInPolygonNonZero(
-              [pointArrays[i][k], pointArrays[i][k + 1]],
-              pointArrays[j],
-            )
-            if (flag) {
-              break
-            }
-          }
-          if (flag) {
-            parents.push(j)
-          }
-        }
-
-        if (parents.length) {
-          parents.forEach((pi) => {
-            let set = parentMap.get(pi)
-            if (!set) {
-              set = new Set<number>()
-              parentMap.set(pi, set)
-            }
-            set.add(i)
-          })
-          parentd.add(i)
-        }
-      }
-      pointArrays.forEach((pointArray, i) => {
-        if (parentd.has(i) || !pointArray.length) {
-          return
         }
         const _pointArray = pointArray.slice()
         const holes: number[] = []
-        parentMap.get(i)?.forEach((ci) => {
+        const child = groups.find(v => v.parentIndex === i)
+        if (child) {
           holes.push(_pointArray.length / 2)
-          _pointArray.push(...pointArrays[ci])
-        })
+          _pointArray.push(...paths[child.index])
+        }
         fillTriangulate(_pointArray, {
           ...options,
           indices,
@@ -387,7 +335,7 @@ export class Path2D extends CompositeCurve<CurvePath> {
           holes,
           style: { ...this.style },
         })
-      })
+      }
     }
     else {
       // pointInPolygonEvenOdd
