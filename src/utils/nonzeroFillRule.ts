@@ -1,15 +1,3 @@
-function centroid(path: number[]): [number, number] {
-  const pathsLen = path.length
-  let sx = 0
-  let sy = 0
-  const n = pathsLen / 2
-  for (let i = 0; i < pathsLen; i += 2) {
-    sx += path[i]
-    sy += path[i + 1]
-  }
-  return [sx / n, sy / n]
-}
-
 function signedArea(pts: number[]): number {
   let sum = 0
   const len = pts.length / 2
@@ -59,7 +47,7 @@ export function nonzeroFillRule(paths: number[][]): Grouping[] {
       continue
     }
     const points = [
-      ...centroid(paths[i]),
+      paths[i][0], paths[i][1],
     ]
     for (let j = 0; j < pathsLen; j++) {
       if (i === j) {
