@@ -1,7 +1,7 @@
 {
   "name": "modern-path2d",
   "type": "module",
-  "version": "1.4.7",
+  "version": "1.4.8",
   "packageManager": "pnpm@9.15.1",
   "description": "A Path2D library, fully compatible with Web Path2D, with additional support for triangulate、animation、deformation etc.",
   "author": "wxm",
