@@ -1,3 +1,14 @@
+## [1.4.9](https://github.com/qq15725/modern-path2d/compare/v1.4.8...v1.4.9) (2025-08-25)
+
+
+### Features
+
+* Path2D meta ([90e6862](https://github.com/qq15725/modern-path2d/commit/90e68623001c6457397543c317cddb945809401d))
+* up deps ([dea08de](https://github.com/qq15725/modern-path2d/commit/dea08dee882014cd34d6dd052a773166ce5656cd))
+* up deps ([4d72ea0](https://github.com/qq15725/modern-path2d/commit/4d72ea0a1fc1eb701a2f6ca0874b4a20c48f690f))
+
+
+
 ## [1.4.8](https://github.com/qq15725/modern-path2d/compare/v1.4.7...v1.4.8) (2025-07-23)
 
 
