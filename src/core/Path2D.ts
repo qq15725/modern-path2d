@@ -23,7 +23,8 @@ import { CurvePath } from './CurvePath'
  * ----CubicBezierCurve
  * ----...
  */
-export class Path2D extends CompositeCurve<CurvePath> {
+export class Path2D<T = any> extends CompositeCurve<CurvePath> {
+  protected _meta?: T
   currentCurve = new CurvePath()
   style: Partial<Path2DStyle>
 
@@ -59,6 +60,15 @@ export class Path2D extends CompositeCurve<CurvePath> {
         this.addData(path)
       }
     }
+  }
+
+  getMeta(): T | undefined {
+    return this._meta
+  }
+
+  setMeta(meta: T | undefined): this {
+    this._meta = meta
+    return this
   }
 
   addPath(path: Path2D | CurvePath): this {

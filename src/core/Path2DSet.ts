@@ -3,9 +3,9 @@ import type { FillTriangulatedResult, StrokeTriangulatedResult } from '../utils'
 import type { Path2D } from './Path2D'
 import { BoundingBox, Vector2 } from '../math'
 
-export class Path2DSet {
+export class Path2DSet<T = any> {
   constructor(
-    public paths: Path2D[] = [],
+    public paths: Path2D<T>[] = [],
     public viewBox?: number[],
   ) {
     //
