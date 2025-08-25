@@ -59,17 +59,17 @@
     "earcut": "^3.0.2"
   },
   "devDependencies": {
-    "@antfu/eslint-config": "^4.17.0",
+    "@antfu/eslint-config": "^5.2.1",
     "@types/earcut": "^3.0.0",
-    "@types/node": "^24.1.0",
-    "bumpp": "^10.2.0",
+    "@types/node": "^24.3.0",
+    "bumpp": "^10.2.3",
     "conventional-changelog-cli": "^5.0.0",
-    "eslint": "^9.31.0",
-    "lint-staged": "^16.1.2",
-    "simple-git-hooks": "^2.13.0",
-    "typescript": "^5.8.3",
-    "unbuild": "^3.5.0",
-    "vite": "^7.0.5",
+    "eslint": "^9.34.0",
+    "lint-staged": "^16.1.5",
+    "simple-git-hooks": "^2.13.1",
+    "typescript": "^5.9.2",
+    "unbuild": "^3.6.1",
+    "vite": "^7.1.3",
     "vitest": "^3.2.4"
   },
   "simple-git-hooks": {
