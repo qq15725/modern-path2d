@@ -36,38 +36,58 @@ function windingNumber(px: number, py: number, path: number[]): number {
   return wn
 }
 
-interface Grouping { index: number, parentIndex: number | null, wn: number }
+function distance(p1: number[], p2: number[]): number {
+  const dx = p2[0] - p1[0]
+  const dy = p2[1] - p1[1]
+  return Math.sqrt(dx * dx + dy * dy)
+}
+
+interface Grouping {
+  index: number
+  dist: number
+  wn: number
+  parentIndex?: number
+}
 
 export function nonzeroFillRule(paths: number[][]): Grouping[] {
   const pathsLen = paths.length
-  const results: Grouping[] = paths.map((_, i) => ({ index: i, parentIndex: null, wn: 0 }))
+  const results: Grouping[] = paths.map((_, i) => ({
+    index: i,
+    dist: 0,
+    wn: 0,
+    parentIndex: undefined,
+  }))
   for (let i = 0; i < pathsLen; i++) {
-    let best: { idx: number, wn: number } | null = null
     if (signedArea(paths[i]) < 0) {
       continue
     }
-    const points = [
-      paths[i][0], paths[i][1],
+    const firstPoint = paths[i]
+    const testPointArray = [
+      ...firstPoint,
     ]
+    let parent: Grouping | undefined
     for (let j = 0; j < pathsLen; j++) {
       if (i === j) {
         continue
       }
-      let wn0 = 0
-      for (let p = 0; p < points.length; p += 2) {
-        wn0 = wn0 || windingNumber(points[p], points[p + 1], paths[j])
-        if (wn0) {
+      let wn = 0
+      for (let p = 0; p < testPointArray.length; p += 2) {
+        wn = wn || windingNumber(testPointArray[p], testPointArray[p + 1], paths[j])
+        if (wn) {
           break
         }
       }
-      const absWn = Math.abs(wn0)
-      if (absWn !== 0 && (!best || absWn > Math.abs(best.wn))) {
-        best = { idx: j, wn: wn0 }
+      if (Math.abs(wn) > 0) {
+        const dist = distance(firstPoint, paths[j])
+        if (!parent || dist < parent.dist) {
+          parent = { index: j, dist, wn }
+        }
       }
     }
-    if (best) {
-      results[i].parentIndex = best.idx
-      results[i].wn = best.wn
+    if (parent) {
+      results[i].dist = parent.dist
+      results[i].wn = parent.wn
+      results[i].parentIndex = parent.index
     }
   }
   return results

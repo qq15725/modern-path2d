@@ -1,7 +1,12 @@
 import type { Path2DStyle } from '../types'
-import type { FillTriangulatedResult, StrokeTriangulatedResult } from '../utils'
 import type { Path2D } from './Path2D'
 import { BoundingBox, Vector2 } from '../math'
+
+export interface TriangulatedResult {
+  vertices: number[]
+  indices: number[]
+  points?: number[]
+}
 
 export class Path2DSet<T = any> {
   constructor(
@@ -22,20 +27,16 @@ export class Path2DSet<T = any> {
   }
 
   toTriangulatedSvgString(
-    result:
-      | FillTriangulatedResult
-      | StrokeTriangulatedResult
-      | (
-        | FillTriangulatedResult
-        | StrokeTriangulatedResult
-      )[] = this.paths.map(p => p.fillTriangulate()),
+    result: TriangulatedResult | TriangulatedResult[]
+      = this.paths.map(p => p.fillTriangulate()),
     padding = 0,
   ): string {
     let polygonStr = ''
+    let pointStr = ''
     const min = { x: -padding, y: -padding }
     const max = { x: padding, y: padding }
     const results = Array.isArray(result) ? result : [result]
-    results.forEach(({ vertices, indices }) => {
+    results.forEach(({ vertices, indices, points = [] }) => {
       const getPoint = (indice: number): number[] => {
         const x = vertices[indice * 2]
         const y = vertices[indice * 2 + 1]
@@ -49,21 +50,39 @@ export class Path2DSet<T = any> {
         const p1 = getPoint(indices[i])
         const p2 = getPoint(indices[i + 1])
         const p3 = getPoint(indices[i + 2])
-        polygonStr += `<polygon points="${p1.join(',')} ${p2.join(',')} ${p3.join(',')}" stroke="none" fill="black" />`
+        polygonStr += `<polygon
+  points="${p1.join(',')} ${p2.join(',')} ${p3.join(',')}"
+  stroke="#28a745"
+  stroke-width="#stroke-width"
+  fill="rgba(40, 167, 69, 0.15)"
+  onmouseover="this.style.fill='rgba(40, 167, 69, 0.5)'"
+  onmouseout="this.style.fill='rgba(40, 167, 69, 0.15)'"
+/>`
+      }
+      for (let i = 0, len = points.length; i < len; i += 2) {
+        pointStr += `<circle
+  cx="${points[i]}"
+  cy="${points[i + 1]}"
+  r="#r"
+  fill="#dc3545"
+/>`
       }
     })
     const viewBox = [min.x, min.y, max.x - min.x, max.y - min.y]
-    return `<svg width="${viewBox[2]}" height="${viewBox[3]}" viewBox="${viewBox.join(' ')}" xmlns="http://www.w3.org/2000/svg">${polygonStr}</svg>`
+    const strokeWidth = Math.max(viewBox[2], viewBox[3]) * 0.001
+    return `<svg
+  width="${viewBox[2]}"
+  height="${viewBox[3]}"
+  viewBox="${viewBox.join(' ')}"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  ${polygonStr.replace(/#stroke-width/g, String(strokeWidth))}
+  ${pointStr.replace(/#r/g, String(strokeWidth))}
+</svg>`
   }
 
   toTriangulatedSvg(
-    result?:
-      | FillTriangulatedResult
-      | StrokeTriangulatedResult
-      | (
-        | FillTriangulatedResult
-        | StrokeTriangulatedResult
-      )[],
+    result?: TriangulatedResult | TriangulatedResult[],
     padding?: number,
   ): SVGElement {
     return new DOMParser()
@@ -74,7 +93,14 @@ export class Path2DSet<T = any> {
   toSvgString(): string {
     const { x, y, width, height } = this.getBoundingBox()!
     const content = this.paths.map(path => path.toSvgPathString()).join('')
-    return `<svg viewBox="${x} ${y} ${width} ${height}" width="${width}px" height="${height}px" xmlns="http://www.w3.org/2000/svg">${content}</svg>`
+    return `<svg
+  viewBox="${x} ${y} ${width} ${height}"
+  width="${width}px"
+  height="${height}px"
+  xmlns="http://www.w3.org/2000/svg"
+>
+${content}
+</svg>`
   }
 
   toSvgUrl(): string {

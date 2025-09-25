@@ -323,7 +323,8 @@ export class Path2D<T = any> extends CompositeCurve<CurvePath> {
     const vertices = _options.vertices ?? []
     const fillRule = _options.style!.fillRule ?? 'nonzero'
     if (fillRule === 'nonzero') {
-      const paths = this.curves.map(curve => curve.getFillVertices(_options))
+      const paths = this.curves
+        .map(curve => curve.getFillVertices(_options))
       const groups = nonzeroFillRule(paths)
       const groupsLen = groups.length
       for (let i = 0; i < groupsLen; i++) {
