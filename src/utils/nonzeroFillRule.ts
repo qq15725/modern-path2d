@@ -1,17 +1,3 @@
-function signedArea(pts: number[]): number {
-  let sum = 0
-  const len = pts.length / 2
-  for (let i = 0; i < len; i++) {
-    const xi = pts[2 * i]
-    const yi = pts[2 * i + 1]
-    const j = (i + 1) % len
-    const xj = pts[2 * j]
-    const yj = pts[2 * j + 1]
-    sum += (xj - xi) * (yj + yi)
-  }
-  return sum
-}
-
 function cross(ax: number, ay: number, bx: number, by: number, cx: number, cy: number): number {
   return (bx - ax) * (cy - ay) - (cx - ax) * (by - ay)
 }
@@ -58,33 +44,29 @@ export function nonzeroFillRule(paths: number[][]): Grouping[] {
     parentIndex: undefined,
   }))
   for (let i = 0; i < pathsLen; i++) {
-    if (signedArea(paths[i]) < 0) {
-      continue
-    }
-    const firstPoint = paths[i]
+    const pointArray = paths[i]
     const testPointArray = [
-      ...firstPoint,
+      pointArray[0], pointArray[1],
     ]
     let parent: Grouping | undefined
+    let totalWn = 0
     for (let j = 0; j < pathsLen; j++) {
       if (i === j) {
         continue
       }
       let wn = 0
       for (let p = 0; p < testPointArray.length; p += 2) {
-        wn = wn || windingNumber(testPointArray[p], testPointArray[p + 1], paths[j])
-        if (wn) {
-          break
-        }
+        wn = windingNumber(testPointArray[p], testPointArray[p + 1], paths[j])
       }
-      if (Math.abs(wn) > 0) {
-        const dist = distance(firstPoint, paths[j])
+      if (wn !== 0) {
+        totalWn += wn
+        const dist = distance(testPointArray, paths[j])
         if (!parent || dist < parent.dist) {
           parent = { index: j, dist, wn }
         }
       }
     }
-    if (parent) {
+    if (totalWn !== 0 && parent) {
       results[i].dist = parent.dist
       results[i].wn = parent.wn
       results[i].parentIndex = parent.index
