@@ -12,7 +12,7 @@ import { fillTriangulate, strokeTriangulate } from '../utils'
 
 export abstract class Curve {
   arcLengthDivision = 200
-  protected _arcLengths?: number[]
+  protected _lengths: number[] = []
 
   abstract getPoint(t: number, output?: Vector2): Vector2
 
@@ -108,13 +108,10 @@ export abstract class Curve {
   }
 
   getLengths(): number[] {
-    if (
-      !this._arcLengths
-      || (this._arcLengths.length !== this.arcLengthDivision + 1)
-    ) {
+    if (this._lengths.length !== this.arcLengthDivision + 1) {
       this.updateLengths()
     }
-    return this._arcLengths!
+    return this._lengths
   }
 
   updateLengths(): void {
@@ -132,7 +129,7 @@ export abstract class Curve {
       arcLengths.push(sum)
       prev = current
     }
-    this._arcLengths = arcLengths
+    this._lengths = arcLengths
   }
 
   getUToTMapping(u: number, distance?: number): number {

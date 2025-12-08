@@ -51,8 +51,15 @@ export class CompositeCurve<T extends Curve = Curve> extends Curve {
     return output
   }
 
+  override getLengths(): number[] {
+    if (this._lengths.length !== this.curves.length) {
+      this.updateLengths()
+    }
+    return this._lengths!
+  }
+
   override updateLengths(): void {
-    const arcLengths = []
+    const lengths = []
     for (
       let i = 0,
         sum = 0,
@@ -61,9 +68,9 @@ export class CompositeCurve<T extends Curve = Curve> extends Curve {
       i++
     ) {
       sum += this.curves[i].getLength()
-      arcLengths.push(sum)
+      lengths.push(sum)
     }
-    this._arcLengths = arcLengths
+    this._lengths = lengths
   }
 
   override getControlPointRefs(): Vector2[] {
