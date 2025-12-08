@@ -157,14 +157,14 @@ export abstract class Curve {
         break
       }
     }
-    i = high
+    i = Math.max(0, high)
     if (lengths[i] === targetLen) {
       return i / (lengthsLen - 1)
     }
     const before = lengths[i]
     const after = lengths[i + 1]
     const segmentLength = after - before
-    const segmentFraction = (targetLen - before) / segmentLength
+    const segmentFraction = Math.max(0, (targetLen - before) / segmentLength)
     return (i + segmentFraction) / (lengthsLen - 1)
   }
 
