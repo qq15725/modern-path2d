@@ -1,3 +1,13 @@
+## [1.4.14](https://github.com/qq15725/modern-path2d/compare/v1.4.13...v1.4.14) (2025-12-08)
+
+
+### Bug Fixes
+
+* addPath ([e313057](https://github.com/qq15725/modern-path2d/commit/e313057af29e91a71417de8bedf64fbb0b4f5265))
+* addPath ([fb62e70](https://github.com/qq15725/modern-path2d/commit/fb62e7068585762d5080efa7a7cddb24004a2a20))
+
+
+
 ## [1.4.13](https://github.com/qq15725/modern-path2d/compare/v1.4.12...v1.4.13) (2025-12-08)
 
 
