@@ -1,3 +1,12 @@
+## [1.4.13](https://github.com/qq15725/modern-path2d/compare/v1.4.12...v1.4.13) (2025-12-08)
+
+
+### Bug Fixes
+
+* getUToTMapping ([89c629b](https://github.com/qq15725/modern-path2d/commit/89c629b997985b10fe154abf73e4ab481d435b46))
+
+
+
 ## [1.4.12](https://github.com/qq15725/modern-path2d/compare/v1.4.11...v1.4.12) (2025-12-08)
 
 
