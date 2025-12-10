@@ -1,15 +1,15 @@
 function cross(ax: number, ay: number, bx: number, by: number, cx: number, cy: number): number {
-  return (bx - ax) * (cy - ay) - (cx - ax) * (by - ay)
+  return (bx - ax) * (cy - ay) - (by - ay) * (cx - ax)
 }
 
-function windingNumber(px: number, py: number, path: number[]): number {
-  const pathsLen = path.length
+function windingNumber(px: number, py: number, polygon: number[]): number {
+  const polygonLen = polygon.length
   let wn = 0
-  for (let i = 0, j = pathsLen - 2; i < pathsLen; j = i, i += 2) {
-    const xi = path[i]
-    const yi = path[i + 1]
-    const xj = path[j]
-    const yj = path[j + 1]
+  for (let i = 0, j = polygonLen - 2; i < polygonLen; j = i, i += 2) {
+    const xi = polygon[i]
+    const yi = polygon[i + 1]
+    const xj = polygon[j]
+    const yj = polygon[j + 1]
     if (yi <= py) {
       if (yj > py && cross(xj, yj, xi, yi, px, py) > 0)
         wn++
@@ -28,49 +28,126 @@ function distance(p1: number[], p2: number[]): number {
   return Math.sqrt(dx * dx + dy * dy)
 }
 
-interface Grouping {
+interface NonzeroFillRuleResult {
   index: number
-  dist: number
-  wn: number
   parentIndex?: number
+  dist?: number
+  winding?: number
 }
 
-export function nonzeroFillRule(paths: number[][]): Grouping[] {
-  const pathsLen = paths.length
-  const results: Grouping[] = paths.map((_, i) => ({
-    index: i,
-    dist: 0,
-    wn: 0,
-    parentIndex: undefined,
-  }))
-  for (let i = 0; i < pathsLen; i++) {
-    const pointArray = paths[i]
-    const testPointArray = [
-      pointArray[0], pointArray[1],
-    ]
-    let parent: Grouping | undefined
-    let totalWn = 0
-    for (let j = 0; j < pathsLen; j++) {
-      if (i === j) {
-        continue
+export function nonzeroFillRule(paths: number[][]): NonzeroFillRuleResult[] {
+  const results: NonzeroFillRuleResult[] = paths.map((_, i) => ({ index: i }))
+
+  const testPointsGroups: [number, number][][] = paths.map((path) => {
+    const len = path.length
+    if (!len) {
+      return [] as [number, number][]
+    }
+    let xMinYAuto = [Number.MAX_SAFE_INTEGER, 0] as [number, number]
+    let xAutoYMin = [0, Number.MAX_SAFE_INTEGER] as [number, number]
+    let xMaxYAuto = [Number.MIN_SAFE_INTEGER, 0] as [number, number]
+    let xAutoYMax = [0, Number.MIN_SAFE_INTEGER] as [number, number]
+    for (let i = 0; i < len; i += 2) {
+      const x = path[i]
+      const y = path[i + 1]
+      if (xMinYAuto[0] > x) {
+        xMinYAuto = [x, y]
       }
-      let wn = 0
-      for (let p = 0; p < testPointArray.length; p += 2) {
-        wn = windingNumber(testPointArray[p], testPointArray[p + 1], paths[j])
+      if (xAutoYMin[1] > y) {
+        xAutoYMin = [x, y]
       }
-      if (wn !== 0) {
-        totalWn += wn
-        const dist = distance(testPointArray, paths[j])
-        if (!parent || dist < parent.dist) {
-          parent = { index: j, dist, wn }
-        }
+      if (xMaxYAuto[0] < x) {
+        xMaxYAuto = [x, y]
+      }
+      if (xAutoYMax[1] < y) {
+        xAutoYMax = [x, y]
       }
     }
-    if (totalWn !== 0 && parent) {
-      results[i].dist = parent.dist
-      results[i].wn = parent.wn
-      results[i].parentIndex = parent.index
+    const mid = [
+      (xMinYAuto[0] + xMaxYAuto[0]) / 2,
+      (xAutoYMin[1] + xAutoYMax[1]) / 2,
+    ]
+    let xMidYMinDx: undefined | number
+    let xMidYMaxDx: undefined | number
+    let xMidYMin: undefined | [number, number]
+    let xMidYMax: undefined | [number, number]
+    let xMinYMidDy: undefined | number
+    let xMaxYMidDy: undefined | number
+    let xMinYMid: undefined | [number, number]
+    let xMaxYMid: undefined | [number, number]
+    for (let i = 0; i < len; i += 2) {
+      const x = path[i]
+      const y = path[i + 1]
+      const _dx = Math.abs(x - mid[0])
+      const _dy = Math.abs(y - mid[1])
+      if (y < mid[1] && (!xMidYMinDx || _dx < xMidYMinDx)) {
+        xMidYMinDx = _dx
+        xMidYMin = [x, y]
+      }
+      if (y > mid[1] && (!xMidYMaxDx || _dx < xMidYMaxDx)) {
+        xMidYMaxDx = _dx
+        xMidYMax = [x, y]
+      }
+      if (x < mid[0] && (!xMinYMidDy || _dy < xMinYMidDy)) {
+        xMinYMidDy = _dy
+        xMinYMid = [x, y]
+      }
+      if (x > mid[0] && (!xMaxYMidDy || _dy < xMaxYMidDy)) {
+        xMaxYMidDy = _dy
+        xMaxYMid = [x, y]
+      }
+    }
+
+    return [
+      xMinYAuto,
+      xAutoYMin,
+      xMaxYAuto,
+      xAutoYMax,
+      xMidYMin,
+      xMidYMax,
+      xMinYMid,
+      xMaxYMid,
+    ].filter(Boolean) as unknown as [number, number][]
+  })
+
+  for (let i = 0, len = paths.length; i < len; i++) {
+    const _results: Required<NonzeroFillRuleResult>[] = []
+    const testPoints = testPointsGroups[i]
+
+    for (let j = 0; j < len; j++) {
+      if (i === j)
+        continue
+
+      const wnMap: Record<number, number> = {}
+      const wnList: number[] = []
+      for (let p = 0, pLen = testPoints.length; p < pLen; p++) {
+        const [x, y] = testPoints[p]
+        const winding = windingNumber(x, y, paths[j])
+        wnMap[winding] = (wnMap[winding] ?? 0) + 1
+        wnList.push(winding)
+      }
+
+      if (
+        wnList.filter(v => v !== 0).length
+        > wnList.filter(v => v === 0).length
+      ) {
+        _results.push({
+          index: i,
+          parentIndex: j,
+          winding: Number(
+            Array.from(Object.entries(wnMap))
+              .sort((a, b) => b[1] - a[1])?.[0]?.[0] ?? 0,
+          ),
+          dist: distance(testPointsGroups[i][0], testPointsGroups[j][0]),
+        })
+      }
+    }
+
+    if (_results.reduce((total, item) => total + item.winding, 0) !== 0) {
+      _results.sort((a, b) => a.dist - b.dist)
+      results[i] = _results[0]
     }
   }
+
   return results
 }

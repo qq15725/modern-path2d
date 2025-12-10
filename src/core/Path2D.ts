@@ -324,7 +324,7 @@ export class Path2D<T = any> extends CompositeCurve<CurvePath> {
       for (let i = 0; i < groupsLen; i++) {
         const groupA = groups[i]
         const pointArray = paths[i]
-        if (groupA.wn || !pointArray.length) {
+        if (groupA.winding || !pointArray.length) {
           continue
         }
         const _pointArray = pointArray.slice()
