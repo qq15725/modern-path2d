@@ -1,3 +1,12 @@
+## [1.4.16](https://github.com/qq15725/modern-path2d/compare/v1.4.15...v1.4.16) (2025-12-16)
+
+
+### Bug Fixes
+
+* getLength ([e9bda2b](https://github.com/qq15725/modern-path2d/commit/e9bda2b2348563eaa0e418ac2ef7e8fa9d90780a))
+
+
+
 ## [1.4.15](https://github.com/qq15725/modern-path2d/compare/v1.4.14...v1.4.15) (2025-12-10)
 
 
