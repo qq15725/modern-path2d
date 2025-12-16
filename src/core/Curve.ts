@@ -104,7 +104,7 @@ export abstract class Curve {
 
   getLength(): number {
     const lengths = this.getLengths()
-    return lengths[lengths.length - 1]
+    return lengths[lengths.length - 1] ?? 0
   }
 
   getLengths(): number[] {
