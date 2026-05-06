@@ -1,3 +1,9 @@
+# [1.5.0](https://github.com/qq15725/modern-path2d/compare/v1.4.16...v1.5.0) (2026-05-06)
+
+
+### Features
+
+* replace Matrix3 to Transform2D ([d47aa6d](https://github.com/qq15725/modern-path2d/commit/d47aa6d376eefb22d2eaca0a0671936595f1d98d))
 ## [1.4.16](https://github.com/qq15725/modern-path2d/compare/v1.4.15...v1.4.16) (2025-12-16)
 
 
