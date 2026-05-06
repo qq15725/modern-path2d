@@ -1,6 +1,5 @@
 import type { Vector2Like } from './Vector2'
-import { parsePathDataArgs } from '../methods'
-import { PI_2 } from './utils'
+import { parseCssFunctions, PI_2 } from '../utils'
 import { Vector2 } from './Vector2'
 
 export interface TransformableObject {
@@ -326,116 +325,84 @@ export class Transform2D {
       && t2d.tx === this.tx && t2d.ty === this.ty
   }
 
-  appendCssTransform(cssTransform: string): this {
-    const transformsTexts = cssTransform.split(')')
-    const transform = new Transform2D()
-    for (let tIndex = transformsTexts.length - 1; tIndex >= 0; tIndex--) {
-      const transformText = transformsTexts[tIndex].trim()
-      if (transformText === '')
-        continue
-      const openParPos = transformText.indexOf('(')
-      const closeParPos = transformText.length
-      if (openParPos > 0 && openParPos < closeParPos) {
-        const transformType = transformText.slice(0, openParPos)
-        const array = parsePathDataArgs(transformText.slice(openParPos + 1))
-        transform.identity()
-        switch (transformType) {
+  appendCssTransform(cssTransform: string, ctx: { width?: number, height?: number } = {}): this {
+    const { width = 1, height = 1 } = ctx
+
+    const output = new Transform2D()
+
+    parseCssFunctions(cssTransform, { width, height })
+      .reverse()
+      .forEach(({ name, args }) => {
+        const values = args.map(arg => arg.normalizedIntValue)
+        switch (name) {
+          case 'translate':
+            output.translate((values[0]) * width, (values[1] ?? values[0]) * height)
+            break
           case 'translateX':
-            transform.translateX(array[0])
+            output.translateX(values[0] * width)
             break
           case 'translateY':
-            transform.translateY(array[0])
+            output.translateY(values[0] * height)
             break
           case 'translateZ':
-            transform.translateZ(array[0])
-            break
-          case 'translate':
-            transform.translate(
-              array[0],
-              array[1] ?? array[0],
-            )
+            output.translateZ(values[0])
             break
           case 'translate3d':
-            transform.translate3d(
-              array[0],
-              (array[1] ?? array[0]),
-              array[2] ?? array[1] ?? array[0],
+            output.translate3d(
+              values[0] * width,
+              (values[1] ?? values[0]) * height,
+              values[2] ?? values[1] ?? values[0],
             )
-            break
-          case 'scaleX':
-            transform.scaleX(array[0])
-            break
-          case 'scaleY':
-            transform.scaleY(array[0])
             break
           case 'scale':
-            transform.scale(
-              array[0],
-              array[1] ?? array[0],
-            )
+            output.scale(values[0], values[1] ?? values[0])
+            break
+          case 'scaleX':
+            output.scaleX(values[0])
+            break
+          case 'scaleY':
+            output.scaleY(values[0])
             break
           case 'scale3d':
-            transform.scale3d(
-              array[0],
-              array[1] ?? array[0],
-              array[2] ?? array[1] ?? array[0],
-            )
+            output.scale3d(values[0], values[1] ?? values[0], values[2] ?? values[1] ?? values[0])
             break
-          case 'rotate': {
-            const rad = array[0] * Math.PI / 180
-            if (array.length >= 3) {
-              const cx = array[1]
-              const cy = array[2]
-              transform.translate(-cx, -cy).rotate(rad).translate(cx, cy)
-            }
-            else {
-              transform.rotate(rad)
-            }
+          case 'rotate':
+            output.rotate(values[0] * PI_2)
             break
-          }
           case 'rotateX':
-            transform.rotateX(array[0] * Math.PI / 180)
+            output.rotateX(values[0] * PI_2)
             break
           case 'rotateY':
-            transform.rotateY(array[0] * Math.PI / 180)
+            output.rotateY(values[0] * PI_2)
             break
           case 'rotateZ':
-            transform.rotateZ(array[0] * Math.PI / 180)
+            output.rotateZ(values[0] * PI_2)
             break
           case 'rotate3d':
-            transform.rotate3d(
-              array[0] * Math.PI / 180,
-              (array[1] ?? array[0]) * Math.PI / 180,
-              (array[2] ?? array[1] ?? array[0]) * Math.PI / 180,
-              (array[3] ?? array[2] ?? array[1] ?? array[0]) * Math.PI / 180,
+            output.rotate3d(
+              values[0] * PI_2,
+              (values[1] ?? values[0]) * PI_2,
+              (values[2] ?? values[1] ?? values[0]) * PI_2,
+              (values[3] ?? values[2] ?? values[1] ?? values[0]) * PI_2,
             )
+            break
+          case 'skew':
+            output.skew(values[0], values[0] ?? values[1])
             break
           case 'skewX':
-            transform.set(1, 0, Math.tan(array[0] * Math.PI / 180), 1, 0, 0)
+            output.skewX(values[0])
             break
           case 'skewY':
-            transform.set(1, Math.tan(array[0] * Math.PI / 180), 0, 1, 0, 0)
+            output.skewY(values[0])
             break
-          case 'skew': {
-            const ax = array[0]
-            const ay = array[1] ?? 0
-            transform.set(1, Math.tan(ay * Math.PI / 180), Math.tan(ax * Math.PI / 180), 1, 0, 0)
-            break
-          }
           case 'matrix':
-            transform.set(
-              array[0],
-              array[1],
-              array[2],
-              array[3],
-              array[4],
-              array[5],
-            )
+            output.set(values[0], values[1], values[2], values[3], values[4], values[5])
             break
         }
-      }
-      this.prepend(transform)
-    }
+      })
+
+    this.prepend(output)
+
     return this
   }
 

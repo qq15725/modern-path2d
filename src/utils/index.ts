@@ -1,4 +1,5 @@
 export * from './catmullRom'
+export * from './css'
 export * from './cubicBezier'
 export * from './fillTriangulate'
 export * from './getAdaptiveCubicBezierCurvePoints'

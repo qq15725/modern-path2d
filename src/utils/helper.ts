@@ -1,5 +1,8 @@
 import { Vector2 } from '../math'
 
+export const PI = Math.PI
+export const PI_2 = PI * 2
+
 export function toKebabCase(str: string): string {
   return str
     .replace(/[^a-z0-9]/gi, '-')
