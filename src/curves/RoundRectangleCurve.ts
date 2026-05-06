@@ -33,8 +33,8 @@ export class RoundRectangleCurve extends RoundCurve {
     return this
   }
 
-  override copy(source: RoundRectangleCurve): this {
-    super.copy(source)
+  override copyFrom(source: RoundRectangleCurve): this {
+    super.copyFrom(source)
     this.x = source.x
     this.y = source.y
     this.width = source.width

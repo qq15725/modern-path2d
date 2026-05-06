@@ -1,4 +1,4 @@
-import type { VectorLike } from '../math'
+import type { Vector2Like } from '../math'
 import type { Path2DCommand } from '../types'
 import type { FillTriangulateOptions } from '../utils'
 import type { Curve } from './Curve'
@@ -85,7 +85,7 @@ export class CurvePath extends CompositeCurve {
     )
   }
 
-  protected _setCurrentPoint(point: VectorLike): this {
+  protected _setCurrentPoint(point: Vector2Like): this {
     this.currentPoint = new Vector2(point.x, point.y)
     if (!this.startPoint) {
       this.startPoint = this.currentPoint.clone()
@@ -109,7 +109,7 @@ export class CurvePath extends CompositeCurve {
       const end = this.currentPoint
       if (end && !start.equals(end)) {
         this.curves.push(new LineCurve(end.clone(), start.clone()))
-        end.copy(start)
+        end.copyFrom(start)
       }
       this.startPoint = undefined
     }
@@ -250,8 +250,8 @@ export class CurvePath extends CompositeCurve {
     return this
   }
 
-  override copy(source: CurvePath): this {
-    super.copy(source)
+  override copyFrom(source: CurvePath): this {
+    super.copyFrom(source)
     this.autoClose = source.autoClose
     this.currentPoint = source.currentPoint?.clone()
     return this

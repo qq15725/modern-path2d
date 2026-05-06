@@ -50,8 +50,8 @@ export class RectangleCurve extends PloygonCurve {
     ]
   }
 
-  override copy(source: RectangleCurve): this {
-    super.copy(source)
+  override copyFrom(source: RectangleCurve): this {
+    super.copyFrom(source)
     this.x = source.x
     this.y = source.y
     this.width = source.width

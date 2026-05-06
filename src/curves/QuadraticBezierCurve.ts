@@ -75,11 +75,11 @@ export class QuadraticBezierCurve extends Curve {
     return this
   }
 
-  override copy(source: QuadraticBezierCurve): this {
-    super.copy(source)
-    this.p1.copy(source.p1)
-    this.cp.copy(source.cp)
-    this.p2.copy(source.p2)
+  override copyFrom(source: QuadraticBezierCurve): this {
+    super.copyFrom(source)
+    this.p1.copyFrom(source.p1)
+    this.cp.copyFrom(source.cp)
+    this.p2.copyFrom(source.p2)
     return this
   }
 }

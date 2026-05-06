@@ -23,11 +23,11 @@ export class LineCurve extends Curve {
 
   override getPoint(t: number, output = new Vector2()): Vector2 {
     if (t === 1) {
-      output.copy(this.p2)
+      output.copyFrom(this.p2)
     }
     else {
       output
-        .copy(this.p2)
+        .copyFrom(this.p2)
         .sub(this.p1)
         .scale(t)
         .add(this.p1)
@@ -102,10 +102,10 @@ export class LineCurve extends Curve {
     return this
   }
 
-  override copy(source: LineCurve): this {
-    super.copy(source)
-    this.p1.copy(source.p1)
-    this.p2.copy(source.p2)
+  override copyFrom(source: LineCurve): this {
+    super.copyFrom(source)
+    this.p1.copyFrom(source.p1)
+    this.p2.copyFrom(source.p2)
     return this
   }
 }

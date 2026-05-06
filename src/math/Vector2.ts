@@ -1,11 +1,9 @@
-import type { Matrix3 } from './Matrix3'
-
-export interface VectorLike {
+export interface Vector2Like {
   x: number
   y: number
 }
 
-export class Vector2 {
+export class Vector2 implements Vector2Like {
   static get MAX(): Vector2 {
     return new Vector2(Infinity, Infinity)
   }
@@ -14,174 +12,198 @@ export class Vector2 {
     return new Vector2(-Infinity, -Infinity)
   }
 
-  get array(): [number, number] {
-    return [this.x, this.y]
+  static lerp(a: Vector2Like, b: Vector2Like, t: number): Vector2 {
+    return new Vector2(b.x, b.y)
+      .clone()
+      .sub(a)
+      .multiply(t)
+      .add(a)
+  }
+
+  get width(): number { return this.x }
+  set width(val) { this.x = val }
+
+  get height(): number { return this.y }
+  set height(val) { this.y = val }
+
+  get left(): number { return this.x }
+  set left(val) { this.x = val }
+
+  get top(): number { return this.y }
+  set top(val) { this.y = val }
+
+  get x(): number { return this._x }
+  set x(value: number) {
+    if (this._x !== value) {
+      this._x = value
+      this._onUpdate?.(this)
+    }
+  }
+
+  get y(): number { return this._y }
+  set y(value: number) {
+    if (this._y !== value) {
+      this._y = value
+      this._onUpdate?.(this)
+    }
   }
 
   constructor(
-    public x = 0,
-    public y = 0,
+    protected _x = 0,
+    protected _y = 0,
+    protected _onUpdate?: (vec: Vector2) => void,
   ) {
     //
   }
 
-  finite(): this {
-    this.x = Number.isFinite(this.x) ? this.x : 0
-    this.y = Number.isFinite(this.y) ? this.y : 0
+  set(x = 0, y = x): this {
+    if (this._x !== x || this._y !== y) {
+      this._x = x
+      this._y = y
+      this._onUpdate?.(this)
+    }
+
     return this
   }
 
-  set(x: number, y: number): this {
-    this.x = x
-    this.y = y
-    return this
+  add(p: Vector2Like): this {
+    return this.set(this._x + p.x, this._y + p.y)
   }
 
-  add(vec: VectorLike): this {
-    this.x += vec.x
-    this.y += vec.y
-    return this
+  sub(p: Vector2Like): this {
+    return this.set(this._x - p.x, this._y - p.y)
   }
 
-  sub(vec: VectorLike): this {
-    this.x -= vec.x
-    this.y -= vec.y
-    return this
+  subVectors(a: Vector2Like, b: Vector2Like): this {
+    return this.set(a.x - b.x, a.y - b.y)
   }
 
-  multiply(vec: VectorLike): this {
-    this.x *= vec.x
-    this.y *= vec.y
-    return this
+  multiply(x = 0, y = x): this {
+    return this.set(this._x * x, this._y * y)
   }
 
-  divide(vec: VectorLike): this {
-    this.x /= vec.x
-    this.y /= vec.y
-    return this
+  divide(x = 0, y = x): this {
+    return this.set(this._x / x, this._y / y)
   }
 
-  dot(vec: VectorLike): number {
-    return this.x * vec.x + this.y * vec.y
+  cross(p: Vector2Like): number {
+    return this._x * p.y - this._y * p.x
   }
 
-  cross(vec: VectorLike): number {
-    return this.x * vec.y - this.y * vec.x
+  dot(p: Vector2Like): number {
+    return this._x * p.x + this._y * p.y
   }
 
-  rotate(a: number, target: VectorLike = { x: 0, y: 0 }): this {
-    const rotation = (-a / 180) * Math.PI
-    const x = this.x - target.x
-    const y = -(this.y - target.y)
-    const sin = Math.sin(rotation)
-    const cos = Math.cos(rotation)
-    this.set(
-      target.x + (x * cos - y * sin),
-      target.y - (x * sin + y * cos),
+  rotate(rad: number, origin: Vector2Like = { x: 0, y: 0 }): this {
+    const { x, y } = this
+    const cos = Math.cos(rad)
+    const sin = Math.sin(rad)
+    return this.set(
+      (x - origin.x) * cos - (y - origin.y) * sin + origin.x,
+      (x - origin.x) * sin + (y - origin.y) * cos + origin.y,
     )
+  }
+
+  getLength(): number {
+    const { x, y } = this
+    return Math.sqrt(x * x + y * y)
+  }
+
+  getAngle(): number {
+    return Math.atan2(-this.x, -this.y) + Math.PI
+  }
+
+  distanceTo(p: Vector2Like): number {
+    return Math.hypot(p.x - this.x, p.y - this.y)
+  }
+
+  normalize(): this {
+    const scalar = 1 / (this.getLength() || 1)
+    this.set(this.x * scalar, this.y * scalar)
     return this
   }
 
-  distanceTo(vec: VectorLike): number {
-    return Math.sqrt(this.distanceToSquared(vec))
+  copyFrom(p: Vector2Like): this {
+    if (this._x !== p.x || this._y !== p.y) {
+      this._x = p.x
+      this._y = p.y
+      this._onUpdate?.(this)
+    }
+    return this
   }
 
-  distanceToSquared(vec: VectorLike): number {
-    const dx = this.x - vec.x
-    const dy = this.y - vec.y
-    return dx * dx + dy * dy
+  copyTo<T extends Vector2>(p: T): T {
+    p.set(this._x, this._y)
+    return p
+  }
+
+  equals(vec: Vector2Like): boolean {
+    return this._x === vec.x && this._y === vec.y
+  }
+
+  get array(): [number, number] {
+    return [this.x, this.y]
+  }
+
+  finite(): this {
+    return this.set(
+      Number.isFinite(this._x) ? this._x : 0,
+      Number.isFinite(this._y) ? this._y : 0,
+    )
   }
 
   lengthSquared(): number {
-    return this.x * this.x + this.y * this.y
+    return this._x * this._x + this._y * this._y
   }
 
   length(): number {
     return Math.sqrt(this.lengthSquared())
   }
 
-  scale(sx: number, sy = sx, target: VectorLike = { x: 0, y: 0 }): this {
-    const x = sx < 0 ? target.x - this.x + target.x : this.x
-    const y = sy < 0 ? target.y - this.y + target.y : this.y
-    this.x = x * Math.abs(sx)
-    this.y = y * Math.abs(sy)
-    return this
+  scale(sx: number, sy = sx, origin: Vector2Like = { x: 0, y: 0 }): this {
+    const x = sx < 0 ? origin.x - this._x + origin.x : this._x
+    const y = sy < 0 ? origin.y - this._y + origin.y : this._y
+    return this.set(
+      x * Math.abs(sx),
+      y * Math.abs(sy),
+    )
   }
 
-  skew(ax: number, ay = 0, target: VectorLike = { x: 0, y: 0 }): this {
-    const dx = this.x - target.x
-    const dy = this.y - target.y
-    this.x = target.x + (dx + Math.tan(ax) * dy)
-    this.y = target.y + (dy + Math.tan(ay) * dx)
-    return this
+  skew(ax: number, ay = 0, origin: Vector2Like = { x: 0, y: 0 }): this {
+    const dx = this._x - origin.x
+    const dy = this._y - origin.y
+    return this.set(
+      origin.x + (dx + Math.tan(ax) * dy),
+      origin.y + (dy + Math.tan(ay) * dx),
+    )
   }
 
-  min(...vecs: VectorLike[]): this {
-    this.x = Math.min(this.x, ...vecs.map(v => v.x))
-    this.y = Math.min(this.y, ...vecs.map(v => v.y))
-    return this
+  clampMin(...pList: Vector2Like[]): this {
+    return this.set(
+      Math.min(this._x, ...pList.map(v => v.x)),
+      Math.min(this._y, ...pList.map(v => v.y)),
+    )
   }
 
-  max(...vecs: VectorLike[]): this {
-    this.x = Math.max(this.x, ...vecs.map(v => v.x))
-    this.y = Math.max(this.y, ...vecs.map(v => v.y))
-    return this
+  clampMax(...pList: Vector2Like[]): this {
+    return this.set(
+      Math.max(this.x, ...pList.map(v => v.x)),
+      Math.max(this.y, ...pList.map(v => v.y)),
+    )
   }
 
-  normalize(): this {
-    return this.scale(1 / (this.length() || 1))
+  clone(_onUpdate?: (vec: Vector2) => void): Vector2 {
+    return new Vector2(this._x, this._y, _onUpdate ?? this._onUpdate)
   }
 
-  addVectors(a: VectorLike, b: VectorLike): this {
-    this.x = a.x + b.x
-    this.y = a.y + b.y
-    return this
+  toJSON(): Vector2Like {
+    return {
+      x: this._x,
+      y: this._y,
+    }
   }
 
-  subVectors(a: VectorLike, b: VectorLike): this {
-    this.x = a.x - b.x
-    this.y = a.y - b.y
-    return this
-  }
-
-  multiplyVectors(a: VectorLike, b: VectorLike): this {
-    this.x = a.x * b.x
-    this.y = a.y * b.y
-    return this
-  }
-
-  divideVectors(a: VectorLike, b: VectorLike): this {
-    this.x = a.x / b.x
-    this.y = a.y / b.y
-    return this
-  }
-
-  lerpVectors(v1: VectorLike, v2: VectorLike, alpha: number): this {
-    this.x = v1.x + (v2.x - v1.x) * alpha
-    this.y = v1.y + (v2.y - v1.y) * alpha
-    return this
-  }
-
-  equals(vec: VectorLike): boolean {
-    return this.x === vec.x && this.y === vec.y
-  }
-
-  applyMatrix3(m: Matrix3): this {
-    const x = this.x
-    const y = this.y
-    const e = m.elements
-    this.x = e[0] * x + e[3] * y + e[6]
-    this.y = e[1] * x + e[4] * y + e[7]
-    return this
-  }
-
-  copy(vec: VectorLike): this {
-    this.x = vec.x
-    this.y = vec.y
-    return this
-  }
-
-  clone(): Vector2 {
-    return new Vector2(this.x, this.y)
+  destroy(): void {
+    this._onUpdate = undefined
   }
 }

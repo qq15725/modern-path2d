@@ -20,10 +20,10 @@ export function svgPathCommandsAddToPath2D(commands: Path2DCommand[], path: Path
         current.add(cmd)
       }
       else {
-        current.copy(cmd)
+        current.copyFrom(cmd)
       }
       path.moveTo(current.x, current.y)
-      control.copy(current)
+      control.copyFrom(current)
     }
     else if (cmd.type === 'h' || cmd.type === 'H') {
       if (cmd.type === 'h') {
@@ -33,7 +33,7 @@ export function svgPathCommandsAddToPath2D(commands: Path2DCommand[], path: Path
         current.x = cmd.x
       }
       path.lineTo(current.x, current.y)
-      control.copy(current)
+      control.copyFrom(current)
     }
     else if (cmd.type === 'v' || cmd.type === 'V') {
       if (cmd.type === 'v') {
@@ -43,17 +43,17 @@ export function svgPathCommandsAddToPath2D(commands: Path2DCommand[], path: Path
         current.y = cmd.y
       }
       path.lineTo(current.x, current.y)
-      control.copy(current)
+      control.copyFrom(current)
     }
     else if (cmd.type === 'l' || cmd.type === 'L') {
       if (cmd.type === 'l') {
         current.add(cmd)
       }
       else {
-        current.copy(cmd)
+        current.copyFrom(cmd)
       }
       path.lineTo(current.x, current.y)
-      control.copy(current)
+      control.copyFrom(current)
     }
     else if (cmd.type === 'c' || cmd.type === 'C') {
       if (cmd.type === 'c') {
@@ -80,7 +80,7 @@ export function svgPathCommandsAddToPath2D(commands: Path2DCommand[], path: Path
         )
         control.x = cmd.x2
         control.y = cmd.y2
-        current.copy(cmd)
+        current.copyFrom(cmd)
       }
     }
     else if (cmd.type === 's' || cmd.type === 'S') {
@@ -108,7 +108,7 @@ export function svgPathCommandsAddToPath2D(commands: Path2DCommand[], path: Path
         )
         control.x = cmd.x2
         control.y = cmd.y2
-        current.copy(cmd)
+        current.copyFrom(cmd)
       }
     }
     else if (cmd.type === 'q' || cmd.type === 'Q') {
@@ -132,7 +132,7 @@ export function svgPathCommandsAddToPath2D(commands: Path2DCommand[], path: Path
         )
         control.x = cmd.x1
         control.y = cmd.y1
-        current.copy(cmd)
+        current.copyFrom(cmd)
       }
     }
     else if (cmd.type === 't' || cmd.type === 'T') {
@@ -156,7 +156,7 @@ export function svgPathCommandsAddToPath2D(commands: Path2DCommand[], path: Path
           cmd.x,
           cmd.y,
         )
-        current.copy(cmd)
+        current.copyFrom(cmd)
       }
     }
     else if (cmd.type === 'a' || cmd.type === 'A') {
@@ -169,9 +169,9 @@ export function svgPathCommandsAddToPath2D(commands: Path2DCommand[], path: Path
       else {
         if (current.equals(cmd))
           continue
-        current.copy(cmd)
+        current.copyFrom(cmd)
       }
-      control.copy(current)
+      control.copyFrom(current)
       parseArcCommand(
         path,
         cmd.rx,
@@ -185,7 +185,7 @@ export function svgPathCommandsAddToPath2D(commands: Path2DCommand[], path: Path
     }
     else if (cmd.type === 'z' || cmd.type === 'Z') {
       if (path.startPoint) {
-        current.copy(path.startPoint)
+        current.copyFrom(path.startPoint)
       }
       path.closePath()
     }

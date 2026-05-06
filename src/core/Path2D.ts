@@ -1,4 +1,4 @@
-import type { VectorLike } from '../math'
+import type { Vector2Like } from '../math'
 import type { Path2DCommand, Path2DData, Path2DStyle } from '../types'
 import type {
   FillTriangulatedResult,
@@ -170,21 +170,21 @@ export class Path2D<T = any> extends CompositeCurve<CurvePath> {
     return this
   }
 
-  scale(sx: number, sy = sx, target: VectorLike = { x: 0, y: 0 }): this {
+  scale(sx: number, sy = sx, target: Vector2Like = { x: 0, y: 0 }): this {
     this.getControlPointRefs().forEach((point) => {
       point.scale(sx, sy, target)
     })
     return this
   }
 
-  skew(ax: number, ay = 0, target: VectorLike = { x: 0, y: 0 }): this {
+  skew(ax: number, ay = 0, target: Vector2Like = { x: 0, y: 0 }): this {
     this.getControlPointRefs().forEach((point) => {
       point.skew(ax, ay, target)
     })
     return this
   }
 
-  rotate(a: number, target: VectorLike = { x: 0, y: 0 }): this {
+  rotate(a: number, target: Vector2Like = { x: 0, y: 0 }): this {
     this.getControlPointRefs().forEach((point) => {
       point.rotate(a, target)
     })
@@ -249,8 +249,8 @@ export class Path2D<T = any> extends CompositeCurve<CurvePath> {
           pointsB[1] ?? pointsB[0],
         )
         if (point) {
-          pointsA[pointsA.length - 1].copy(point)
-          pointsB[0].copy(point)
+          pointsA[pointsA.length - 1].copyFrom(point)
+          pointsB[0].copyFrom(point)
         }
       })
     })
@@ -282,8 +282,8 @@ export class Path2D<T = any> extends CompositeCurve<CurvePath> {
               point.clone().add({ x: -halfStrokeWidth, y: -halfStrokeWidth }),
             )
           }
-          min.min(...points)
-          max.max(...points)
+          min.clampMin(...points)
+          max.clampMax(...points)
         }
       }
     })
@@ -434,8 +434,8 @@ export class Path2D<T = any> extends CompositeCurve<CurvePath> {
     return `<path d="${this.toData()}" style="${cssText}"></path>`
   }
 
-  override copy(source: Path2D): this {
-    super.copy(source)
+  override copyFrom(source: Path2D): this {
+    super.copyFrom(source)
     this.currentCurve = source.currentCurve.clone()
     this.style = { ...source.style }
     return this

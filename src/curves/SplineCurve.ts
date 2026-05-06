@@ -29,8 +29,8 @@ export class SplineCurve extends Curve {
     return this.points
   }
 
-  override copy(source: SplineCurve): this {
-    super.copy(source)
+  override copyFrom(source: SplineCurve): this {
+    super.copyFrom(source)
     this.points = []
     for (let i = 0, len = source.points.length; i < len; i++) {
       this.points.push(source.points[i].clone())

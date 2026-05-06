@@ -1,10 +1,10 @@
 import type { Path2DCommand } from '../types'
 import { Curve } from '../core/Curve'
-import { Matrix3, Vector2 } from '../math'
+import { Transform2D, Vector2 } from '../math'
 
-const tempTransform0 = new Matrix3()
-const tempTransform1 = new Matrix3()
-const tempTransform2 = new Matrix3()
+const tempTransform0 = new Transform2D()
+const tempTransform1 = new Transform2D()
+const tempTransform2 = new Transform2D()
 const tempV2 = new Vector2()
 
 export class RoundCurve extends Curve {
@@ -110,16 +110,16 @@ export class RoundCurve extends Curve {
     return this
   }
 
-  override applyTransform(matrix: Matrix3): this {
+  override applyTransform(transform: Transform2D): this {
     tempV2.set(this.cx, this.cy)
-    tempV2.applyMatrix3(matrix)
+    transform.apply(tempV2, tempV2)
     this.cx = tempV2.x
     this.cy = tempV2.y
-    if (isTransformSkewed(matrix)) {
-      transfEllipseGeneric(this, matrix)
+    if (isTransformSkewed(transform)) {
+      transfEllipseGeneric(this, transform)
     }
     else {
-      transfEllipseNoSkew(this, matrix)
+      transfEllipseNoSkew(this, transform)
     }
     return this
   }
@@ -279,8 +279,8 @@ export class RoundCurve extends Curve {
     return this._getAdaptiveVerticesByArc(output)
   }
 
-  override copy(source: RoundCurve): this {
-    super.copy(source)
+  override copyFrom(source: RoundCurve): this {
+    super.copyFrom(source)
     this.cx = source.cx
     this.cy = source.cy
     this.rx = source.rx
@@ -295,7 +295,7 @@ export class RoundCurve extends Curve {
   }
 }
 
-function transfEllipseGeneric(curve: RoundCurve, m: Matrix3): void {
+function transfEllipseGeneric(curve: RoundCurve, m: Transform2D): void {
   // For math description see:
   // https://math.stackexchange.com/questions/4544164
   const a = curve.rx
@@ -304,26 +304,19 @@ function transfEllipseGeneric(curve: RoundCurve, m: Matrix3): void {
   const sinTheta = Math.sin(curve.rotate)
   const v1 = new Vector2(a * cosTheta, a * sinTheta)
   const v2 = new Vector2(-b * sinTheta, b * cosTheta)
-  const f1 = v1.applyMatrix3(m)
-  const f2 = v2.applyMatrix3(m)
-  const mF = tempTransform0.set(
-    f1.x,
-    f2.x,
-    0,
-    f1.y,
-    f2.y,
-    0,
-    0,
-    0,
-    1,
-  )
+  const f1x = m.a * v1.x + m.c * v1.y
+  const f1y = m.b * v1.x + m.d * v1.y
+  const f2x = m.a * v2.x + m.c * v2.y
+  const f2y = m.b * v2.x + m.d * v2.y
+  const mF = tempTransform0.set(f1x, f1y, f2x, f2y, 0, 0)
 
-  const mFInv = tempTransform1.copy(mF).invert()
-  const mFInvT = tempTransform2.copy(mFInv).transpose()
-  const mQ = mFInvT.multiply(mFInv)
-  const mQe = mQ.elements
+  const mFInv = tempTransform1.copyFrom(mF).affineInvert()
+  const { a: ia, b: ib, c: ic, d: id } = mFInv
+  const qA = ia * ia + ib * ib
+  const qB = ic * ia + id * ib
+  const qD = ic * ic + id * id
 
-  const ed = eigenDecomposition(mQe[0], mQe[1], mQe[4])
+  const ed = eigenDecomposition(qA, qB, qD)
   const rt1sqrt = Math.sqrt(ed.rt1)
   const rt2sqrt = Math.sqrt(ed.rt2)
 
@@ -338,19 +331,15 @@ function transfEllipseGeneric(curve: RoundCurve, m: Matrix3): void {
   // would converge to a sinle value effectively removing the whole curve
   if (!isFullEllipse) {
     const mDsqrt = tempTransform1.set(
-      rt1sqrt, 0, 0,
-      0, rt2sqrt, 0,
-      0, 0, 1,
+      rt1sqrt, 0, 0, rt2sqrt, 0, 0,
     )
 
     const mRT = tempTransform2.set(
-      ed.cs, ed.sn, 0,
-      -ed.sn, ed.cs, 0,
-      0, 0, 1,
+      ed.cs, ed.sn, -ed.sn, ed.cs, 0, 0,
     )
-    const mDRF = mDsqrt.multiply(mRT).multiply(mF)
+    const mDRF = mDsqrt.append(mRT).append(mF)
     const transformAngle = (phi: number): number => {
-      const { x: cosR, y: sinR } = new Vector2(Math.cos(phi), Math.sin(phi)).applyMatrix3(mDRF)
+      const { x: cosR, y: sinR } = mDRF.apply({ x: Math.cos(phi), y: Math.sin(phi) })
       return Math.atan2(sinR, cosR)
     }
     curve.startAngle = transformAngle(curve.startAngle)
@@ -361,13 +350,12 @@ function transfEllipseGeneric(curve: RoundCurve, m: Matrix3): void {
   }
 }
 
-function transfEllipseNoSkew(curve: RoundCurve, m: Matrix3): void {
+function transfEllipseNoSkew(curve: RoundCurve, m: Transform2D): void {
   // Faster shortcut if no skew is applied
   // (e.g, a euclidean transform of a group containing the ellipse)
-  const sx = getTransformScaleX(m)
-  const sy = getTransformScaleY(m)
-  curve.rx *= sx
-  curve.ry *= sy
+  const { scale } = m.decompose()
+  curve.rx *= scale.x
+  curve.ry *= scale.y
   // Extract rotate angle from the matrix of form:
   //
   //  | cosθ sx   -sinθ sy |
@@ -376,9 +364,9 @@ function transfEllipseNoSkew(curve: RoundCurve, m: Matrix3): void {
   // Remembering that tanθ = sinθ / cosθ; and that
   // `sx`, `sy`, or both might be zero.
   const theta
-    = sx > Number.EPSILON
-      ? Math.atan2(m.elements[1], m.elements[0])
-      : Math.atan2(-m.elements[3], m.elements[4])
+    = scale.x > Number.EPSILON
+      ? Math.atan2(m.b, m.a)
+      : Math.atan2(-m.c, m.d)
   curve.rotate += theta
   if (isTransformFlipped(m)) {
     curve.startAngle *= -1
@@ -387,30 +375,17 @@ function transfEllipseNoSkew(curve: RoundCurve, m: Matrix3): void {
   }
 }
 
-function isTransformFlipped(m: Matrix3): boolean {
-  const te = m.elements
-  return te[0] * te[4] - te[1] * te[3] < 0
+function isTransformFlipped(m: Transform2D): boolean {
+  return m.a * m.d - m.c * m.b < 0
 }
 
-function isTransformSkewed(m: Matrix3): boolean {
-  const te = m.elements
-  const basisDot = te[0] * te[3] + te[1] * te[4]
+function isTransformSkewed(m: Transform2D): boolean {
+  const basisDot = m.a * m.c + m.b * m.d
   // Shortcut for trivial rotations and transformations
   if (basisDot === 0)
     return false
-  const sx = getTransformScaleX(m)
-  const sy = getTransformScaleY(m)
-  return Math.abs(basisDot / (sx * sy)) > Number.EPSILON
-}
-
-function getTransformScaleX(m: Matrix3): number {
-  const te = m.elements
-  return Math.sqrt(te[0] * te[0] + te[1] * te[1])
-}
-
-function getTransformScaleY(m: Matrix3): number {
-  const te = m.elements
-  return Math.sqrt(te[3] * te[3] + te[4] * te[4])
+  const { scale } = m.decompose()
+  return Math.abs(basisDot / (scale.x * scale.y)) > Number.EPSILON
 }
 
 // Calculates the eigensystem of a real symmetric 2x2 matrix

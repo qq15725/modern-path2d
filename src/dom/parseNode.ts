@@ -1,5 +1,5 @@
 import type { Path2D } from '../core'
-import { Matrix3 } from '../math'
+import { Transform2D } from '../math'
 import { getNodeTransform } from './getNodeTransform'
 import { parseCircleNode } from './parseCircleNode'
 import { parseCSSStylesheet } from './parseCSSStylesheet'
@@ -90,8 +90,8 @@ export function parseNode(
     return paths
   }
 
-  const currentTransform = new Matrix3()
-  const transformStack: Matrix3[] = []
+  const currentTransform = new Transform2D()
+  const transformStack: Transform2D[] = []
   const transform = getNodeTransform(node, currentTransform, transformStack)
   if (path) {
     path.applyTransform(currentTransform)
@@ -110,7 +110,7 @@ export function parseNode(
   if (transform) {
     transformStack.pop()
     if (transformStack.length > 0) {
-      currentTransform.copy(transformStack[transformStack.length - 1])
+      currentTransform.copyFrom(transformStack[transformStack.length - 1])
     }
     else {
       currentTransform.identity()

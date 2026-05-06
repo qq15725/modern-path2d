@@ -1,4 +1,4 @@
-import type { Matrix3 } from '../math'
+import type { Transform2D } from '../math'
 import type { Path2DCommand } from '../types'
 import type {
   FillTriangulateOptions,
@@ -144,7 +144,7 @@ export class CompositeCurve<T extends Curve = Curve> extends Curve {
     }
   }
 
-  override applyTransform(transform: Matrix3 | ((point: Vector2) => void)): this {
+  override applyTransform(transform: Transform2D | ((point: Vector2) => void)): this {
     this.curves.forEach(curve => curve.applyTransform(transform))
     return this
   }
@@ -172,8 +172,8 @@ export class CompositeCurve<T extends Curve = Curve> extends Curve {
     return this
   }
 
-  override copy(source: CompositeCurve<T>): this {
-    super.copy(source)
+  override copyFrom(source: CompositeCurve<T>): this {
+    super.copyFrom(source)
     this.curves = source.curves.map(curve => curve.clone())
     return this
   }

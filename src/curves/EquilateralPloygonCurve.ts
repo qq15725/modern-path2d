@@ -43,8 +43,8 @@ export class EquilateralPloygonCurve extends PloygonCurve {
     return this
   }
 
-  override copy(source: EquilateralPloygonCurve): this {
-    super.copy(source)
+  override copyFrom(source: EquilateralPloygonCurve): this {
+    super.copyFrom(source)
     this.cx = source.cx
     this.cy = source.cy
     this.radius = source.radius

@@ -1,4 +1,4 @@
-import type { Matrix3, VectorLike } from '../math'
+import type { Transform2D, Vector2Like } from '../math'
 import type { Path2DCommand, Path2DData } from '../types'
 import type {
   FillTriangulatedResult,
@@ -28,14 +28,14 @@ export abstract class Curve {
     return []
   }
 
-  applyTransform(transform: Matrix3 | ((point: Vector2) => void)): this {
+  applyTransform(transform: Transform2D | ((point: Vector2) => void)): this {
     const isFunction = typeof transform === 'function'
     this.getControlPointRefs().forEach((p) => {
       if (isFunction) {
         transform(p)
       }
       else {
-        p.applyMatrix3(transform)
+        transform.apply(p, p)
       }
     })
     return this
@@ -172,7 +172,7 @@ export abstract class Curve {
     const delta = 0.0001
     const t1 = Math.max(0, t - delta)
     const t2 = Math.min(1, t + delta)
-    return output.copy(this.getPoint(t2).sub(this.getPoint(t1)).normalize())
+    return output.copyFrom(this.getPoint(t2).sub(this.getPoint(t1)).normalize())
   }
 
   getTangentAt(u: number, output?: Vector2): Vector2 {
@@ -188,7 +188,7 @@ export abstract class Curve {
     return this.getNormal(this.getUToTMapping(u), output)
   }
 
-  getTForPoint(target: VectorLike, epsilon = 0.001): number {
+  getTForPoint(target: Vector2Like, epsilon = 0.001): number {
     let low = 0
     let high = 1
     let mid = (low + high) / 2
@@ -213,8 +213,8 @@ export abstract class Curve {
     const potins = this.getPoints()
     for (let i = 0, len = potins.length; i < len; i++) {
       const p = potins[i]
-      min.min(p)
-      max.max(p)
+      min.clampMin(p)
+      max.clampMax(p)
     }
     return { min: min.finite(), max: max.finite() }
   }
@@ -275,12 +275,12 @@ export abstract class Curve {
     return this
   }
 
-  copy(source: Curve): this {
+  copyFrom(source: Curve): this {
     this.arcLengthDivision = source.arcLengthDivision
     return this
   }
 
   clone(): this {
-    return new (this.constructor as any)().copy(this)
+    return new (this.constructor as any)().copyFrom(this)
   }
 }

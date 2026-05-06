@@ -105,12 +105,12 @@ export class CubicBezierCurve extends Curve {
     return this
   }
 
-  override copy(source: CubicBezierCurve): this {
-    super.copy(source)
-    this.p1.copy(source.p1)
-    this.cp1.copy(source.cp1)
-    this.cp2.copy(source.cp2)
-    this.p2.copy(source.p2)
+  override copyFrom(source: CubicBezierCurve): this {
+    super.copyFrom(source)
+    this.p1.copyFrom(source.p1)
+    this.cp1.copyFrom(source.cp1)
+    this.cp2.copyFrom(source.cp2)
+    this.p2.copyFrom(source.p2)
     return this
   }
 }

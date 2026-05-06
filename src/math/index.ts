@@ -1,3 +1,4 @@
 export * from './BoundingBox'
-export * from './Matrix3'
+export * from './Transform2D'
+export * from './utils'
 export * from './Vector2'
