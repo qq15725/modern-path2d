@@ -1,3 +1,14 @@
+## [1.5.2](https://github.com/qq15725/modern-path2d/compare/v1.5.1...v1.5.2) (2026-05-06)
+
+
+### Bug Fixes
+
+* export ([d0dee42](https://github.com/qq15725/modern-path2d/commit/d0dee427642275a39c003d4ccceaa4cf234f184d))
+
+
+### Features
+
+* parseCssFunctions ([013ce8a](https://github.com/qq15725/modern-path2d/commit/013ce8a01e18ce06c4fe99a8efaae1843f99d10b))
 ## [1.5.1](https://github.com/qq15725/modern-path2d/compare/v1.5.0...v1.5.1) (2026-05-06)
 # [1.5.0](https://github.com/qq15725/modern-path2d/compare/v1.4.16...v1.5.0) (2026-05-06)
 
