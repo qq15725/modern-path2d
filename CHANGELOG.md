@@ -1,3 +1,4 @@
+## [1.5.1](https://github.com/qq15725/modern-path2d/compare/v1.5.0...v1.5.1) (2026-05-06)
 # [1.5.0](https://github.com/qq15725/modern-path2d/compare/v1.4.16...v1.5.0) (2026-05-06)
 
 
