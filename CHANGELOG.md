@@ -1,3 +1,9 @@
+## [1.5.4](https://github.com/qq15725/modern-path2d/compare/v1.5.3...v1.5.4) (2026-05-07)
+
+
+### Bug Fixes
+
+* Path2D.rotate ([afb53f6](https://github.com/qq15725/modern-path2d/commit/afb53f6de3ffdbe08f2f937569978e59c7d5359e))
 ## [1.5.3](https://github.com/qq15725/modern-path2d/compare/v1.5.2...v1.5.3) (2026-05-07)
 
 
