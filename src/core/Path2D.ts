@@ -184,8 +184,7 @@ export class Path2D<T = any> extends CompositeCurve<CurvePath> {
     return this
   }
 
-  rotate(angle: number, target: Vector2Like = { x: 0, y: 0 }): this {
-    const rad = (-angle / 180) * Math.PI
+  rotate(rad: number, target: Vector2Like = { x: 0, y: 0 }): this {
     this.getControlPointRefs().forEach((point) => {
       point.rotate(rad, target)
     })

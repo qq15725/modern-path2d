@@ -96,7 +96,7 @@ async function testJSONFixtures(): Promise<void> {
       .bold(0.5)
       .scale(2)
       .skew(-0.24)
-      .rotate(90)
+      .rotate(Math.PI / 2)
     const canvas = new Path2DSet([path]).toCanvas()
     canvas.dataset.file = key
     document.body.append(canvas)
@@ -124,7 +124,7 @@ function testPath(): void {
     .bold(0.2 * 100 * 0.05)
     .scale(2)
     .skew(-0.24)
-    .rotate(90)
+    .rotate(Math.PI / 2)
 
   document.body.append(new Path2DSet([path]).toTriangulatedSvg(path.fillTriangulate()))
   document.body.append(new Path2DSet([path]).toTriangulatedSvg(path.strokeTriangulate()))
