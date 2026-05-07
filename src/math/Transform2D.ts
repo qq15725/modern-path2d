@@ -338,7 +338,7 @@ export class Transform2D {
       && t2d.tx === this.tx && t2d.ty === this.ty
   }
 
-  appendCssTransform(cssTransform: string, ctx: { width?: number, height?: number } = {}): this {
+  prependCssTransform(cssTransform: string, ctx: { width?: number, height?: number } = {}): this {
     const { width = 1, height = 1 } = ctx
 
     const temp = new Transform2D()
@@ -348,9 +348,6 @@ export class Transform2D {
       .forEach(({ name, args }) => {
         const values = args.map(arg => arg.normalizedIntValue)
         switch (name) {
-          case 'translate':
-            temp.translate((values[0]) * width, (values[1] ?? values[0]) * height)
-            break
           case 'translateX':
             temp.translateX(values[0] * width)
             break
@@ -360,6 +357,12 @@ export class Transform2D {
           case 'translateZ':
             temp.translateZ(values[0])
             break
+          case 'translate':
+            temp.translate(
+              values[0] * width,
+              (values[1] ?? values[0]) * height,
+            )
+            break
           case 'translate3d':
             temp.translate3d(
               values[0] * width,
@@ -367,20 +370,24 @@ export class Transform2D {
               values[2] ?? values[1] ?? values[0],
             )
             break
-          case 'scale':
-            temp.scale(values[0], values[1] ?? values[0])
-            break
           case 'scaleX':
             temp.scaleX(values[0])
             break
           case 'scaleY':
             temp.scaleY(values[0])
             break
-          case 'scale3d':
-            temp.scale3d(values[0], values[1] ?? values[0], values[2] ?? values[1] ?? values[0])
+          case 'scale':
+            temp.scale(
+              values[0],
+              values[1] ?? values[0],
+            )
             break
-          case 'rotate':
-            temp.rotate(values[0] * PI_2)
+          case 'scale3d':
+            temp.scale3d(
+              values[0],
+              values[1] ?? values[0],
+              values[2] ?? values[1] ?? values[0],
+            )
             break
           case 'rotateX':
             temp.rotateX(values[0] * PI_2)
@@ -391,6 +398,9 @@ export class Transform2D {
           case 'rotateZ':
             temp.rotateZ(values[0] * PI_2)
             break
+          case 'rotate':
+            temp.rotate(values[0] * PI_2)
+            break
           case 'rotate3d':
             temp.rotate3d(
               values[0] * PI_2,
@@ -399,14 +409,17 @@ export class Transform2D {
               (values[3] ?? values[2] ?? values[1] ?? values[0]) * PI_2,
             )
             break
-          case 'skew':
-            temp.skew(values[0], values[0] ?? values[1])
-            break
           case 'skewX':
-            temp.skewX(values[0])
+            temp.skewX(values[0] * PI_2)
             break
           case 'skewY':
-            temp.skewY(values[0])
+            temp.skewY(values[0] * PI_2)
+            break
+          case 'skew':
+            temp.skew(
+              values[0] * PI_2,
+              (values[0] ?? values[1]) * PI_2,
+            )
             break
           case 'matrix':
             temp.set(values[0], values[1], values[2], values[3], values[4], values[5])

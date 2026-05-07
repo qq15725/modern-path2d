@@ -25,7 +25,7 @@ function parseNodeTransform(node: SVGElement): Transform2D {
   }
 
   if (node.hasAttribute('transform')) {
-    transform.appendCssTransform(node.getAttribute('transform')!)
+    transform.prependCssTransform(node.getAttribute('transform')!)
   }
 
   return transform
