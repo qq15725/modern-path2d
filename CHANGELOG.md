@@ -1,3 +1,9 @@
+## [1.5.6](https://github.com/qq15725/modern-path2d/compare/v1.5.5...v1.5.6) (2026-05-07)
+
+
+### Bug Fixes
+
+* prependCssTransform ([557dd43](https://github.com/qq15725/modern-path2d/commit/557dd43f15543eb5a4114848a9f51ee13215a7c6))
 ## [1.5.5](https://github.com/qq15725/modern-path2d/compare/v1.5.4...v1.5.5) (2026-05-07)
 
 
