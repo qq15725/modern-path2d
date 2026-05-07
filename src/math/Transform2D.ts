@@ -111,24 +111,37 @@ export class Transform2D {
     return this
   }
 
-  protected _skewX?: number
-  protected _skewY?: number
-  protected _skewXTan = 1
-  protected _skewYTan = 1
+  skewX(x: number): this {
+    const tan = Math.tan(x)
+    this.a += tan * this.b
+    this.c += tan * this.d
+    this.tx += tan * this.ty
+    return this
+  }
 
-  skewX(x: number): this { return this.skew(x, 0) }
-  skewY(y: number): this { return this.skew(0, y) }
+  skewY(y: number): this {
+    const tan = Math.tan(y)
+    this.b += tan * this.a
+    this.d += tan * this.c
+    this.ty += tan * this.tx
+    return this
+  }
+
   skew(x: number, y: number): this {
-    if (x !== this._skewX) {
-      this._skewX = x
-      this._skewXTan = Math.tan(x)
-    }
-    if (y !== this._skewY) {
-      this._skewY = y
-      this._skewYTan = Math.tan(y)
-    }
-    this.b *= this._skewXTan
-    this.c *= this._skewYTan
+    const tanX = Math.tan(x)
+    const tanY = Math.tan(y)
+    const a1 = this.a
+    const b1 = this.b
+    const c1 = this.c
+    const d1 = this.d
+    const tx1 = this.tx
+    const ty1 = this.ty
+    this.a = a1 + tanX * b1
+    this.b = tanY * a1 + b1
+    this.c = c1 + tanX * d1
+    this.d = tanY * c1 + d1
+    this.tx = tx1 + tanX * ty1
+    this.ty = tanY * tx1 + ty1
     return this
   }
 
@@ -328,7 +341,7 @@ export class Transform2D {
   appendCssTransform(cssTransform: string, ctx: { width?: number, height?: number } = {}): this {
     const { width = 1, height = 1 } = ctx
 
-    const output = new Transform2D()
+    const temp = new Transform2D()
 
     parseCssFunctions(cssTransform, { width, height })
       .reverse()
@@ -336,50 +349,50 @@ export class Transform2D {
         const values = args.map(arg => arg.normalizedIntValue)
         switch (name) {
           case 'translate':
-            output.translate((values[0]) * width, (values[1] ?? values[0]) * height)
+            temp.translate((values[0]) * width, (values[1] ?? values[0]) * height)
             break
           case 'translateX':
-            output.translateX(values[0] * width)
+            temp.translateX(values[0] * width)
             break
           case 'translateY':
-            output.translateY(values[0] * height)
+            temp.translateY(values[0] * height)
             break
           case 'translateZ':
-            output.translateZ(values[0])
+            temp.translateZ(values[0])
             break
           case 'translate3d':
-            output.translate3d(
+            temp.translate3d(
               values[0] * width,
               (values[1] ?? values[0]) * height,
               values[2] ?? values[1] ?? values[0],
             )
             break
           case 'scale':
-            output.scale(values[0], values[1] ?? values[0])
+            temp.scale(values[0], values[1] ?? values[0])
             break
           case 'scaleX':
-            output.scaleX(values[0])
+            temp.scaleX(values[0])
             break
           case 'scaleY':
-            output.scaleY(values[0])
+            temp.scaleY(values[0])
             break
           case 'scale3d':
-            output.scale3d(values[0], values[1] ?? values[0], values[2] ?? values[1] ?? values[0])
+            temp.scale3d(values[0], values[1] ?? values[0], values[2] ?? values[1] ?? values[0])
             break
           case 'rotate':
-            output.rotate(values[0] * PI_2)
+            temp.rotate(values[0] * PI_2)
             break
           case 'rotateX':
-            output.rotateX(values[0] * PI_2)
+            temp.rotateX(values[0] * PI_2)
             break
           case 'rotateY':
-            output.rotateY(values[0] * PI_2)
+            temp.rotateY(values[0] * PI_2)
             break
           case 'rotateZ':
-            output.rotateZ(values[0] * PI_2)
+            temp.rotateZ(values[0] * PI_2)
             break
           case 'rotate3d':
-            output.rotate3d(
+            temp.rotate3d(
               values[0] * PI_2,
               (values[1] ?? values[0]) * PI_2,
               (values[2] ?? values[1] ?? values[0]) * PI_2,
@@ -387,21 +400,21 @@ export class Transform2D {
             )
             break
           case 'skew':
-            output.skew(values[0], values[0] ?? values[1])
+            temp.skew(values[0], values[0] ?? values[1])
             break
           case 'skewX':
-            output.skewX(values[0])
+            temp.skewX(values[0])
             break
           case 'skewY':
-            output.skewY(values[0])
+            temp.skewY(values[0])
             break
           case 'matrix':
-            output.set(values[0], values[1], values[2], values[3], values[4], values[5])
+            temp.set(values[0], values[1], values[2], values[3], values[4], values[5])
             break
         }
       })
 
-    this.prepend(output)
+    this.prepend(temp)
 
     return this
   }
@@ -445,6 +458,17 @@ export class Transform2D {
 
   toString(): string {
     return `[Transform2D a=${this.a} b=${this.b} c=${this.c} d=${this.d} tx=${this.tx} ty=${this.ty}]`
+  }
+
+  toJSON(): { a: number, b: number, c: number, d: number, tx: number, ty: number } {
+    return {
+      a: this.a,
+      b: this.b,
+      c: this.c,
+      d: this.d,
+      tx: this.tx,
+      ty: this.ty,
+    }
   }
 
   destroy(): void {
