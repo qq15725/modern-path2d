@@ -1,3 +1,9 @@
+## [1.5.3](https://github.com/qq15725/modern-path2d/compare/v1.5.2...v1.5.3) (2026-05-07)
+
+
+### Bug Fixes
+
+* Transform2D skewX ([82ce148](https://github.com/qq15725/modern-path2d/commit/82ce148263f82fd2358e89d20547e979a71978a6))
 ## [1.5.2](https://github.com/qq15725/modern-path2d/compare/v1.5.1...v1.5.2) (2026-05-06)
 
 
