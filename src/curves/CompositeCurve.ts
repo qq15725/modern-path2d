@@ -33,22 +33,30 @@ export class CompositeCurve<T extends Curve = Curve> extends Curve {
   override getPoint(t: number, output = new Vector2()): Vector2 {
     const d = t * this.getLength()
     const lengths = this.getLengths()
-    let i = 0
-    while (i < lengths.length) {
-      if (lengths[i] >= d) {
-        const diff = lengths[i] - d
-        const curve = this.curves[i]
-        const length = curve.getLength()
-        return curve.getPointAt(
-          length === 0
-            ? 0
-            : 1 - diff / length,
-          output,
-        )
+    const n = lengths.length
+    if (n === 0)
+      return output
+    // Binary search for the first cumulative length >= d.
+    let lo = 0
+    let hi = n - 1
+    while (lo < hi) {
+      const mid = (lo + hi) >>> 1
+      if (lengths[mid] < d) {
+        lo = mid + 1
       }
-      i++
+      else {
+        hi = mid
+      }
     }
-    return output
+    const diff = lengths[lo] - d
+    const curve = this.curves[lo]
+    const length = curve.getLength()
+    return curve.getPointAt(
+      length === 0
+        ? 0
+        : 1 - diff / length,
+      output,
+    )
   }
 
   override getLengths(): number[] {
