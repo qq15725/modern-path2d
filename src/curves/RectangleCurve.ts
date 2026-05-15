@@ -1,9 +1,9 @@
 import type { FillTriangulateOptions } from '../utils'
 import { Vector2 } from '../math'
 import { LineCurve } from './LineCurve'
-import { PloygonCurve } from './PloygonCurve'
+import { PolygonCurve } from './PolygonCurve'
 
-export class RectangleCurve extends PloygonCurve {
+export class RectangleCurve extends PolygonCurve {
   constructor(
     public x = 0,
     public y = 0,

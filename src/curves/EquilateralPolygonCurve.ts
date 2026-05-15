@@ -1,8 +1,8 @@
 import { Vector2 } from '../math'
 import { LineCurve } from './LineCurve'
-import { PloygonCurve } from './PloygonCurve'
+import { PolygonCurve } from './PolygonCurve'
 
-export class EquilateralPloygonCurve extends PloygonCurve {
+export class EquilateralPolygonCurve extends PolygonCurve {
   constructor(
     public cx = 0,
     public cy = 0,
@@ -43,7 +43,7 @@ export class EquilateralPloygonCurve extends PloygonCurve {
     return this
   }
 
-  override copyFrom(source: EquilateralPloygonCurve): this {
+  override copyFrom(source: EquilateralPolygonCurve): this {
     super.copyFrom(source)
     this.cx = source.cx
     this.cy = source.cy
