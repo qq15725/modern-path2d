@@ -51,6 +51,13 @@ export class CubicBezierCurve extends Curve {
   }
 
   protected _solveQuadratic(a: number, b: number, c: number): number[] {
+    if (Math.abs(a) < 1e-12) {
+      // Linear: b*t + c = 0
+      if (Math.abs(b) < 1e-12)
+        return []
+      const t = -c / b
+      return t >= 0 && t <= 1 ? [t] : []
+    }
     const discriminant = b * b - 4 * a * c
     if (discriminant < 0)
       return []
@@ -62,31 +69,25 @@ export class CubicBezierCurve extends Curve {
 
   override getMinMax(min = Vector2.MAX, max = Vector2.MIN): { min: Vector2, max: Vector2 } {
     const { p1, cp1, cp2, p2 } = this
+    // B'(t) = 3(cp1-p1) + 6(p1-2cp1+cp2)*t + 3(-p1+3cp1-3cp2+p2)*t^2, per axis.
     const dxRoots = this._solveQuadratic(
+      3 * (-p1.x + 3 * cp1.x - 3 * cp2.x + p2.x),
+      6 * (p1.x - 2 * cp1.x + cp2.x),
       3 * (cp1.x - p1.x),
-      6 * (cp2.x - cp1.x),
-      3 * (p2.x - cp2.x),
     )
     const dyRoots = this._solveQuadratic(
+      3 * (-p1.y + 3 * cp1.y - 3 * cp2.y + p2.y),
+      6 * (p1.y - 2 * cp1.y + cp2.y),
       3 * (cp1.y - p1.y),
-      6 * (cp2.y - cp1.y),
-      3 * (p2.y - cp2.y),
     )
     const tValues = [0, 1, ...dxRoots, ...dyRoots]
-    const samplePoints = (tValues: number[], precision: number): void => {
-      for (const t of tValues) {
-        for (let i = 0; i <= precision; i++) {
-          const delta = (i / precision - 0.5)
-          const refinedT = Math.min(1, Math.max(0, t + delta))
-          const point = this.getPoint(refinedT)
-          min.x = Math.min(min.x, point.x)
-          min.y = Math.min(min.y, point.y)
-          max.x = Math.max(max.x, point.x)
-          max.y = Math.max(max.y, point.y)
-        }
-      }
+    for (const t of tValues) {
+      const point = this.getPoint(t)
+      min.x = Math.min(min.x, point.x)
+      min.y = Math.min(min.y, point.y)
+      max.x = Math.max(max.x, point.x)
+      max.y = Math.max(max.y, point.y)
     }
-    samplePoints(tValues, 10)
     return { min: min.finite(), max: max.finite() }
   }
 

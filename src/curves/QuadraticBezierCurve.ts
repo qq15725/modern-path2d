@@ -49,14 +49,26 @@ export class QuadraticBezierCurve extends Curve {
 
   override getMinMax(min = Vector2.MAX, max = Vector2.MIN): { min: Vector2, max: Vector2 } {
     const { p1, cp, p2 } = this
-    const x1 = 0.5 * (p1.x + cp.x)
-    const y1 = 0.5 * (p1.y + cp.y)
-    const x2 = 0.5 * (p1.x + p2.x)
-    const y2 = 0.5 * (p1.y + p2.y)
-    min.x = Math.min(min.x, p1.x, p2.x, x1, x2)
-    min.y = Math.min(min.y, p1.y, p2.y, y1, y2)
-    max.x = Math.max(max.x, p1.x, p2.x, x1, x2)
-    max.y = Math.max(max.y, p1.y, p2.y, y1, y2)
+    // Quadratic Bezier: B'(t)=0 => t = (p1 - cp) / (p1 - 2*cp + p2), per axis.
+    const extrema = (a: number, b: number, c: number): number | null => {
+      const denom = a - 2 * b + c
+      if (Math.abs(denom) < 1e-12)
+        return null
+      const t = (a - b) / denom
+      return t > 0 && t < 1 ? t : null
+    }
+    const tx = extrema(p1.x, cp.x, p2.x)
+    const ty = extrema(p1.y, cp.y, p2.y)
+    const xs = [p1.x, p2.x]
+    const ys = [p1.y, p2.y]
+    if (tx !== null)
+      xs.push(quadraticBezier(tx, p1.x, cp.x, p2.x))
+    if (ty !== null)
+      ys.push(quadraticBezier(ty, p1.y, cp.y, p2.y))
+    min.x = Math.min(min.x, ...xs)
+    min.y = Math.min(min.y, ...ys)
+    max.x = Math.max(max.x, ...xs)
+    max.y = Math.max(max.y, ...ys)
     return { min: min.finite(), max: max.finite() }
   }
 
