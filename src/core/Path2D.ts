@@ -98,13 +98,12 @@ export class Path2D<T = any> extends CompositeCurve<CurvePath> {
   }
 
   moveTo(x: number, y: number): this {
-    if (!this.currentCurve.currentPoint?.equals({ x, y })) {
-      if (this.currentCurve.curves.length) {
-        this.currentCurve = new CurvePath()
-        this.curves.push(this.currentCurve)
-      }
-      this.currentCurve.moveTo(x, y)
+    // Web Path2D spec: moveTo always starts a new subpath.
+    if (this.currentCurve.curves.length) {
+      this.currentCurve = new CurvePath()
+      this.curves.push(this.currentCurve)
     }
+    this.currentCurve.moveTo(x, y)
     return this
   }
 
