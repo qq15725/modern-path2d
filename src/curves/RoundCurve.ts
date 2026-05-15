@@ -410,6 +410,8 @@ function eigenDecomposition(A: number, B: number, C: number): { rt1: number, rt2
   }
   else if (sm < 0) {
     rt2 = 0.5 * (sm - rt)
+    t = 1 / rt2
+    rt1 = A * t * C - B * t * B
   }
   else {
     // This case needs to be treated separately to avoid div by 0
