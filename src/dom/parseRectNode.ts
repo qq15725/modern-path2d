@@ -7,10 +7,16 @@ import { parseFloatWithUnits } from './parseFloatWithUnits'
 export function parseRectNode(node: SVGRectElement): Path2D {
   const x = parseFloatWithUnits(node.getAttribute('x') || 0)
   const y = parseFloatWithUnits(node.getAttribute('y') || 0)
-  const rx = parseFloatWithUnits(node.getAttribute('rx') || node.getAttribute('ry') || 0)
-  const ry = parseFloatWithUnits(node.getAttribute('ry') || node.getAttribute('rx') || 0)
+  const rxAttr = node.getAttribute('rx')
+  const ryAttr = node.getAttribute('ry')
+  // SVG spec: if only one of rx/ry is specified, the other takes the same value.
+  let rx = parseFloatWithUnits(rxAttr ?? ryAttr ?? 0)
+  let ry = parseFloatWithUnits(ryAttr ?? rxAttr ?? 0)
   const w = parseFloatWithUnits(node.getAttribute('width'))
   const h = parseFloatWithUnits(node.getAttribute('height'))
+  // SVG spec: rx is clamped to w/2; ry is clamped to h/2. Negative is treated as 0.
+  rx = Math.max(0, Math.min(rx, w / 2))
+  ry = Math.max(0, Math.min(ry, h / 2))
   // Ellipse arc to Bezier approximation Coefficient (Inversed). See:
   // https://spencermortensen.com/articles/bezier-circle/
   const bci = 1 - 0.551915024494

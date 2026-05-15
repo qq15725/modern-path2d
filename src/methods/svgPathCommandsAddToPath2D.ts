@@ -13,8 +13,17 @@ function getReflection(a: number, b: number): number {
 export function svgPathCommandsAddToPath2D(commands: Path2DCommand[], path: Path2D | CurvePath): void {
   const current = new Vector2()
   const control = new Vector2()
+  let prevType = ''
   for (let i = 0, l = commands.length; i < l; i++) {
     const cmd = commands[i]
+    // SVG spec: S/s reflects only if prev is C/c/S/s; T/t reflects only if prev is Q/q/T/t.
+    // Otherwise, the reflected control point coincides with the current point.
+    if ((cmd.type === 's' || cmd.type === 'S') && !'CcSs'.includes(prevType)) {
+      control.copyFrom(current)
+    }
+    else if ((cmd.type === 't' || cmd.type === 'T') && !'QqTt'.includes(prevType)) {
+      control.copyFrom(current)
+    }
     if (cmd.type === 'm' || cmd.type === 'M') {
       if (cmd.type === 'm') {
         current.add(cmd)
@@ -192,5 +201,6 @@ export function svgPathCommandsAddToPath2D(commands: Path2DCommand[], path: Path
     else {
       console.warn('Unsupported commands', cmd)
     }
+    prevType = cmd.type
   }
 }
