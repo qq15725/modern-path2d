@@ -161,11 +161,9 @@ export class Vector2 implements Vector2Like {
   }
 
   scale(sx: number, sy = sx, origin: Vector2Like = { x: 0, y: 0 }): this {
-    const x = sx < 0 ? origin.x - this._x + origin.x : this._x
-    const y = sy < 0 ? origin.y - this._y + origin.y : this._y
     return this.set(
-      x * Math.abs(sx),
-      y * Math.abs(sy),
+      origin.x + (this._x - origin.x) * sx,
+      origin.y + (this._y - origin.y) * sy,
     )
   }
 
