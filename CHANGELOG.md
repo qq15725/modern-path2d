@@ -1,3 +1,18 @@
+# [1.6.0](https://github.com/qq15725/modern-path2d/compare/v1.5.6...v1.6.0) (2026-05-15)
+
+
+### Bug Fixes
+
+* analytical extrema for QuadraticBezier and CubicBezier getMinMax ([e482392](https://github.com/qq15725/modern-path2d/commit/e4823929f24bcd6e3e9e525bcc227c0be7cd9117))
+* numerical correctness in getDirectedArea and eigenDecomposition ([c199b28](https://github.com/qq15725/modern-path2d/commit/c199b28fd7995c10eb5c05cfa7270e4b26b3763b))
+* Path2D.moveTo always starts a new subpath ([957b8bf](https://github.com/qq15725/modern-path2d/commit/957b8bf36f1b44ae91d468416cb7b9f584d7df6e))
+* SVG spec compliance for S/T reflection and rect rx/ry ([577db51](https://github.com/qq15725/modern-path2d/commit/577db517b7c0b617d61b688983086cc0a30baadb))
+* Vector2.scale respect non-zero origin ([4c9ee5a](https://github.com/qq15725/modern-path2d/commit/4c9ee5aca89f40196b306d0a237a9ccd15f4a3be))
+
+
+### Performance Improvements
+
+* binary search cumulative lengths in CompositeCurve.getPoint ([839ab04](https://github.com/qq15725/modern-path2d/commit/839ab04e6a0dd1e45e471e581b63761e075cf09b))
 ## [1.5.6](https://github.com/qq15725/modern-path2d/compare/v1.5.5...v1.5.6) (2026-05-07)
 
 
