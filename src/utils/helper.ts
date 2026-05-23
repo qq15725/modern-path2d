@@ -10,28 +10,27 @@ export function toKebabCase(str: string): string {
     .toLowerCase()
 }
 
-export function getIntersectionPoint(p1: Vector2, p2: Vector2, q1: Vector2, q2: Vector2): Vector2 {
+/**
+ * Intersection of line p1→p2 with line q1→q2, or `null` when the segments are parallel
+ * (`crossRS === 0`) or the intersection lies too far off p1→p2 (`|t| > 1`). Callers must
+ * handle `null` (e.g. `Path2D.bold` skips the join when there is no usable point).
+ */
+export function getIntersectionPoint(p1: Vector2, p2: Vector2, q1: Vector2, q2: Vector2): Vector2 | null {
   const r = p2.clone().sub(p1)
   const s = q2.clone().sub(q1)
   const q1p1 = q1.clone().sub(p1)
 
   const crossRS = r.cross(s)
   if (crossRS === 0) {
-    // TODO 优化点
-    return new Vector2(
-      (p1.x + q1.x) / 2,
-      (p1.y + q1.y) / 2,
-    )
+    // Parallel / collinear: no single intersection point.
+    return null
   }
 
   const t = q1p1.cross(s) / crossRS
 
   if (Math.abs(t) > 1) {
-    // TODO 优化点
-    return new Vector2(
-      (p1.x + q1.x) / 2,
-      (p1.y + q1.y) / 2,
-    )
+    // Intersection is too far beyond the p1→p2 span to be a sensible join.
+    return null
   }
 
   return new Vector2(

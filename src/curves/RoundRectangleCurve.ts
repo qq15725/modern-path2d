@@ -1,7 +1,13 @@
-import { Vector2 } from '../math'
-import { RoundCurve } from './RoundCurve'
+import { ArcCurve } from './ArcCurve'
+import { CompositeCurve } from './CompositeCurve'
+import { LineCurve } from './LineCurve'
 
-export class RoundRectangleCurve extends RoundCurve {
+/**
+ * A rounded rectangle, modelled as a real composite of 4 `LineCurve` edges + 4 quarter
+ * `ArcCurve` corners (like {@link RectangleCurve}). `getPoint`/`getLength`/`getMinMax`/
+ * `toCommands` therefore describe the actual rounded outline — not a bare ellipse.
+ */
+export class RoundRectangleCurve extends CompositeCurve {
   constructor(
     public x = 0,
     public y = 0,
@@ -14,27 +20,49 @@ export class RoundRectangleCurve extends RoundCurve {
   }
 
   update(): this {
-    const { x, y, width, height, radius } = this
-    const halfWidth = width / 2
-    const halfHeight = height / 2
-    const cx = x + halfWidth
-    const cy = y + halfHeight
-    const rx = Math.max(0, Math.min(radius, Math.min(halfWidth, halfHeight)))
-    const ry = rx
-    this._center = new Vector2(cx, cy)
-    this._radius = new Vector2(rx, ry)
-    this._diff = new Vector2(halfWidth - rx, halfHeight - ry)
+    const { x, y, width, height } = this
+    const r = Math.max(0, Math.min(this.radius, Math.abs(width) / 2, Math.abs(height) / 2))
+    const x0 = x
+    const x1 = x + r
+    const x2 = x + width - r
+    const x3 = x + width
+    const y0 = y
+    const y1 = y + r
+    const y2 = y + height - r
+    const y3 = y + height
+
+    if (r <= 0) {
+      this.curves = [
+        LineCurve.from(x0, y0, x3, y0),
+        LineCurve.from(x3, y0, x3, y3),
+        LineCurve.from(x3, y3, x0, y3),
+        LineCurve.from(x0, y3, x0, y0),
+      ]
+    }
+    else {
+      const HALF_PI = Math.PI / 2
+      this.curves = [
+        LineCurve.from(x1, y0, x2, y0), // top edge
+        new ArcCurve(x2, y1, r, -HALF_PI, 0, true), // top-right corner
+        LineCurve.from(x3, y1, x3, y2), // right edge
+        new ArcCurve(x2, y2, r, 0, HALF_PI, true), // bottom-right corner
+        LineCurve.from(x2, y3, x1, y3), // bottom edge
+        new ArcCurve(x1, y2, r, HALF_PI, Math.PI, true), // bottom-left corner
+        LineCurve.from(x0, y2, x0, y1), // left edge
+        new ArcCurve(x1, y1, r, Math.PI, Math.PI * 1.5, true), // top-left corner
+      ]
+    }
+    this.invalidate()
     return this
   }
 
   override drawTo(ctx: CanvasRenderingContext2D): this {
-    const { x, y, width, height, radius } = this
-    ctx.roundRect(x, y, width, height, radius)
+    ctx.roundRect(this.x, this.y, this.width, this.height, this.radius)
     return this
   }
 
   override copyFrom(source: RoundRectangleCurve): this {
-    super.copyFrom(source)
+    this.arcLengthDivision = source.arcLengthDivision
     this.x = source.x
     this.y = source.y
     this.width = source.width

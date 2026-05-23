@@ -90,8 +90,8 @@ export class RoundCurve extends Curve {
   /**
    * Analytical bounds of the (elliptical) arc: the start/end points plus the per-axis
    * extrema angles that fall within the swept interval. Matches {@link getPoint}, so it is
-   * exact for `ArcCurve`/`EllipseCurve`. `RoundRectangleCurve` (with a non-zero `_diff`)
-   * keeps the existing ellipse-only behavior — see TODO.
+   * exact for `ArcCurve`/`EllipseCurve`. The `_diff` offset (used only by the legacy
+   * `_getAdaptiveVerticesByCircle` path) is intentionally ignored here.
    */
   override getMinMax(min = Vector2.MAX, max = Vector2.MIN): { min: Vector2, max: Vector2 } {
     const { startAngle, rotate } = this
@@ -183,6 +183,8 @@ export class RoundCurve extends Curve {
     else {
       transfEllipseNoSkew(this, transform)
     }
+    // Radii/angles change via plain fields (not control-point refs), so invalidate explicitly.
+    this.invalidate()
     return this
   }
 

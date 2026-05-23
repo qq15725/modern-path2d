@@ -5,6 +5,7 @@ import {
   LineCurve,
   QuadraticBezierCurve,
   RectangleCurve,
+  RoundRectangleCurve,
   SplineCurve,
   Transform2D,
   Vector2,
@@ -76,6 +77,40 @@ describe('RectangleCurve', () => {
   it('contains its center', () => {
     expect(rect.isPointInFill({ x: 25, y: 40 })).toBe(true)
     expect(rect.isPointInFill({ x: 0, y: 0 })).toBe(false)
+  })
+})
+
+describe('RoundRectangleCurve', () => {
+  const rr = new RoundRectangleCurve(10, 20, 100, 60, 10)
+
+  it('is a real composite (4 lines + 4 arcs)', () => {
+    expect(rr.curves).toHaveLength(8)
+  })
+
+  it('bounds equal the rectangle box', () => {
+    const { min, max } = rr.getMinMax()
+    expect(min.x).toBeCloseTo(10)
+    expect(min.y).toBeCloseTo(20)
+    expect(max.x).toBeCloseTo(110)
+    expect(max.y).toBeCloseTo(80)
+  })
+
+  it('starts at (x+r, y) and the perimeter accounts for rounded corners', () => {
+    expect(rr.getPoint(0)).toMatchObject({ x: 20, y: 20 })
+    // 2(w-2r) + 2(h-2r) + 2πr
+    expect(rr.getLength()).toBeCloseTo(240 + 2 * Math.PI * 10, 0)
+  })
+
+  it('clips the rounded corners in hit testing', () => {
+    expect(rr.isPointInFill({ x: 60, y: 50 })).toBe(true) // center
+    expect(rr.isPointInFill({ x: 15, y: 25 })).toBe(true) // inside the corner radius
+    expect(rr.isPointInFill({ x: 11, y: 21 })).toBe(false) // clipped corner
+    expect(rr.isPointInFill({ x: 5, y: 5 })).toBe(false) // outside
+  })
+
+  it('degenerates to a rectangle when radius <= 0', () => {
+    const plain = new RoundRectangleCurve(0, 0, 10, 10, 0)
+    expect(plain.curves).toHaveLength(4)
   })
 })
 

@@ -95,7 +95,7 @@ To compose "apply A first, then B": result = `B · A`. Use `A.prepend(B)` or `B.
 
 `getAdaptiveVertices()` is the core sampling path used for triangulation and rendering. Concrete curves override this for higher accuracy (e.g. cubic bezier uses adaptive subdivision). `getSpacedVertices()` uses arc-length reparameterization for even spacing.
 
-`getMinMax()` (the bbox primitive) is **analytical** for `QuadraticBezierCurve`, `CubicBezierCurve` (solves `B'(t) = 0` per axis; cubic falls back to a linear solve when the leading coefficient is ~0) and `RoundCurve`/`ArcCurve`/`EllipseCurve` (start/end points + per-axis angular extrema within the swept interval, rotation-aware — see `RoundCurve.getMinMax`). The base `Curve.getMinMax` (used by `SplineCurve` and other samplers) iterates the flat `getAdaptiveVertices()` array directly — no per-point `Vector2`/`map` allocation. Composites aggregate from children. `Path2D.getMinMax(withStyle)` adds stroke by inflating the analytical geometric bounds by half the stroke width (no sampling). `RoundRectangleCurve` (non-zero `_diff`) still reports ellipse-only bounds — see TODO.
+`getMinMax()` (the bbox primitive) is **analytical** for `QuadraticBezierCurve`, `CubicBezierCurve` (solves `B'(t) = 0` per axis; cubic falls back to a linear solve when the leading coefficient is ~0) and `RoundCurve`/`ArcCurve`/`EllipseCurve` (start/end points + per-axis angular extrema within the swept interval, rotation-aware — see `RoundCurve.getMinMax`). The base `Curve.getMinMax` (used by `SplineCurve` and other samplers) iterates the flat `getAdaptiveVertices()` array directly — no per-point `Vector2`/`map` allocation. Composites aggregate from children (incl. `RectangleCurve`/`RoundRectangleCurve`, which are real line+arc composites). `Path2D.getMinMax(withStyle)` adds stroke by inflating the analytical geometric bounds by half the stroke width (no sampling). Only `SplineCurve` still samples.
 
 ### Build outputs
 
@@ -106,10 +106,10 @@ To compose "apply A first, then B": result = `B · A`. Use `A.prepend(B)` or `B.
 ## TODO
 
 ### Known correctness gaps
-- **`RoundRectangleCurve` is not a true composite.** It extends `RoundCurve` (single ellipse) and only `drawTo` / `_getAdaptiveVerticesByCircle` honor `_diff`. `getPoint(t)`, `getLength`, `getLengths`, `toCommands` all return ellipse-only results — wrong for rounded rectangles. Should be rebuilt as 4 `LineCurve` + 4 `ArcCurve` like `RectangleCurve`.
-- **In-place control-point mutation does not auto-invalidate caches.** `invalidate()` now exists (clears `_lengths`, hit-test vertex caches) and fires automatically on `applyTransform` and `Path2D.scale/skew/rotate/bold`; composites also refresh on `curves.length` change. But `getControlPointRefs()` still hands out mutable `Vector2`s whose `_onUpdate` is not wired to `invalidate()`, so directly assigning e.g. `curve.p2.x = …` leaves caches stale until you call `invalidate()` yourself. Wiring `Vector2._onUpdate` through to the owning curve would close this fully.
-- **`getIntersectionPoint` silently falls back to the midpoint** on parallel / out-of-range segments (`src/utils/helper.ts`). Callers (`Path2D` stroke join) gate on truthy returns, so changing to `null` is safe but visually changes joins — needs a test plan first.
-- **`Vector2.divide(0)` returns NaN** with no guard. Audit call sites before adding a guard (may mask upstream bugs).
+- **In-place control-point mutation does not auto-invalidate caches.** `invalidate()` clears `_lengths` + hit-test vertex caches and **bubbles up to `_owner`** (composites set children's `_owner` when they cache). It fires automatically on `applyTransform` (incl. `RoundCurve`'s custom path) and `Path2D.scale/skew/rotate/bold`; composites also refresh on `curves.length` change. Still **not** auto: directly assigning `curve.p2.x = …` leaves caches stale until you call `invalidate()` (which now propagates to ancestors). Per-point `Vector2._onUpdate` auto-wiring is deliberately **not** done — `Vector2.clone()` carries `_onUpdate` and clones are used for throwaway math (`getIntersectionPoint`) and copies (`SplineCurve`), and `RectangleCurve` shares corner `Vector2`s between segments, so naive wiring causes spurious/cross-instance invalidation.
+- **`Vector2.divide(0)` leaves that axis unchanged** (guarded — was NaN). `divide` has no internal callers; the guard only affects external use.
+
+Closed (kept here for history): `RoundRectangleCurve` is now a true composite (4 `LineCurve` + 4 `ArcCurve`); `getIntersectionPoint` returns `null` on parallel/out-of-range segments (callers already gate on truthy).
 
 ### Performance backlog
 Benchmarks live in `test/perf.bench.ts` (`pnpm bench`). Recent wins (200-bezier / 400-ring fixtures):
@@ -131,7 +131,7 @@ Priority order if/when targeted:
 3. `simplify` (self-intersection cleanup)
 4. `PathMeasure` class — `getPosTan(d)`, `getSegment(start, end)`. (`contains(x, y)` is **done** — see the Hit testing subsystem: `contains` / `isPointInFill` / `isPointInStroke` / `Path2DSet.hitTest`.)
 5. `reverse`
-6. `getTightBounds` — **mostly done**: quadratic/cubic and arcs/ellipses are analytical and `CompositeCurve`/`Path2D` aggregate from them (`getBoundingBox(false)` is already tight). Remaining: `SplineCurve` still samples, and `RoundRectangleCurve` reports ellipse-only bounds (blocked on rebuilding it as lines+arcs).
+6. `getTightBounds` — **mostly done**: quadratic/cubic and arcs/ellipses are analytical and `CompositeCurve`/`Path2D` (incl. `RoundRectangleCurve`) aggregate from them (`getBoundingBox(false)` is already tight). Remaining: `SplineCurve` still samples (Catmull-Rom extrema).
 7. `trim(startT, endT)`
 8. `conicTo` (rational quadratic)
 9. Binary `toCmds` / `fromCmds`

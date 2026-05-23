@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { Transform2D, Vector2 } from '../src/index'
+import { getIntersectionPoint, Transform2D, Vector2 } from '../src/index'
 
 describe('Vector2', () => {
   it('arithmetic', () => {
@@ -7,6 +7,11 @@ describe('Vector2', () => {
     expect(new Vector2(5, 5).sub({ x: 1, y: 2 })).toMatchObject({ x: 4, y: 3 })
     expect(new Vector2(2, 3).multiply(2)).toMatchObject({ x: 4, y: 6 })
     expect(new Vector2(4, 6).divide(2)).toMatchObject({ x: 2, y: 3 })
+  })
+
+  it('divide by 0 leaves the axis unchanged (no NaN)', () => {
+    expect(new Vector2(10, 20).divide(0)).toMatchObject({ x: 10, y: 20 })
+    expect(new Vector2(10, 20).divide(0, 4)).toMatchObject({ x: 10, y: 5 })
   })
 
   it('dot / cross / distance / length', () => {
@@ -95,5 +100,37 @@ describe('Transform2D', () => {
     const r = new Transform2D().prependCssTransform('rotate(90deg)').apply({ x: 1, y: 0 })
     expect(r.x).toBeCloseTo(0)
     expect(r.y).toBeCloseTo(1)
+  })
+})
+
+describe('getIntersectionPoint', () => {
+  it('returns the crossing of two lines', () => {
+    const p = getIntersectionPoint(
+      new Vector2(0, 0),
+      new Vector2(10, 0),
+      new Vector2(5, -5),
+      new Vector2(5, 5),
+    )
+    expect(p).not.toBeNull()
+    expect(p!.x).toBeCloseTo(5)
+    expect(p!.y).toBeCloseTo(0)
+  })
+
+  it('returns null for parallel lines', () => {
+    expect(getIntersectionPoint(
+      new Vector2(0, 0),
+      new Vector2(10, 0),
+      new Vector2(0, 5),
+      new Vector2(10, 5),
+    )).toBeNull()
+  })
+
+  it('returns null when the intersection is out of range', () => {
+    expect(getIntersectionPoint(
+      new Vector2(0, 0),
+      new Vector2(1, 0),
+      new Vector2(100, -5),
+      new Vector2(100, 5),
+    )).toBeNull()
   })
 })

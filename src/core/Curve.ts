@@ -24,18 +24,36 @@ export abstract class Curve {
   arcLengthDivision = 200
   protected _lengths: number[] = []
   protected _adaptiveCache?: number[]
+  /**
+   * Parent composite, set lazily when a composite caches its children. Lets
+   * {@link invalidate} propagate up so an ancestor's caches refresh too.
+   */
+  _owner?: Curve
+  protected _invalidating = false
 
   abstract getPoint(t: number, output?: Vector2): Vector2
 
   /**
-   * Drop cached arc lengths and the cached sampled outline used by hit testing.
-   * Called automatically by {@link applyTransform}; call it manually after mutating
-   * control-point coordinates in place — the caches cannot observe such mutations.
+   * Drop cached arc lengths and the cached sampled outline used by hit testing, then
+   * bubble up to {@link _owner}. Called automatically by {@link applyTransform} and the
+   * `Path2D` mutators; call it manually after mutating control-point coordinates in place —
+   * the caches cannot observe such mutations.
    */
   invalidate(): this {
+    if (this._invalidating) {
+      return this // re-entrancy guard: blocks the upward bubble re-triggering a downward sweep
+    }
+    this._invalidating = true
+    this._invalidateSelf()
+    this._owner?.invalidate()
+    this._invalidating = false
+    return this
+  }
+
+  /** Clears this curve's own caches. Composites also clear their children (see override). */
+  protected _invalidateSelf(): void {
     this._lengths.length = 0
     this._adaptiveCache = undefined
-    return this
   }
 
   /**

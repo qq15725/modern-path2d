@@ -83,7 +83,11 @@ export class Vector2 implements Vector2Like {
   }
 
   divide(x = 0, y = x): this {
-    return this.set(this._x / x, this._y / y)
+    // Dividing by 0 leaves that axis unchanged rather than producing NaN/Infinity.
+    return this.set(
+      x === 0 ? this._x : this._x / x,
+      y === 0 ? this._y : this._y / y,
+    )
   }
 
   cross(p: Vector2Like): number {

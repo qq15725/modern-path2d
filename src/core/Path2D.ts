@@ -273,17 +273,19 @@ export class Path2D<T = any> extends CompositeCurve<CurvePath> {
    *
    * Defaults `fillRule` to `style.fillRule`, then `'nonzero'` (matching SVG/Canvas).
    */
-  override invalidate(): this {
-    super.invalidate()
+  protected override _invalidateSelf(): void {
+    super._invalidateSelf()
     this._ringsCache = undefined
     this._ringsCacheLen = -1
-    return this
   }
 
   /** Per-sub-path sampled rings, cached for repeated hit tests. */
   protected _getRings(): number[][] {
     if (!this._ringsCache || this._ringsCacheLen !== this.curves.length) {
-      this._ringsCache = this.curves.map(curve => curve.getAdaptiveVertices())
+      this._ringsCache = this.curves.map((curve) => {
+        curve._owner = this
+        return curve.getAdaptiveVertices()
+      })
       this._ringsCacheLen = this.curves.length
     }
     return this._ringsCache

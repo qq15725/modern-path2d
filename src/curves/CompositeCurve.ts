@@ -18,17 +18,20 @@ export class CompositeCurve<T extends Curve = Curve> extends Curve {
     super()
   }
 
-  override invalidate(): this {
-    super.invalidate()
+  protected override _invalidateSelf(): void {
+    super._invalidateSelf()
     this._adaptiveCacheLen = -1
+    // The re-entrancy guard in invalidate() stops these children bubbling back into us.
     this.curves.forEach(curve => curve.invalidate())
-    return this
   }
 
   protected override _getCachedAdaptiveVertices(): number[] {
     // Also recompute when the number of sub-curves changes (e.g. while building),
     // not just on explicit invalidate().
     if (!this._adaptiveCache || this._adaptiveCacheLen !== this.curves.length) {
+      this.curves.forEach((curve) => {
+        curve._owner = this
+      })
       this._adaptiveCache = this.getAdaptiveVertices()
       this._adaptiveCacheLen = this.curves.length
     }
@@ -94,6 +97,7 @@ export class CompositeCurve<T extends Curve = Curve> extends Curve {
       i < len;
       i++
     ) {
+      this.curves[i]._owner = this
       sum += this.curves[i].getLength()
       lengths.push(sum)
     }
@@ -172,7 +176,11 @@ export class CompositeCurve<T extends Curve = Curve> extends Curve {
   }
 
   override applyTransform(transform: Transform2D | ((point: Vector2) => void)): this {
+    // Suppress each child's invalidate() from bubbling back up per-curve during a bulk
+    // transform (would be O(n²)); invalidate once at the end instead.
+    this._invalidating = true
     this.curves.forEach(curve => curve.applyTransform(transform))
+    this._invalidating = false
     this.invalidate()
     return this
   }
