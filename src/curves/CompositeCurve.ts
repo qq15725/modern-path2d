@@ -10,10 +10,29 @@ import { BoundingBox, Vector2 } from '../math'
 import { LineCurve } from './LineCurve'
 
 export class CompositeCurve<T extends Curve = Curve> extends Curve {
+  protected _adaptiveCacheLen = -1
+
   constructor(
     public curves: T[] = [],
   ) {
     super()
+  }
+
+  override invalidate(): this {
+    super.invalidate()
+    this._adaptiveCacheLen = -1
+    this.curves.forEach(curve => curve.invalidate())
+    return this
+  }
+
+  protected override _getCachedAdaptiveVertices(): number[] {
+    // Also recompute when the number of sub-curves changes (e.g. while building),
+    // not just on explicit invalidate().
+    if (!this._adaptiveCache || this._adaptiveCacheLen !== this.curves.length) {
+      this._adaptiveCache = this.getAdaptiveVertices()
+      this._adaptiveCacheLen = this.curves.length
+    }
+    return this._adaptiveCache
   }
 
   getFlatCurves(): Curve[] {
@@ -154,6 +173,7 @@ export class CompositeCurve<T extends Curve = Curve> extends Curve {
 
   override applyTransform(transform: Transform2D | ((point: Vector2) => void)): this {
     this.curves.forEach(curve => curve.applyTransform(transform))
+    this.invalidate()
     return this
   }
 

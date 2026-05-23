@@ -23,8 +23,28 @@ export interface IsPointInStrokeOptions {
 export abstract class Curve {
   arcLengthDivision = 200
   protected _lengths: number[] = []
+  protected _adaptiveCache?: number[]
 
   abstract getPoint(t: number, output?: Vector2): Vector2
+
+  /**
+   * Drop cached arc lengths and the cached sampled outline used by hit testing.
+   * Called automatically by {@link applyTransform}; call it manually after mutating
+   * control-point coordinates in place — the caches cannot observe such mutations.
+   */
+  invalidate(): this {
+    this._lengths.length = 0
+    this._adaptiveCache = undefined
+    return this
+  }
+
+  /**
+   * Sampled outline cached for repeated hit tests (read-only — do not mutate the result).
+   * Invalidated by {@link invalidate}.
+   */
+  protected _getCachedAdaptiveVertices(): number[] {
+    return this._adaptiveCache ??= this.getAdaptiveVertices()
+  }
 
   getPointAt(u: number, output = new Vector2()): Vector2 {
     return this.getPoint(this.getUToTMapping(u), output)
@@ -48,6 +68,7 @@ export abstract class Curve {
         transform.apply(p, p)
       }
     })
+    this.invalidate()
     return this
   }
 
@@ -220,12 +241,28 @@ export abstract class Curve {
   }
 
   getMinMax(min = Vector2.MAX, max = Vector2.MIN): { min: Vector2, max: Vector2 } {
-    const potins = this.getPoints()
-    for (let i = 0, len = potins.length; i < len; i++) {
-      const p = potins[i]
-      min.clampMin(p)
-      max.clampMax(p)
+    // Iterate the flat vertex array directly: avoids the per-point Vector2
+    // allocation of getPoints() and the per-call array allocation inside
+    // clampMin/clampMax.
+    const vertices = this.getAdaptiveVertices()
+    let minX = min.x
+    let minY = min.y
+    let maxX = max.x
+    let maxY = max.y
+    for (let i = 0, len = vertices.length; i < len; i += 2) {
+      const x = vertices[i]
+      const y = vertices[i + 1]
+      if (x < minX)
+        minX = x
+      if (y < minY)
+        minY = y
+      if (x > maxX)
+        maxX = x
+      if (y > maxY)
+        maxY = y
     }
+    min.set(minX, minY)
+    max.set(maxX, maxY)
     return { min: min.finite(), max: max.finite() }
   }
 
@@ -245,7 +282,7 @@ export abstract class Curve {
    * are honored — a single `Curve` is always one ring.
    */
   isPointInFill(point: Vector2Like, options: IsPointInFillOptions = {}): boolean {
-    return pointInPolygon(point, this.getAdaptiveVertices(), options.fillRule)
+    return pointInPolygon(point, this._getCachedAdaptiveVertices(), options.fillRule)
   }
 
   /**
@@ -259,7 +296,7 @@ export abstract class Curve {
    */
   isPointInStroke(point: Vector2Like, options: IsPointInStrokeOptions = {}): boolean {
     const { strokeWidth = 1, tolerance = 0, closed = false } = options
-    const distance = pointToPolylineDistance(point, this.getAdaptiveVertices(), closed)
+    const distance = pointToPolylineDistance(point, this._getCachedAdaptiveVertices(), closed)
     return distance <= strokeWidth / 2 + tolerance
   }
 

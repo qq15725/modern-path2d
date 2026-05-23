@@ -61,6 +61,7 @@ Curve (abstract base)
 **Hit testing** (`src/utils/pointInPolygon.ts` + curve methods):
 - Pure primitives: `pointInPolygon` (single ring), `pointInPolygons` (multi-ring/holes), `pointToSegmentDistance`, `pointToPolylineDistance`. All take flat `number[]` vertices and a `FillRule` (default `'nonzero'`).
 - `Curve.isPointInFill` / `isPointInStroke` + the concise PathKit-style `contains(x, y)` alias. `Curve`/`CurvePath` test a single ring; **`Path2D` overrides `isPointInFill`** to evaluate all sub-paths together via `pointInPolygons` (so holes work). All are purely geometric — the `fill: 'none'` fallback lives in `Path2DSet.hitTest`, which returns the topmost hit path (fill first, then stroke).
+- Hit testing caches the sampled outline (`Curve._adaptiveCache`, `Path2D._ringsCache`) for repeated pointer queries, refreshed by `invalidate()`. `invalidate()` fires automatically on `applyTransform` and `Path2D.scale/skew/rotate/bold`; composite caches also refresh when `curves.length` changes. Mutating control-point coordinates **in place** does not auto-invalidate — call `invalidate()` (same caveat as the `_lengths` cache).
 
 **Math** (`src/math/`): `Vector2`, `Transform2D`, `BoundingBox`. `Matrix3` still exists but is **no longer used** by the transform pipeline — all curve transforms use `Transform2D`.
 
@@ -94,7 +95,7 @@ To compose "apply A first, then B": result = `B · A`. Use `A.prepend(B)` or `B.
 
 `getAdaptiveVertices()` is the core sampling path used for triangulation and rendering. Concrete curves override this for higher accuracy (e.g. cubic bezier uses adaptive subdivision). `getSpacedVertices()` uses arc-length reparameterization for even spacing.
 
-`getMinMax()` (the bbox primitive) is **analytical** for `QuadraticBezierCurve` and `CubicBezierCurve` (solves `B'(t) = 0` per axis, with the cubic falling back to a linear solve when the leading coefficient is ~0). `RoundCurve`/`ArcCurve` and the composite/path types still sample — flagged in TODO.
+`getMinMax()` (the bbox primitive) is **analytical** for `QuadraticBezierCurve`, `CubicBezierCurve` (solves `B'(t) = 0` per axis; cubic falls back to a linear solve when the leading coefficient is ~0) and `RoundCurve`/`ArcCurve`/`EllipseCurve` (start/end points + per-axis angular extrema within the swept interval, rotation-aware — see `RoundCurve.getMinMax`). The base `Curve.getMinMax` (used by `SplineCurve` and other samplers) iterates the flat `getAdaptiveVertices()` array directly — no per-point `Vector2`/`map` allocation. Composites aggregate from children. `Path2D.getMinMax(withStyle)` adds stroke by inflating the analytical geometric bounds by half the stroke width (no sampling). `RoundRectangleCurve` (non-zero `_diff`) still reports ellipse-only bounds — see TODO.
 
 ### Build outputs
 
@@ -106,15 +107,16 @@ To compose "apply A first, then B": result = `B · A`. Use `A.prepend(B)` or `B.
 
 ### Known correctness gaps
 - **`RoundRectangleCurve` is not a true composite.** It extends `RoundCurve` (single ellipse) and only `drawTo` / `_getAdaptiveVerticesByCircle` honor `_diff`. `getPoint(t)`, `getLength`, `getLengths`, `toCommands` all return ellipse-only results — wrong for rounded rectangles. Should be rebuilt as 4 `LineCurve` + 4 `ArcCurve` like `RectangleCurve`.
-- **`_lengths` cache does not invalidate on control-point mutation.** `getControlPointRefs()` hands out mutable `Vector2`s, but `Vector2._onUpdate` is not wired to invalidate cached arc lengths. Either route mutations through an invalidator, or expose an explicit `invalidateLengths()`.
+- **In-place control-point mutation does not auto-invalidate caches.** `invalidate()` now exists (clears `_lengths`, hit-test vertex caches) and fires automatically on `applyTransform` and `Path2D.scale/skew/rotate/bold`; composites also refresh on `curves.length` change. But `getControlPointRefs()` still hands out mutable `Vector2`s whose `_onUpdate` is not wired to `invalidate()`, so directly assigning e.g. `curve.p2.x = …` leaves caches stale until you call `invalidate()` yourself. Wiring `Vector2._onUpdate` through to the owning curve would close this fully.
 - **`getIntersectionPoint` silently falls back to the midpoint** on parallel / out-of-range segments (`src/utils/helper.ts`). Callers (`Path2D` stroke join) gate on truthy returns, so changing to `null` is safe but visually changes joins — needs a test plan first.
 - **`Vector2.divide(0)` returns NaN** with no guard. Audit call sites before adding a guard (may mask upstream bugs).
 
-### Performance backlog (needs benchmarks first)
-- `nonzeroFillRule` is roughly O(n²~n³) over subpaths — large icon sets are visibly slow. Consider an R-tree / scanline prefilter.
-- `strokeTriangulate` does per-vertex `verts.push(x, y)`; preallocate + index writes would shave hot-path time.
-- `Path2D.getMinMax` samples `arcLengthDivision * 8` points per curve just to account for stroke width. Replace with analytical bounds + half-stroke offset (the underlying `Curve.getMinMax` is already analytical for quadratic/cubic — wire those through and stop sampling).
-- Hot loops in `Curve.getUnevenVertices` / `getSpacedVertices` allocate a fresh `Vector2` per sample — reuse a temp.
+### Performance backlog
+Benchmarks live in `test/perf.bench.ts` (`pnpm bench`). Recent wins (200-bezier / 400-ring fixtures):
+- **DONE — `Path2D.getMinMax` stroke expansion.** Was sampling `arcLengthDivision` points × 8 `Vector2` clones per curve; now inflates the analytical geometric bounds by half the stroke width. ~6× faster (`getBoundingBox(withStyle)` 0.39ms → 0.06ms), and the base `Curve.getMinMax` no longer allocates per point.
+- **DONE — `nonzeroFillRule` AABB prefilter.** Skips the winding test for ring pairs whose bounds are disjoint (result-exact). 400-ring fill: 49ms → 1.5ms (`nonzeroFillRule` itself 48ms → 1ms). For huge sets with many *overlapping* rings an R-tree / scanline prefilter is still the next step.
+- **DONE — hit-test outline caching.** `isPointInFill`/`isPointInStroke` reuse a cached sampled outline; repeated `Path2DSet.hitTest` ~5× faster.
+- **Measured, not a hotspot — `strokeTriangulate`.** ~0.14ms for 200 beziers; per-vertex `push` is not dominating. Preallocation is awkward (round joins add a variable vertex count) and deferred until a profile says otherwise.
 
 ### SVG / DOM gaps
 - `parseCSSStylesheet` only supports class and id selectors. No `!important`, no descendant/attr/pseudo selectors.
@@ -129,7 +131,7 @@ Priority order if/when targeted:
 3. `simplify` (self-intersection cleanup)
 4. `PathMeasure` class — `getPosTan(d)`, `getSegment(start, end)`. (`contains(x, y)` is **done** — see the Hit testing subsystem: `contains` / `isPointInFill` / `isPointInStroke` / `Path2DSet.hitTest`.)
 5. `reverse`
-6. `getTightBounds` — quadratic/cubic are already analytical; finish arcs (use angular extrema at 0, π/2, π, 3π/2 within the start→end sweep) and have `CompositeCurve.getBoundingBox` aggregate from the analytical primitives.
+6. `getTightBounds` — **mostly done**: quadratic/cubic and arcs/ellipses are analytical and `CompositeCurve`/`Path2D` aggregate from them (`getBoundingBox(false)` is already tight). Remaining: `SplineCurve` still samples, and `RoundRectangleCurve` reports ellipse-only bounds (blocked on rebuilding it as lines+arcs).
 7. `trim(startT, endT)`
 8. `conicTo` (rational quadratic)
 9. Binary `toCmds` / `fromCmds`
@@ -137,4 +139,4 @@ Priority order if/when targeted:
 ### Repo hygiene
 - `src/deformations/arap.ts` and `msl.ts` are stubs and are NOT exported from `src/index.ts`, despite the README hinting at them. Either implement or delete (or move under `src/experimental/`).
 - The README mentions "animation" but there is no dedicated module. A `PathMeasure`-based `animate(progress)` would be the smallest credible API.
-- Test coverage is still thin: `test/index.test.ts` only asserts `1 === 1`; `test/hitTest.test.ts` covers the hit-testing primitives + `Path2D`/`Path2DSet` fill/stroke/`contains`. Everything else is untested — any non-trivial refactor needs new tests first.
+- Test suite (`pnpm test`) now covers hit testing (`hitTest`), analytical bounds vs sampling (`bounds`), cache invalidation (`cache`), `nonzeroFillRule` grouping/prefilter (`nonzero`), curve invariants (`curves`), SVG path round-trips (`parse`) and `Vector2`/`Transform2D` math (`math`). Perf benchmarks live in `test/perf.bench.ts` (`pnpm bench`). Still thin around SVG XML→`Path2DSet` (`svgToPath2DSet`, CSS/`transform` attrs), triangulation output correctness, and deformations — add tests there before refactoring those.

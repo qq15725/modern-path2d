@@ -26,6 +26,8 @@ import { CurvePath } from './CurvePath'
  */
 export class Path2D<T = any> extends CompositeCurve<CurvePath> {
   protected _meta?: T
+  protected _ringsCache?: number[][]
+  protected _ringsCacheLen = -1
   currentCurve = new CurvePath()
   style: Partial<Path2DStyle>
 
@@ -174,6 +176,7 @@ export class Path2D<T = any> extends CompositeCurve<CurvePath> {
     this.getControlPointRefs().forEach((point) => {
       point.scale(sx, sy, target)
     })
+    this.invalidate()
     return this
   }
 
@@ -181,6 +184,7 @@ export class Path2D<T = any> extends CompositeCurve<CurvePath> {
     this.getControlPointRefs().forEach((point) => {
       point.skew(ax, ay, target)
     })
+    this.invalidate()
     return this
   }
 
@@ -188,6 +192,7 @@ export class Path2D<T = any> extends CompositeCurve<CurvePath> {
     this.getControlPointRefs().forEach((point) => {
       point.rotate(rad, target)
     })
+    this.invalidate()
     return this
   }
 
@@ -254,6 +259,7 @@ export class Path2D<T = any> extends CompositeCurve<CurvePath> {
         }
       })
     })
+    this.invalidate()
     return this
   }
 
@@ -267,13 +273,25 @@ export class Path2D<T = any> extends CompositeCurve<CurvePath> {
    *
    * Defaults `fillRule` to `style.fillRule`, then `'nonzero'` (matching SVG/Canvas).
    */
+  override invalidate(): this {
+    super.invalidate()
+    this._ringsCache = undefined
+    this._ringsCacheLen = -1
+    return this
+  }
+
+  /** Per-sub-path sampled rings, cached for repeated hit tests. */
+  protected _getRings(): number[][] {
+    if (!this._ringsCache || this._ringsCacheLen !== this.curves.length) {
+      this._ringsCache = this.curves.map(curve => curve.getAdaptiveVertices())
+      this._ringsCacheLen = this.curves.length
+    }
+    return this._ringsCache
+  }
+
   override isPointInFill(point: Vector2Like, options: IsPointInFillOptions = {}): boolean {
     const fillRule: FillRule = options.fillRule ?? this.style.fillRule ?? 'nonzero'
-    return pointInPolygons(
-      point,
-      this.curves.map(curve => curve.getAdaptiveVertices()),
-      fillRule,
-    )
+    return pointInPolygons(point, this._getRings(), fillRule)
   }
 
   /**
@@ -294,35 +312,21 @@ export class Path2D<T = any> extends CompositeCurve<CurvePath> {
   }
 
   override getMinMax(min = Vector2.MAX, max = Vector2.MIN, withStyle = true): { min: Vector2, max: Vector2 } {
-    const strokeWidth = this.strokeWidth
     this.curves.forEach((curve) => {
       curve.getMinMax(min, max)
-      if (withStyle) {
-        if (strokeWidth > 1) {
-          const halfStrokeWidth = strokeWidth / 2
-          const isClockwise = curve.isClockwise()
-          const points = []
-          for (let t = 0; t <= 1; t += 1 / curve.arcLengthDivision) {
-            const point = curve.getPoint(t)
-            const normal = curve.getNormal(t)
-            const dist1 = normal.clone().scale(isClockwise ? halfStrokeWidth : -halfStrokeWidth)
-            const dist2 = normal.clone().scale(isClockwise ? -halfStrokeWidth : halfStrokeWidth)
-            points.push(
-              point.clone().add(dist1),
-              point.clone().add(dist2),
-              point.clone().add({ x: halfStrokeWidth, y: 0 }),
-              point.clone().add({ x: -halfStrokeWidth, y: 0 }),
-              point.clone().add({ x: 0, y: halfStrokeWidth }),
-              point.clone().add({ x: 0, y: -halfStrokeWidth }),
-              point.clone().add({ x: halfStrokeWidth, y: halfStrokeWidth }),
-              point.clone().add({ x: -halfStrokeWidth, y: -halfStrokeWidth }),
-            )
-          }
-          min.clampMin(...points)
-          max.clampMax(...points)
-        }
-      }
     })
+    if (withStyle) {
+      const strokeWidth = this.strokeWidth
+      // Inflate the (analytical) geometric bounds by half the stroke width instead of
+      // sampling the offset outline. Equivalent to the union of per-curve offsets, and
+      // conservative for round/bevel joins. Sharp miter spikes are not accounted for —
+      // neither was the prior sampled approximation.
+      if (strokeWidth > 1 && Number.isFinite(min.x)) {
+        const half = strokeWidth / 2
+        min.set(min.x - half, min.y - half)
+        max.set(max.x + half, max.y + half)
+      }
+    }
     return { min: min.finite(), max: max.finite() }
   }
 

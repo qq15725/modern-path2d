@@ -69,6 +69,68 @@ export class RoundCurve extends Curve {
     return output.set(_x, _y)
   }
 
+  /**
+   * Point on the ellipse at an absolute angle (mirrors {@link getPoint}'s parameterization,
+   * ignoring `_diff`).
+   */
+  protected _pointAtAngle(angle: number, output: Vector2): Vector2 {
+    let x = this.cx + this.rx * Math.cos(angle)
+    let y = this.cy + this.ry * Math.sin(angle)
+    if (this.rotate !== 0) {
+      const cos = Math.cos(this.rotate)
+      const sin = Math.sin(this.rotate)
+      const tx = x - this.cx
+      const ty = y - this.cy
+      x = tx * cos - ty * sin + this.cx
+      y = tx * sin + ty * cos + this.cy
+    }
+    return output.set(x, y)
+  }
+
+  /**
+   * Analytical bounds of the (elliptical) arc: the start/end points plus the per-axis
+   * extrema angles that fall within the swept interval. Matches {@link getPoint}, so it is
+   * exact for `ArcCurve`/`EllipseCurve`. `RoundRectangleCurve` (with a non-zero `_diff`)
+   * keeps the existing ellipse-only behavior — see TODO.
+   */
+  override getMinMax(min = Vector2.MAX, max = Vector2.MIN): { min: Vector2, max: Vector2 } {
+    const { startAngle, rotate } = this
+    const delta = this._getDeltaAngle()
+    const cosT = Math.cos(rotate)
+    const sinT = Math.sin(rotate)
+    const p = tempV2
+    let minX = min.x
+    let minY = min.y
+    let maxX = max.x
+    let maxY = max.y
+    const consider = (angle: number): void => {
+      this._pointAtAngle(angle, p)
+      if (p.x < minX)
+        minX = p.x
+      if (p.y < minY)
+        minY = p.y
+      if (p.x > maxX)
+        maxX = p.x
+      if (p.y > maxY)
+        maxY = p.y
+    }
+    consider(startAngle)
+    consider(startAngle + delta)
+    // x extrema: d/da[rx·cosθ·cos a − ry·sinθ·sin a] = 0  ⇒  a = atan2(−ry·sinθ, rx·cosθ)
+    // y extrema: d/da[rx·sinθ·cos a + ry·cosθ·sin a] = 0  ⇒  a = atan2( ry·cosθ, rx·sinθ)
+    const ax = Math.atan2(-this.ry * sinT, this.rx * cosT)
+    const ay = Math.atan2(this.ry * cosT, this.rx * sinT)
+    const bases = [ax, ax + Math.PI, ay, ay + Math.PI]
+    for (let i = 0; i < 4; i++) {
+      if (angleInSweep(bases[i], startAngle, delta)) {
+        consider(bases[i])
+      }
+    }
+    min.set(minX, minY)
+    max.set(maxX, maxY)
+    return { min: min.finite(), max: max.finite() }
+  }
+
   override toCommands(): Path2DCommand[] {
     const { cx, cy, rx, ry, startAngle, endAngle, clockwise, rotate } = this
     const startX = cx + rx * Math.cos(startAngle) * Math.cos(rotate) - ry * Math.sin(startAngle) * Math.sin(rotate)
@@ -293,6 +355,28 @@ export class RoundCurve extends Curve {
     this.rotate = source.rotate
     return this
   }
+}
+
+/**
+ * Whether absolute angle `a` lies on the arc swept from `start` by signed `delta`.
+ * A full sweep (|delta| ≈ 2π) contains every angle.
+ */
+function angleInSweep(a: number, start: number, delta: number): boolean {
+  const PI_2 = Math.PI * 2
+  const eps = 1e-9
+  if (Math.abs(delta) >= PI_2 - eps) {
+    return true
+  }
+  let off = (a - start) % PI_2
+  if (delta >= 0) {
+    if (off < -eps)
+      off += PI_2
+    return off >= -eps && off <= delta + eps
+  }
+  if (off > eps) {
+    off -= PI_2
+  }
+  return off <= eps && off >= delta - eps
 }
 
 function transfEllipseGeneric(curve: RoundCurve, m: Transform2D): void {

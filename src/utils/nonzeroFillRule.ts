@@ -35,12 +35,27 @@ interface NonzeroFillRuleResult {
   winding?: number
 }
 
+interface Aabb {
+  minX: number
+  minY: number
+  maxX: number
+  maxY: number
+}
+
+function aabbIntersects(a: Aabb, b: Aabb): boolean {
+  return a.minX <= b.maxX && a.maxX >= b.minX && a.minY <= b.maxY && a.maxY >= b.minY
+}
+
 export function nonzeroFillRule(paths: number[][]): NonzeroFillRuleResult[] {
   const results: NonzeroFillRuleResult[] = paths.map((_, i) => ({ index: i }))
 
-  const testPointsGroups: [number, number][][] = paths.map((path) => {
+  // Per-ring axis-aligned bounds, reused as a cheap prefilter below.
+  const bboxes: (Aabb | null)[] = []
+
+  const testPointsGroups: [number, number][][] = paths.map((path, pathIndex) => {
     const len = path.length
     if (!len) {
+      bboxes[pathIndex] = null
       return [] as [number, number][]
     }
     let xMinYAuto = [Number.MAX_SAFE_INTEGER, 0] as [number, number]
@@ -62,6 +77,12 @@ export function nonzeroFillRule(paths: number[][]): NonzeroFillRuleResult[] {
       if (xAutoYMax[1] < y) {
         xAutoYMax = [x, y]
       }
+    }
+    bboxes[pathIndex] = {
+      minX: xMinYAuto[0],
+      minY: xAutoYMin[1],
+      maxX: xMaxYAuto[0],
+      maxY: xAutoYMax[1],
     }
     const mid = [
       (xMinYAuto[0] + xMaxYAuto[0]) / 2,
@@ -113,10 +134,19 @@ export function nonzeroFillRule(paths: number[][]): NonzeroFillRuleResult[] {
   for (let i = 0, len = paths.length; i < len; i++) {
     const _results: Required<NonzeroFillRuleResult>[] = []
     const testPoints = testPointsGroups[i]
+    const boxI = bboxes[i]
 
     for (let j = 0; j < len; j++) {
       if (i === j)
         continue
+
+      // Ring j can only contain ring i's test points if their bounds overlap.
+      // When the boxes are disjoint every winding number is 0, so the original
+      // algorithm would record nothing for this pair — skipping is exact.
+      const boxJ = bboxes[j]
+      if (!boxI || !boxJ || !aabbIntersects(boxI, boxJ)) {
+        continue
+      }
 
       const wnMap: Record<number, number> = {}
       const wnList: number[] = []

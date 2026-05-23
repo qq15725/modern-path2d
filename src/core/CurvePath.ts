@@ -92,7 +92,7 @@ export class CurvePath extends CompositeCurve {
    */
   override isPointInStroke(point: Vector2Like, options: IsPointInStrokeOptions = {}): boolean {
     const { strokeWidth = 1, tolerance = 0 } = options
-    const vertices = this.getAdaptiveVertices()
+    const vertices = this._getCachedAdaptiveVertices()
     const len = vertices.length
     const closed = options.closed
       ?? (
