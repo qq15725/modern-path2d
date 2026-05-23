@@ -1,3 +1,14 @@
+# [1.7.0](https://github.com/qq15725/modern-path2d/compare/v1.6.1...v1.7.0) (2026-05-23)
+
+
+### Bug Fixes
+
+* correctness gaps — rounded-rect composite, null intersections, divide guard, cache bubbling ([6920536](https://github.com/qq15725/modern-path2d/commit/69205366fcc275068d87a993937e3908e6d2d902))
+
+
+### Performance Improvements
+
+* analytical bounds, fill-rule prefilter, hit-test caching + tests ([cc1e4bd](https://github.com/qq15725/modern-path2d/commit/cc1e4bdd3d9eeb202853e8ff6efd6ec2c0cb3199))
 ## [1.6.1](https://github.com/qq15725/modern-path2d/compare/v1.6.0...v1.6.1) (2026-05-23)
 
 
