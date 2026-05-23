@@ -26,6 +26,10 @@
 
 - Path triangulate (fill、stroke)
 
+- Hit testing (point in fill / stroke, holes-aware)
+
+- Analytical bounding box (lines / beziers / arcs / ellipses)
+
 - Parse SVG to Path2DSet
 
 - TypeScript
@@ -97,4 +101,55 @@ console.log(path.fillTriangulate())
 
 // triangulate for stroke
 console.log(path.strokeTriangulate())
+
+/**
+ * Hit testing
+ */
+
+// point in fill — holes are honored, fillRule defaults to 'nonzero'
+path.isPointInFill({ x: 75, y: 75 })
+
+// concise PathKit-style shorthand for fill containment
+path.contains(75, 75)
+
+// point on stroke — within strokeWidth / 2 + tolerance
+path.isPointInStroke({ x: 110, y: 75 }, { strokeWidth: 4, tolerance: 1 })
+
+// hit test a whole set top-to-bottom; returns the hit Path2D or undefined
+const set = new Path2DSet([path])
+const hit = set.hitTest({ x: 75, y: 75 }) // Path2D | undefined
+
+/**
+ * Bounding box
+ */
+
+// analytical bounds, tight for lines / beziers / arcs / ellipses
+const { x, y, width, height } = path.getBoundingBox()
+
+// geometry only, ignoring stroke width
+path.getBoundingBox(false)
+```
+
+### Low-level geometry helpers
+
+Pure functions over flat `[x0, y0, x1, y1, ...]` vertices, useful for building your own hit
+testing. Vertices are treated as an implicitly closed ring.
+
+```ts
+import {
+  pointInPolygon,
+  pointInPolygons,
+  pointToPolylineDistance,
+  pointToSegmentDistance,
+} from 'modern-path2d'
+
+// single ring (fillRule: 'nonzero' | 'evenodd', default 'nonzero')
+pointInPolygon({ x: 5, y: 5 }, [0, 0, 10, 0, 10, 10, 0, 10]) // true
+
+// multi-ring shape with holes — sums winding / crossings across all rings
+pointInPolygons({ x: 5, y: 5 }, [outerRing, innerHole]) // false (in the hole)
+
+// distance to a segment / polyline (for stroke hit testing)
+pointToSegmentDistance({ x: 5, y: 1 }, { x: 0, y: 0 }, { x: 10, y: 0 }) // 1
+pointToPolylineDistance({ x: 5, y: 1 }, [0, 0, 10, 0, 10, 10], true) // closed polyline
 ```
