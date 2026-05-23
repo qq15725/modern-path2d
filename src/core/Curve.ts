@@ -1,5 +1,5 @@
 import type { Transform2D, Vector2Like } from '../math'
-import type { Path2DCommand, Path2DData } from '../types'
+import type { FillRule, Path2DCommand, Path2DData } from '../types'
 import type {
   FillTriangulatedResult,
   FillTriangulateOptions,
@@ -8,7 +8,17 @@ import type {
 } from '../utils'
 import { BoundingBox, Vector2 } from '../math'
 import { svgPathCommandsToData } from '../methods'
-import { fillTriangulate, strokeTriangulate } from '../utils'
+import { fillTriangulate, pointInPolygon, pointToPolylineDistance, strokeTriangulate } from '../utils'
+
+export interface IsPointInFillOptions {
+  fillRule?: FillRule
+}
+
+export interface IsPointInStrokeOptions {
+  strokeWidth?: number
+  tolerance?: number
+  closed?: boolean
+}
 
 export abstract class Curve {
   arcLengthDivision = 200
@@ -222,6 +232,43 @@ export abstract class Curve {
   getBoundingBox(): BoundingBox {
     const { min, max } = this.getMinMax()
     return new BoundingBox(min.x, min.y, max.x - min.x, max.y - min.y)
+  }
+
+  /**
+   * Test whether a point lies inside the area enclosed by this curve.
+   *
+   * The curve is sampled via {@link getAdaptiveVertices} into a single implicitly closed
+   * ring. This is purely geometric (it ignores any `fill`/`stroke` style), mirroring
+   * `CanvasRenderingContext2D.isPointInPath`.
+   *
+   * Composites that hold multiple sub-paths (e.g. {@link Path2D}) override this so holes
+   * are honored — a single `Curve` is always one ring.
+   */
+  isPointInFill(point: Vector2Like, options: IsPointInFillOptions = {}): boolean {
+    return pointInPolygon(point, this.getAdaptiveVertices(), options.fillRule)
+  }
+
+  /**
+   * Test whether a point lies on this curve's stroke, i.e. within `strokeWidth / 2 + tolerance`
+   * of the sampled outline. The point must be in the same coordinate space as the curve.
+   *
+   * Options: `strokeWidth` (path units, default `1`), `tolerance` (extra hit slack in path
+   * units, default `0` — useful for thin strokes; no coordinate scaling is assumed, so convert
+   * pixel tolerance to path units upstream if your path is normalized), and `closed` (whether
+   * to include the closing edge from the last vertex back to the first).
+   */
+  isPointInStroke(point: Vector2Like, options: IsPointInStrokeOptions = {}): boolean {
+    const { strokeWidth = 1, tolerance = 0, closed = false } = options
+    const distance = pointToPolylineDistance(point, this.getAdaptiveVertices(), closed)
+    return distance <= strokeWidth / 2 + tolerance
+  }
+
+  /**
+   * Concise PathKit-style fill containment test: `contains(x, y)` is shorthand for
+   * {@link isPointInFill} with a `{ x, y }` point.
+   */
+  contains(x: number, y: number, options: IsPointInFillOptions = {}): boolean {
+    return this.isPointInFill({ x, y }, options)
   }
 
   getFillVertices(_options?: FillTriangulateOptions): number[] {

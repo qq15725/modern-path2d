@@ -1,4 +1,5 @@
-import type { Path2DStyle } from '../types'
+import type { Vector2Like } from '../math'
+import type { FillRule, Path2DStyle } from '../types'
 import type { Path2D } from './Path2D'
 import { BoundingBox, Vector2 } from '../math'
 
@@ -14,6 +15,57 @@ export class Path2DSet<T = any> {
     public viewBox?: number[],
   ) {
     //
+  }
+
+  /**
+   * Test whether a point lies inside the filled area of any path in this set.
+   * Purely geometric (ignores `fill: 'none'`); use {@link hitTest} for style-aware hits.
+   */
+  isPointInFill(point: Vector2Like, options: { fillRule?: FillRule } = {}): boolean {
+    return this.paths.some(path => path.isPointInFill(point, options))
+  }
+
+  /**
+   * Concise PathKit-style fill containment test across the whole set; shorthand for
+   * {@link isPointInFill} with a `{ x, y }` point.
+   */
+  contains(x: number, y: number, options: { fillRule?: FillRule } = {}): boolean {
+    return this.isPointInFill({ x, y }, options)
+  }
+
+  /**
+   * Find the topmost path hit by a point, or `undefined` if none.
+   *
+   * Paths are tested top-to-bottom (last drawn first). For each path a fill hit is checked
+   * first (skipped when `style.fill` is `'none'`), then — if `stroke` is enabled — a stroke
+   * hit (skipped when `style.stroke` is `'none'`). This honors the "fill: none falls back to
+   * stroke" rule; the coordinate space of `point` must match the paths (no scaling assumed).
+   *
+   * Options: `stroke` (also test strokes, default `true`), `tolerance` (extra stroke hit slack
+   * in path units, default `0`), and `fillRule` (overrides each path's own fill rule).
+   */
+  hitTest(
+    point: Vector2Like,
+    options: { stroke?: boolean, tolerance?: number, fillRule?: FillRule } = {},
+  ): Path2D<T> | undefined {
+    const { stroke = true, tolerance, fillRule } = options
+    for (let i = this.paths.length - 1; i >= 0; i--) {
+      const path = this.paths[i]
+      if (
+        (path.style.fill ?? '#000') !== 'none'
+        && path.isPointInFill(point, { fillRule })
+      ) {
+        return path
+      }
+      if (
+        stroke
+        && (path.style.stroke ?? 'none') !== 'none'
+        && path.isPointInStroke(point, { tolerance })
+      ) {
+        return path
+      }
+    }
+    return undefined
   }
 
   getBoundingBox(withStyle = true): BoundingBox | undefined {

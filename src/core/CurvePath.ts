@@ -1,7 +1,7 @@
 import type { Vector2Like } from '../math'
 import type { Path2DCommand } from '../types'
 import type { FillTriangulateOptions } from '../utils'
-import type { Curve } from './Curve'
+import type { Curve, IsPointInStrokeOptions } from './Curve'
 import {
   ArcCurve,
   CompositeCurve,
@@ -15,6 +15,7 @@ import {
 } from '../curves'
 import { Vector2 } from '../math'
 import { svgPathCommandsAddToPath2D, svgPathDataToCommands } from '../methods'
+import { pointToPolylineDistance } from '../utils'
 
 export class CurvePath extends CompositeCurve {
   startPoint?: Vector2
@@ -83,6 +84,22 @@ export class CurvePath extends CompositeCurve {
     return this._closeVertices(
       super.getFillVertices(options),
     )
+  }
+
+  /**
+   * Same as {@link Curve.isPointInStroke}, but `closed` defaults to this sub-path's actual
+   * closed-ness: explicitly `autoClose`, or geometrically closed (first vertex === last).
+   */
+  override isPointInStroke(point: Vector2Like, options: IsPointInStrokeOptions = {}): boolean {
+    const { strokeWidth = 1, tolerance = 0 } = options
+    const vertices = this.getAdaptiveVertices()
+    const len = vertices.length
+    const closed = options.closed
+      ?? (
+        this.autoClose
+        || (len >= 6 && vertices[0] === vertices[len - 2] && vertices[1] === vertices[len - 1])
+      )
+    return pointToPolylineDistance(point, vertices, closed) <= strokeWidth / 2 + tolerance
   }
 
   protected _setCurrentPoint(point: Vector2Like): this {

@@ -1,16 +1,17 @@
 import type { Vector2Like } from '../math'
-import type { Path2DCommand, Path2DData, Path2DStyle } from '../types'
+import type { FillRule, Path2DCommand, Path2DData, Path2DStyle } from '../types'
 import type {
   FillTriangulatedResult,
   FillTriangulateOptions,
   StrokeTriangulatedResult,
   StrokeTriangulateOptions,
 } from '../utils'
+import type { IsPointInFillOptions, IsPointInStrokeOptions } from './Curve'
 import { drawPoint, setCanvasContext } from '../canvas'
 import { CompositeCurve } from '../curves'
 import { BoundingBox, Vector2 } from '../math'
 import { svgPathCommandsAddToPath2D, svgPathDataToCommands } from '../methods'
-import { fillTriangulate, getIntersectionPoint, nonzeroFillRule, toKebabCase } from '../utils'
+import { fillTriangulate, getIntersectionPoint, nonzeroFillRule, pointInPolygons, toKebabCase } from '../utils'
 import { CurvePath } from './CurvePath'
 
 /**
@@ -254,6 +255,42 @@ export class Path2D<T = any> extends CompositeCurve<CurvePath> {
       })
     })
     return this
+  }
+
+  /**
+   * Test whether a point lies inside the filled area of this path.
+   *
+   * Each sub-path ({@link CurvePath}) is sampled into its own ring and all rings are
+   * evaluated together via {@link pointInPolygons}, so holes (donut / hollow shapes) are
+   * honored. This is purely geometric and ignores `style.fill` — for the `fill: 'none'`
+   * fallback, gate the call upstream (see {@link Path2DSet.hitTest}).
+   *
+   * Defaults `fillRule` to `style.fillRule`, then `'nonzero'` (matching SVG/Canvas).
+   */
+  override isPointInFill(point: Vector2Like, options: IsPointInFillOptions = {}): boolean {
+    const fillRule: FillRule = options.fillRule ?? this.style.fillRule ?? 'nonzero'
+    return pointInPolygons(
+      point,
+      this.curves.map(curve => curve.getAdaptiveVertices()),
+      fillRule,
+    )
+  }
+
+  /**
+   * Test whether a point lies on this path's stroke. A hit on any sub-path counts.
+   *
+   * Defaults `strokeWidth` to this path's own {@link strokeWidth} (which is `0` when
+   * `style.stroke` is `'none'`). Each sub-path infers its own closed-ness unless `closed`
+   * is given explicitly.
+   */
+  override isPointInStroke(point: Vector2Like, options: IsPointInStrokeOptions = {}): boolean {
+    const strokeWidth = options.strokeWidth ?? this.strokeWidth
+    const { tolerance = 0, closed } = options
+    return this.curves.some(curve => curve.isPointInStroke(point, {
+      strokeWidth,
+      tolerance,
+      closed,
+    }))
   }
 
   override getMinMax(min = Vector2.MAX, max = Vector2.MIN, withStyle = true): { min: Vector2, max: Vector2 } {

@@ -58,6 +58,10 @@ Curve (abstract base)
 - `strokeTriangulate` — generates stroke geometry as triangles
 - `nonzeroFillRule` — determines winding/parent relationships for nonzero fill rule
 
+**Hit testing** (`src/utils/pointInPolygon.ts` + curve methods):
+- Pure primitives: `pointInPolygon` (single ring), `pointInPolygons` (multi-ring/holes), `pointToSegmentDistance`, `pointToPolylineDistance`. All take flat `number[]` vertices and a `FillRule` (default `'nonzero'`).
+- `Curve.isPointInFill` / `isPointInStroke` + the concise PathKit-style `contains(x, y)` alias. `Curve`/`CurvePath` test a single ring; **`Path2D` overrides `isPointInFill`** to evaluate all sub-paths together via `pointInPolygons` (so holes work). All are purely geometric — the `fill: 'none'` fallback lives in `Path2DSet.hitTest`, which returns the topmost hit path (fill first, then stroke).
+
 **Math** (`src/math/`): `Vector2`, `Transform2D`, `BoundingBox`. `Matrix3` still exists but is **no longer used** by the transform pipeline — all curve transforms use `Transform2D`.
 
 **Deformations** (`src/deformations/`): `ffd` (Free-Form Deformation). `arap` and `msl` exist but are not exported.
@@ -123,7 +127,7 @@ Priority order if/when targeted:
 1. Boolean ops (`union` / `intersect` / `difference` / `xor`)
 2. `strokeAsPath` / `offset`
 3. `simplify` (self-intersection cleanup)
-4. `PathMeasure` class — `getPosTan(d)`, `getSegment(start, end)`, `contains(x, y)`
+4. `PathMeasure` class — `getPosTan(d)`, `getSegment(start, end)`. (`contains(x, y)` is **done** — see the Hit testing subsystem: `contains` / `isPointInFill` / `isPointInStroke` / `Path2DSet.hitTest`.)
 5. `reverse`
 6. `getTightBounds` — quadratic/cubic are already analytical; finish arcs (use angular extrema at 0, π/2, π, 3π/2 within the start→end sweep) and have `CompositeCurve.getBoundingBox` aggregate from the analytical primitives.
 7. `trim(startT, endT)`
@@ -133,4 +137,4 @@ Priority order if/when targeted:
 ### Repo hygiene
 - `src/deformations/arap.ts` and `msl.ts` are stubs and are NOT exported from `src/index.ts`, despite the README hinting at them. Either implement or delete (or move under `src/experimental/`).
 - The README mentions "animation" but there is no dedicated module. A `PathMeasure`-based `animate(progress)` would be the smallest credible API.
-- Test coverage is essentially empty (`test/index.test.ts` only asserts `1 === 1`). Any non-trivial refactor here needs new tests first.
+- Test coverage is still thin: `test/index.test.ts` only asserts `1 === 1`; `test/hitTest.test.ts` covers the hit-testing primitives + `Path2D`/`Path2DSet` fill/stroke/`contains`. Everything else is untested — any non-trivial refactor needs new tests first.
