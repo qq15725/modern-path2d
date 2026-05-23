@@ -1,3 +1,9 @@
+## [1.6.1](https://github.com/qq15725/modern-path2d/compare/v1.6.0...v1.6.1) (2026-05-23)
+
+
+### Features
+
+* add point-in-fill / point-in-stroke hit testing ([953f2e4](https://github.com/qq15725/modern-path2d/commit/953f2e46b68d0f4aa03ac35206689bca1def1040))
 # [1.6.0](https://github.com/qq15725/modern-path2d/compare/v1.5.6...v1.6.0) (2026-05-15)
 
 
