@@ -1,3 +1,9 @@
+## [1.8.2](https://github.com/qq15725/modern-path2d/compare/v1.8.1...v1.8.2) (2026-06-01)
+
+
+### Bug Fixes
+
+* collapse duplicate vertices in strokeTriangulate (seam spikes) ([dfc0692](https://github.com/qq15725/modern-path2d/commit/dfc0692b14d1faae2dce7e3ff7e36d48d42f2569))
 ## [1.8.1](https://github.com/qq15725/modern-path2d/compare/v1.8.0...v1.8.1) (2026-06-01)
 
 
