@@ -91,6 +91,27 @@ describe('stroke triangulation', () => {
     expect(open.curves[0].isClosed()).toBe(false)
   })
 
+  it('no seam spikes on a two-arc circle (duplicate vertices collapsed)', () => {
+    // SVG circle built from two semicircle arcs + Z — the arc seam and closing line leave
+    // coincident vertices that previously produced zero-length segments → NaN spikes.
+    const p = new Path2D().addData('M0 50 A50 50 0 1 0 100 50 A50 50 0 1 0 0 50 Z')
+    p.style.strokeWidth = 4
+    const r = p.strokeTriangulate()
+    expect(r.vertices.every(Number.isFinite)).toBe(true)
+    // the stroke band hugs r=50: centerline fully covered, nothing at the center or far outside
+    expect(uncoveredOnRing(r, 50, 50, 50)).toBe(0)
+    expect(uncoveredOnRing(r, 50, 50, 0.0001)).toBeGreaterThan(700) // center is empty
+  })
+
+  it('strokeTriangulate tolerates duplicate input points without NaN', () => {
+    const pts = [0, 0, 10, 0, 10, 0, 10, 10, 10, 10, 0, 10, 0, 0]
+    const r = strokeTriangulate(pts, {
+      lineStyle: { width: 2, alignment: 0.5, join: 'miter', cap: 'butt', miterLimit: 10 },
+    })
+    expect(r.vertices.length).toBeGreaterThan(0)
+    expect(r.vertices.every(Number.isFinite)).toBe(true)
+  })
+
   it('resolveLineStyle maps Path2DStyle onto LineStyle', () => {
     expect(resolveLineStyle({ strokeWidth: 4, strokeLinejoin: 'round', strokeLinecap: 'square' }))
       .toMatchObject({ width: 4, join: 'round', cap: 'square' })

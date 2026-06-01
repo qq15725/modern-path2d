@@ -79,6 +79,14 @@ export function strokeTriangulate(
     return { vertices, indices }
   }
 
+  // Collapse consecutive duplicate points. Sub-curve seams (e.g. two arcs meeting, or a
+  // degenerate closing line) leave coincident vertices; the zero-length segments make the
+  // perpendicular/miter math divide by ~0 and spray spikes at the seam.
+  points = dedupeConsecutivePoints(points, eps)
+  if (points.length < 4) {
+    return { vertices, indices }
+  }
+
   const style = lineStyle
 
   let alignment = style.alignment
@@ -461,6 +469,23 @@ export function strokeTriangulate(
     vertices,
     indices,
   }
+}
+
+/**
+ * Return a copy of the flat point list with consecutive near-coincident points removed
+ * (distance < `eps`). Keeps the first occurrence; does not touch the first/last wrap so the
+ * caller's closed-path detection still works.
+ */
+function dedupeConsecutivePoints(points: number[], eps: number): number[] {
+  const out: number[] = [points[0], points[1]]
+  for (let i = 2; i < points.length; i += 2) {
+    const x = points[i]
+    const y = points[i + 1]
+    if (Math.abs(x - out[out.length - 2]) >= eps || Math.abs(y - out[out.length - 1]) >= eps) {
+      out.push(x, y)
+    }
+  }
+  return out
 }
 
 function getOrientationOfPoints(points: number[]): number {
