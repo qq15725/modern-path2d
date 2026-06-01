@@ -12,7 +12,7 @@ import { drawPoint, setCanvasContext } from '../canvas'
 import { CompositeCurve } from '../curves'
 import { BoundingBox, Vector2 } from '../math'
 import { svgPathCommandsAddToPath2D, svgPathDataToCommands } from '../methods'
-import { fillTriangulate, getIntersectionPoint, nonzeroFillRule, pointInPolygons, polygonBoolean, toKebabCase } from '../utils'
+import { evenoddFillRule, fillTriangulate, getIntersectionPoint, nonzeroFillRule, pointInPolygons, polygonBoolean, toKebabCase } from '../utils'
 import { CurvePath } from './CurvePath'
 
 /**
@@ -444,15 +444,33 @@ export class Path2D<T = any> extends CompositeCurve<CurvePath> {
       }
     }
     else {
-      // pointInPolygonEvenOdd
-      this.curves.forEach((curve) => {
-        curve.fillTriangulate({
+      // even-odd: nest rings by containment parity so holes are real holes, not solid overlaps.
+      const paths = this.curves
+        .map(curve => curve.getFillVertices(_options))
+      const groups = evenoddFillRule(paths)
+      const groupsLen = groups.length
+      for (let i = 0; i < groupsLen; i++) {
+        const pointArray = paths[i]
+        // odd depth = hole (emitted as a hole of its shell below); skip as a standalone shell.
+        if ((groups[i].depth & 1) === 1 || !pointArray.length) {
+          continue
+        }
+        const _pointArray = pointArray.slice()
+        const holes: number[] = []
+        for (let j = 0; j < groupsLen; j++) {
+          if (groups[j].parentIndex === i && (groups[j].depth & 1) === 1) {
+            holes.push(_pointArray.length / 2)
+            _pointArray.push(...paths[j])
+          }
+        }
+        fillTriangulate(_pointArray, {
           ...options,
           indices,
           vertices,
+          holes,
           style: { ...this.style },
         })
-      })
+      }
     }
     return { indices, vertices }
   }
