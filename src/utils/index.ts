@@ -1,3 +1,4 @@
+export * from './boolean'
 export * from './catmullRom'
 export * from './css'
 export * from './cubicBezier'

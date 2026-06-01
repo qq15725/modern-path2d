@@ -1,0 +1,175 @@
+import { describe, expect, it } from 'vitest'
+import { Path2D, PathMeasure } from '../src/index'
+import { resolveLineStyle, strokeTriangulate } from '../src/utils'
+
+function inTriangle(
+  px: number,
+  py: number,
+  ax: number,
+  ay: number,
+  bx: number,
+  by: number,
+  cx: number,
+  cy: number,
+): boolean {
+  const d = (by - cy) * (ax - cx) + (cx - bx) * (ay - cy)
+  const a = ((by - cy) * (px - cx) + (cx - bx) * (py - cy)) / d
+  const b = ((cy - ay) * (px - cx) + (ax - cx) * (py - cy)) / d
+  const c = 1 - a - b
+  return a >= -1e-6 && b >= -1e-6 && c >= -1e-6
+}
+
+/** Number of points on the circle of radius `rad` (centered cx,cy) NOT covered by any triangle. */
+function uncoveredOnRing(
+  result: { vertices: number[], indices: number[] },
+  cx: number,
+  cy: number,
+  rad: number,
+  step = 0.5,
+): number {
+  const { vertices: V, indices: I } = result
+  let bad = 0
+  for (let deg = 0; deg < 360; deg += step) {
+    const a = (deg * Math.PI) / 180
+    const px = cx + rad * Math.cos(a)
+    const py = cy + rad * Math.sin(a)
+    let ok = false
+    for (let i = 0; i < I.length; i += 3) {
+      const x = I[i]
+      const y = I[i + 1]
+      const z = I[i + 2]
+      if (inTriangle(px, py, V[x * 2], V[x * 2 + 1], V[y * 2], V[y * 2 + 1], V[z * 2], V[z * 2 + 1])) {
+        ok = true
+        break
+      }
+    }
+    if (!ok)
+      bad++
+  }
+  return bad
+}
+
+describe('stroke triangulation', () => {
+  it('honors style.strokeWidth instead of a 1px hairline', () => {
+    const p = new Path2D()
+    p.arc(100, 100, 50, 0, Math.PI * 2, true)
+    p.style.stroke = 'black'
+    p.style.strokeWidth = 20
+    const r = p.strokeTriangulate()
+    // width 20 centered on r=50 → covers r∈[40,60]
+    expect(uncoveredOnRing(r, 100, 100, 43)).toBe(0)
+    expect(uncoveredOnRing(r, 100, 100, 57)).toBe(0)
+    // outside the band → not covered
+    expect(uncoveredOnRing(r, 100, 100, 70)).toBeGreaterThan(700)
+  })
+
+  it('leaves no seam gap on a full circle (closed inferred)', () => {
+    const p = new Path2D()
+    p.arc(100, 100, 50, 0, Math.PI * 2, true)
+    p.style.strokeWidth = 8
+    expect(p.curves[0].isClosed()).toBe(true)
+    expect(uncoveredOnRing(p.strokeTriangulate(), 100, 100, 50)).toBe(0)
+  })
+
+  it('infers closed-ness per shape', () => {
+    const circle = new Path2D()
+    circle.arc(100, 100, 50, 0, Math.PI * 2, true)
+    expect(circle.curves[0].isClosed()).toBe(true)
+
+    const semi = new Path2D()
+    semi.arc(100, 100, 50, 0, Math.PI, false)
+    expect(semi.curves[0].isClosed()).toBe(false)
+
+    const rect = new Path2D()
+    rect.rect(10, 10, 80, 80)
+    expect(rect.curves[0].isClosed()).toBe(true)
+
+    const open = new Path2D()
+    open.moveTo(0, 0)
+    open.lineTo(50, 0)
+    open.lineTo(50, 50)
+    expect(open.curves[0].isClosed()).toBe(false)
+  })
+
+  it('resolveLineStyle maps Path2DStyle onto LineStyle', () => {
+    expect(resolveLineStyle({ strokeWidth: 4, strokeLinejoin: 'round', strokeLinecap: 'square' }))
+      .toMatchObject({ width: 4, join: 'round', cap: 'square' })
+    // arcs / miter-clip degrade to miter; undefined width → 1
+    expect(resolveLineStyle({ strokeLinejoin: 'arcs' })).toMatchObject({ width: 1, join: 'miter' })
+    expect(resolveLineStyle(undefined)).toMatchObject({ width: 1, join: 'miter', cap: 'butt' })
+  })
+
+  it('alignment shifts the stroke inside/outside consistently for CW and CCW', () => {
+    // Covered radial extent (along 45°) for a circle of radius 50, stroke width 10.
+    const bandCenter = (cw: boolean, alignment: number): number => {
+      const p = new Path2D()
+      p.arc(100, 100, 50, 0, Math.PI * 2, cw)
+      const r = strokeTriangulate(p.curves[0].getAdaptiveVertices(), {
+        lineStyle: { width: 10, alignment, join: 'miter', cap: 'butt', miterLimit: 10 },
+      })
+      const a = Math.PI / 4
+      let lo = Infinity
+      let hi = -Infinity
+      for (let rad = 20; rad <= 80; rad += 0.1) {
+        const px = 100 + rad * Math.cos(a)
+        const py = 100 + rad * Math.sin(a)
+        const { vertices: V, indices: I } = r
+        for (let i = 0; i < I.length; i += 3) {
+          const x = I[i]
+          const y = I[i + 1]
+          const z = I[i + 2]
+          if (inTriangle(px, py, V[x * 2], V[x * 2 + 1], V[y * 2], V[y * 2 + 1], V[z * 2], V[z * 2 + 1])) {
+            lo = Math.min(lo, rad)
+            hi = Math.max(hi, rad)
+            break
+          }
+        }
+      }
+      return (lo + hi) / 2
+    }
+    for (const cw of [false, true]) {
+      expect(bandCenter(cw, 0)).toBeCloseTo(55, 0) // outer
+      expect(bandCenter(cw, 0.5)).toBeCloseTo(50, 0) // centered
+      expect(bandCenter(cw, 1)).toBeCloseTo(45, 0) // inner
+    }
+  })
+
+  it('explicit lineStyle still wins over derived style', () => {
+    const p = new Path2D()
+    p.arc(100, 100, 50, 0, Math.PI * 2, true)
+    const verts = p.curves[0].getAdaptiveVertices()
+    const r = strokeTriangulate(verts, {
+      style: { strokeWidth: 50 },
+      lineStyle: { width: 2, alignment: 0.5, join: 'miter', cap: 'butt', miterLimit: 10 },
+    })
+    // explicit width 2 used → r=70 far outside
+    expect(uncoveredOnRing(r, 100, 100, 70)).toBeGreaterThan(700)
+  })
+})
+
+describe('PathMeasure', () => {
+  it('measures a circle', () => {
+    const p = new Path2D()
+    p.arc(100, 100, 50, 0, Math.PI * 2, true)
+    const m = new PathMeasure(p)
+    expect(m.getLength()).toBeCloseTo(2 * Math.PI * 50, 0)
+    expect(m.isClosed()).toBe(true)
+    // quarter way around lands at the top of the circle
+    const q = m.getPosTanAtProgress(0.25)
+    expect(q.position.x).toBeCloseTo(100, 0)
+    expect(q.position.y).toBeCloseTo(50, 0)
+  })
+
+  it('getPosTan clamps distance and reports tangent angle on a line', () => {
+    const l = new Path2D()
+    l.moveTo(0, 0)
+    l.lineTo(100, 0)
+    const m = new PathMeasure(l)
+    expect(m.getLength()).toBeCloseTo(100, 5)
+    expect(m.getPosition(50).x).toBeCloseTo(50, 5)
+    expect(m.getPosTan(50).angle).toBeCloseTo(0, 5)
+    // clamps past the end
+    expect(m.getPosition(1000).x).toBeCloseTo(100, 5)
+    expect(m.sample(8)).toHaveLength(9)
+  })
+})

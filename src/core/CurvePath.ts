@@ -48,6 +48,24 @@ export class CurvePath extends CompositeCurve {
     return this
   }
 
+  /**
+   * A sub-path is closed if it was explicitly closed (`autoClose`, i.e. a `Z`/`closePath`), or if
+   * it forms a geometric loop / wraps a single closed primitive (handled by the base class).
+   */
+  override isClosed(): boolean {
+    return this.autoClose || super.isClosed()
+  }
+
+  /** Reverse direction, then refresh the {@link startPoint}/{@link currentPoint} cursors. */
+  override reverse(): this {
+    super.reverse()
+    if (this.curves.length) {
+      this.startPoint = this.getPoint(0)
+      this.currentPoint = this.getPoint(1)
+    }
+    return this
+  }
+
   protected _closeVertices(output: number[]): number[] {
     if (
       this.autoClose

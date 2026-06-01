@@ -29,6 +29,12 @@ export class SplineCurve extends Curve {
     return this.points
   }
 
+  override reverse(): this {
+    this.points.reverse()
+    this.invalidate()
+    return this
+  }
+
   override copyFrom(source: SplineCurve): this {
     super.copyFrom(source)
     this.points = []

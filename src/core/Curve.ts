@@ -76,6 +76,23 @@ export abstract class Curve {
     return []
   }
 
+  /**
+   * Reverse the traversal direction in place (start ↔ end, same geometry). The base
+   * implementation reverses the order of the control-point *values*, which is correct for
+   * line / Bézier / spline primitives whose {@link getControlPointRefs} order matches their
+   * parametric order. {@link RoundCurve} (angle-based) and composites (child order) override it.
+   */
+  reverse(): this {
+    const refs = this.getControlPointRefs()
+    const n = refs.length
+    const snapshot = refs.map(p => p.clone())
+    for (let i = 0; i < n; i++) {
+      refs[i].copyFrom(snapshot[n - 1 - i])
+    }
+    this.invalidate()
+    return this
+  }
+
   applyTransform(transform: Transform2D | ((point: Vector2) => void)): this {
     const isFunction = typeof transform === 'function'
     this.getControlPointRefs().forEach((p) => {
@@ -228,6 +245,23 @@ export abstract class Curve {
     return this.getTangent(this.getUToTMapping(u), output)
   }
 
+  /**
+   * PathKit-style sample at an absolute arc-length `distance` along the curve: the point, the unit
+   * tangent, and the tangent `angle` in radians. `distance` is clamped to `[0, getLength()]`, so
+   * passing `0`/`getLength()` always yields the endpoints. See {@link PathMeasure} for a wrapper.
+   */
+  getPosTan(distance: number): { position: Vector2, tangent: Vector2, angle: number } {
+    const length = this.getLength()
+    const u = length > 0 ? Math.min(Math.max(distance / length, 0), 1) : 0
+    const t = this.getUToTMapping(u)
+    const tangent = this.getTangent(t)
+    return {
+      position: this.getPoint(t),
+      tangent,
+      angle: Math.atan2(tangent.y, tangent.x),
+    }
+  }
+
   getNormal(t: number, output = new Vector2()): Vector2 {
     this.getTangent(t, output)
     return output.set(-output.y, output.x).normalize()
@@ -337,10 +371,29 @@ export abstract class Curve {
     )
   }
 
+  /**
+   * Whether this curve forms a closed loop (its outline should be stroked without end caps,
+   * stitching the last vertex back to the first). The base test is purely geometric — the first
+   * sampled vertex coincides with the last. Curves that close without a duplicated endpoint
+   * (a full-revolution {@link RoundCurve}, rectangles, polygons) override this.
+   */
+  isClosed(): boolean {
+    const v = this._getCachedAdaptiveVertices()
+    const len = v.length
+    if (len < 6) {
+      return false
+    }
+    const eps = 1e-4
+    return Math.abs(v[0] - v[len - 2]) < eps && Math.abs(v[1] - v[len - 1]) < eps
+  }
+
   strokeTriangulate(options?: StrokeTriangulateOptions): StrokeTriangulatedResult {
     return strokeTriangulate(
       this.getAdaptiveVertices(),
-      options,
+      {
+        ...options,
+        closed: options?.closed ?? this.isClosed(),
+      },
     )
   }
 

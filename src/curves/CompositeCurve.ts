@@ -141,6 +141,17 @@ export class CompositeCurve<T extends Curve = Curve> extends Curve {
     return output
   }
 
+  /**
+   * A composite is closed when its single child is closed (e.g. a lone full-circle arc), or when
+   * its assembled outline returns to its start (rectangles, polygons, multi-segment loops).
+   */
+  override isClosed(): boolean {
+    if (this.curves.length === 1) {
+      return this.curves[0].isClosed()
+    }
+    return super.isClosed()
+  }
+
   override strokeTriangulate(options?: StrokeTriangulateOptions): StrokeTriangulatedResult {
     if (this.curves.length === 1) {
       return this.curves[0].strokeTriangulate(options)
@@ -148,6 +159,14 @@ export class CompositeCurve<T extends Curve = Curve> extends Curve {
     else {
       return super.strokeTriangulate(options)
     }
+  }
+
+  /** Reverse the sub-curve order and reverse each sub-curve, so the whole outline runs backwards. */
+  override reverse(): this {
+    this.curves.reverse()
+    this.curves.forEach(curve => curve.reverse())
+    this.invalidate()
+    return this
   }
 
   override getFillVertices(options?: FillTriangulateOptions): number[] {

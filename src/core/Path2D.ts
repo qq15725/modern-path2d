@@ -1,6 +1,7 @@
 import type { Vector2Like } from '../math'
 import type { FillRule, Path2DCommand, Path2DData, Path2DStyle } from '../types'
 import type {
+  BooleanOp,
   FillTriangulatedResult,
   FillTriangulateOptions,
   StrokeTriangulatedResult,
@@ -11,7 +12,7 @@ import { drawPoint, setCanvasContext } from '../canvas'
 import { CompositeCurve } from '../curves'
 import { BoundingBox, Vector2 } from '../math'
 import { svgPathCommandsAddToPath2D, svgPathDataToCommands } from '../methods'
-import { fillTriangulate, getIntersectionPoint, nonzeroFillRule, pointInPolygons, toKebabCase } from '../utils'
+import { fillTriangulate, getIntersectionPoint, nonzeroFillRule, pointInPolygons, polygonBoolean, toKebabCase } from '../utils'
 import { CurvePath } from './CurvePath'
 
 /**
@@ -296,6 +297,61 @@ export class Path2D<T = any> extends CompositeCurve<CurvePath> {
     return pointInPolygons(point, this._getRings(), fillRule)
   }
 
+  /** Build a `Path2D` from flat rings (`[x0,y0,…]` per sub-path); closed-and-filled as sub-paths. */
+  static fromRings(rings: number[][], style: Partial<Path2DStyle> = {}): Path2D {
+    const path = new Path2D(undefined, style)
+    for (const ring of rings) {
+      if (ring.length < 6) {
+        continue
+      }
+      // Drop a trailing duplicate of the start point — closePath() re-adds the closing edge.
+      let end = ring.length
+      if (
+        ring[0] === ring[end - 2]
+        && ring[1] === ring[end - 1]
+      ) {
+        end -= 2
+      }
+      path.moveTo(ring[0], ring[1])
+      for (let i = 2; i < end; i += 2) {
+        path.lineTo(ring[i], ring[i + 1])
+      }
+      path.closePath()
+    }
+    return path
+  }
+
+  /**
+   * Boolean (path) operation against another path, returning a NEW `Path2D` whose outline is the
+   * polygonal result. Curves are sampled before clipping, so the result is a polygonal
+   * approximation (see {@link polygonBoolean}). The result inherits this path's `style` unless
+   * overridden via `style`. Holes are emitted as oppositely-wound sub-paths (nonzero fill).
+   */
+  booleanOp(op: BooleanOp, other: Path2D, style?: Partial<Path2DStyle>): Path2D {
+    const rings = polygonBoolean(op, this._getRings(), other._getRings())
+    return Path2D.fromRings(rings, { ...this.style, ...style })
+  }
+
+  /** `this ∪ other` — the combined filled area. */
+  union(other: Path2D, style?: Partial<Path2DStyle>): Path2D {
+    return this.booleanOp('union', other, style)
+  }
+
+  /** `this ∩ other` — only the overlapping area. */
+  intersection(other: Path2D, style?: Partial<Path2DStyle>): Path2D {
+    return this.booleanOp('intersection', other, style)
+  }
+
+  /** `this − other` — this path with `other` cut away. */
+  difference(other: Path2D, style?: Partial<Path2DStyle>): Path2D {
+    return this.booleanOp('difference', other, style)
+  }
+
+  /** `this ⊕ other` — areas covered by exactly one of the two paths. */
+  xor(other: Path2D, style?: Partial<Path2DStyle>): Path2D {
+    return this.booleanOp('xor', other, style)
+  }
+
   /**
    * Test whether a point lies on this path's stroke. A hit on any sub-path counts.
    *
@@ -408,7 +464,7 @@ export class Path2D<T = any> extends CompositeCurve<CurvePath> {
 
   drawTo(ctx: CanvasRenderingContext2D, style: Partial<Path2DStyle> = {}): this {
     style = { ...this.style, ...style }
-    const { fill = '#000', stroke = 'none' } = style
+    const { fill = '#000', stroke = 'none', fillRule = 'nonzero' } = style
     ctx.beginPath()
     ctx.save()
     setCanvasContext(ctx, style)
@@ -416,7 +472,8 @@ export class Path2D<T = any> extends CompositeCurve<CurvePath> {
       path.drawTo(ctx)
     })
     if (fill !== 'none') {
-      ctx.fill()
+      // Pass the fill rule through — otherwise `evenodd` paths (holes, self-overlap) fill solid.
+      ctx.fill(fillRule)
     }
     if (stroke !== 'none') {
       ctx.stroke()

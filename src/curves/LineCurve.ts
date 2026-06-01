@@ -51,6 +51,16 @@ export class LineCurve extends Curve {
     return [this.p1, this.p2]
   }
 
+  // Swap endpoint *references* (not values) so corner Vector2s shared with adjacent
+  // segments stay intact and simply re-associate with the reversed segment.
+  override reverse(): this {
+    const { p1, p2 } = this
+    this.p1 = p2
+    this.p2 = p1
+    this.invalidate()
+    return this
+  }
+
   override getAdaptiveVertices(output: number[] = []): number[] {
     output.push(
       this.p1.x, this.p1.y,

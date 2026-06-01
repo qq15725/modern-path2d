@@ -126,15 +126,17 @@ Benchmarks live in `test/perf.bench.ts` (`pnpm bench`). Recent wins (200-bezier 
 
 ### PathKit feature gaps (this lib markets itself as PathKit-like)
 Priority order if/when targeted:
-1. Boolean ops (`union` / `intersect` / `difference` / `xor`)
+1. Boolean ops (`union` / `intersect` / `difference` / `xor`) — **done**: `Path2D.union/intersection/difference/xor/booleanOp` return a new `Path2D`, backed by `polygonBoolean` (`src/utils/boolean.ts`) over the `polygon-clipping` dep (Martinez–Rueda). Inputs are **sampled** outlines, so results are polygonal approximations; multi-ring operands use even-odd (XOR) to form holes; output shells are CCW / holes CW (nonzero-renderable). See `test/boolean.test.ts`.
 2. `strokeAsPath` / `offset`
 3. `simplify` (self-intersection cleanup)
-4. `PathMeasure` class — `getPosTan(d)`, `getSegment(start, end)`. (`contains(x, y)` is **done** — see the Hit testing subsystem: `contains` / `isPointInFill` / `isPointInStroke` / `Path2DSet.hitTest`.)
-5. `reverse`
+4. `PathMeasure` class — **done** (`src/core/PathMeasure.ts`): `getLength` / `isClosed` / `getPosTan(d)` / `getPosTanAtProgress(t)` / `sample(n)`, plus `Curve.getPosTan(distance)`. `getSegment(start, end)` still pending (needs `trim`). (`contains(x, y)` also done — see Hit testing.)
+5. `reverse` — **done**: `Curve.reverse()` in place. Leaf curves swap endpoint/control-point **references** (not values, to preserve corner `Vector2`s shared between adjacent segments); `RoundCurve` swaps angles + flips `clockwise`; composites reverse child order + each child. Full-revolution arcs keep the dense circle sampler (broadened `RoundCurve.getAdaptiveVertices` fast path). See `test/reverse.test.ts`.
 6. `getTightBounds` — **mostly done**: quadratic/cubic and arcs/ellipses are analytical and `CompositeCurve`/`Path2D` (incl. `RoundRectangleCurve`) aggregate from them (`getBoundingBox(false)` is already tight). Remaining: `SplineCurve` still samples (Catmull-Rom extrema).
 7. `trim(startT, endT)`
 8. `conicTo` (rational quadratic)
 9. Binary `toCmds` / `fromCmds`
+
+Stroke triangulation now honors `style` (`strokeWidth`/`strokeLinejoin`/`strokeLinecap`/`strokeMiterlimit` → `lineStyle` via `resolveLineStyle`) and infers `closed` per-shape via `Curve.isClosed()` (full-circle arcs, rects, polygons, and `autoClose` sub-paths report closed; open arcs/polylines don't). This fixed the WebGL circle-stroke gap (was a 1px miter hairline + seam). See `test/stroke.test.ts`.
 
 ### Repo hygiene
 - `src/deformations/arap.ts` and `msl.ts` are stubs and are NOT exported from `src/index.ts`, despite the README hinting at them. Either implement or delete (or move under `src/experimental/`).

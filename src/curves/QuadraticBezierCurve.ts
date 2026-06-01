@@ -37,6 +37,15 @@ export class QuadraticBezierCurve extends Curve {
     return [this.p1, this.cp, this.p2]
   }
 
+  // Swap endpoint references (cp is symmetric); keeps shared corner Vector2s intact.
+  override reverse(): this {
+    const { p1, p2 } = this
+    this.p1 = p2
+    this.p2 = p1
+    this.invalidate()
+    return this
+  }
+
   override getAdaptiveVertices(output: number[] = []): number[] {
     return getAdaptiveQuadraticBezierCurvePoints(
       this.p1.x, this.p1.y,

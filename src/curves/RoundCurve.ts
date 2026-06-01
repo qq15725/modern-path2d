@@ -39,6 +39,24 @@ export class RoundCurve extends Curve {
     return this.clockwise
   }
 
+  /**
+   * A circle/ellipse arc is closed when it sweeps (at least) a full revolution — the sampled
+   * outline does not duplicate the start vertex, so the geometric first==last test in the base
+   * class would wrongly report a full circle as open and leave a seam gap in the stroke.
+   */
+  override isClosed(): boolean {
+    return Math.abs(this.endAngle - this.startAngle) >= Math.PI * 2 - 1e-9 || super.isClosed()
+  }
+
+  override reverse(): this {
+    const { startAngle, endAngle } = this
+    this.startAngle = endAngle
+    this.endAngle = startAngle
+    this.clockwise = !this.clockwise
+    this.invalidate()
+    return this
+  }
+
   protected _getDeltaAngle(): number {
     const PI_2 = Math.PI * 2
     let deltaAngle = this.endAngle - this.startAngle
@@ -337,8 +355,29 @@ export class RoundCurve extends Curve {
   }
 
   override getAdaptiveVertices(output: number[] = []): number[] {
-    if (this.startAngle === 0 && this.endAngle === Math.PI * 2) {
+    const PI2 = Math.PI * 2
+    if (this.startAngle === 0 && this.endAngle === PI2) {
       return this._getAdaptiveVerticesByCircle(output)
+    }
+    // Full revolution in a non-canonical orientation (e.g. a circle reversed to 2π→0): reuse the
+    // dense circle sampler and flip vertex order when traversed the other way, so reversing a
+    // circle keeps its resolution instead of falling back to the coarse arc sampler.
+    if (Math.abs(this.endAngle - this.startAngle) >= PI2 - 1e-9) {
+      const tmp = this._getAdaptiveVerticesByCircle([])
+      const n = tmp.length / 2
+      if (this.endAngle > this.startAngle) {
+        for (let i = 0; i < tmp.length; i++) {
+          output.push(tmp[i])
+        }
+      }
+      else {
+        // keep the same start vertex (angle 0), reverse the rest
+        output.push(tmp[0], tmp[1])
+        for (let i = n - 1; i >= 1; i--) {
+          output.push(tmp[i * 2], tmp[i * 2 + 1])
+        }
+      }
+      return output
     }
     return this._getAdaptiveVerticesByArc(output)
   }

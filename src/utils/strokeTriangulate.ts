@@ -25,6 +25,36 @@ export interface LineStyle {
   miterLimit: number
 }
 
+/**
+ * Map an SVG/canvas `strokeLinejoin` onto the three joins the triangulator supports.
+ * `arcs`/`miter-clip` (rarely implemented even by browsers) degrade to `miter`.
+ */
+function resolveLineJoin(join?: string): LineJoin {
+  switch (join) {
+    case 'round':
+    case 'bevel':
+    case 'miter':
+      return join
+    default:
+      return 'miter'
+  }
+}
+
+/**
+ * Derive a triangulator {@link LineStyle} from a (partial) {@link Path2DStyle}. This is what
+ * makes `path.strokeTriangulate()` honor `style.strokeWidth` / `strokeLinejoin` / `strokeLinecap`
+ * / `strokeMiterlimit` instead of silently falling back to a 1px miter hairline.
+ */
+export function resolveLineStyle(style?: Partial<Path2DStyle>): LineStyle {
+  return {
+    width: style?.strokeWidth ?? 1,
+    alignment: 0.5,
+    join: resolveLineJoin(style?.strokeLinejoin),
+    cap: style?.strokeLinecap ?? 'butt',
+    miterLimit: style?.strokeMiterlimit ?? 10,
+  }
+}
+
 const closePointEps = 1e-4
 const curveEps = 0.0001
 
@@ -35,16 +65,13 @@ export function strokeTriangulate(
   const {
     vertices = [],
     indices = [],
-    lineStyle = {
-      alignment: 0.5,
-      cap: 'butt',
-      join: 'miter',
-      width: 1,
-      miterLimit: 10,
-    },
     flipAlignment = false,
     closed = true,
   } = options
+
+  // Explicit `lineStyle` wins; otherwise derive from the path's `style` (so strokeWidth/join/cap
+  // are respected); otherwise fall back to a 1px miter hairline.
+  const lineStyle = options.lineStyle ?? resolveLineStyle(options.style)
 
   const eps = closePointEps
 

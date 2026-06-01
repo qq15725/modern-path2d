@@ -50,6 +50,17 @@ export class CubicBezierCurve extends Curve {
     return [this.p1, this.cp1, this.cp2, this.p2]
   }
 
+  // Swap endpoint and control-point references; keeps shared corner Vector2s intact.
+  override reverse(): this {
+    const { p1, cp1, cp2, p2 } = this
+    this.p1 = p2
+    this.cp1 = cp2
+    this.cp2 = cp1
+    this.p2 = p1
+    this.invalidate()
+    return this
+  }
+
   protected _solveQuadratic(a: number, b: number, c: number): number[] {
     if (Math.abs(a) < 1e-12) {
       // Linear: b*t + c = 0
