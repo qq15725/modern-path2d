@@ -1,3 +1,9 @@
+# [1.8.0](https://github.com/qq15725/modern-path2d/compare/v1.7.0...v1.8.0) (2026-06-01)
+
+
+### Features
+
+* PathMeasure, reverse(), boolean ops; stroke style/closed; evenodd fill ([4c19e25](https://github.com/qq15725/modern-path2d/commit/4c19e25f2a9bbb42a807a5650b1fb489b90b0140))
 # [1.7.0](https://github.com/qq15725/modern-path2d/compare/v1.6.1...v1.7.0) (2026-05-23)
 
 
