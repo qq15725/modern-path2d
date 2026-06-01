@@ -1,3 +1,9 @@
+## [1.8.1](https://github.com/qq15725/modern-path2d/compare/v1.8.0...v1.8.1) (2026-06-01)
+
+
+### Bug Fixes
+
+* honor evenodd fill rule in fillTriangulate (WebGL holes) ([0ec1c5a](https://github.com/qq15725/modern-path2d/commit/0ec1c5ac6f067295b7e3f7527181d5a3b55a825e))
 # [1.8.0](https://github.com/qq15725/modern-path2d/compare/v1.7.0...v1.8.0) (2026-06-01)
 
 
