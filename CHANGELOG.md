@@ -1,3 +1,9 @@
+## [1.8.3](https://github.com/qq15725/modern-path2d/compare/v1.8.2...v1.8.3) (2026-06-02)
+
+
+### Features
+
+* accept fillRule directly in FillTriangulateOptions ([bbcc86f](https://github.com/qq15725/modern-path2d/commit/bbcc86f698b60ea8f3af2d0ab132d60db618a9a3))
 ## [1.8.2](https://github.com/qq15725/modern-path2d/compare/v1.8.1...v1.8.2) (2026-06-01)
 
 
