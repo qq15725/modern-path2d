@@ -1,3 +1,9 @@
+## [1.8.5](https://github.com/qq15725/modern-path2d/compare/v1.8.4...v1.8.5) (2026-06-02)
+
+
+### Bug Fixes
+
+* dedupe contour vertices before earcut (hole-eating after transform) ([8c69fd3](https://github.com/qq15725/modern-path2d/commit/8c69fd3d77a68367d05fd7c1b65b61a90c0d42d0))
 ## [1.8.4](https://github.com/qq15725/modern-path2d/compare/v1.8.3...v1.8.4) (2026-06-02)
 
 
