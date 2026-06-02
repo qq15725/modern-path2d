@@ -21,6 +21,49 @@ export interface FillTriangulatedResult {
   indices: number[]
 }
 
+const fillDedupeEps = 1e-7
+
+/**
+ * Drop consecutive (and ring-closing) coincident points per contour, remapping the hole indices.
+ * Sub-curve seams (two arcs meeting, a degenerate closing line) leave duplicate vertices; the
+ * resulting zero-length edges make earcut produce overlapping triangles that eat into holes —
+ * especially after a coordinate round-trip perturbs the geometry just enough to trip it.
+ */
+function dedupeContours(
+  points: number[],
+  holeIndices: number[],
+  eps: number,
+): { points: number[], holes: number[] } {
+  const total = points.length / 2
+  const bounds = [0, ...holeIndices, total]
+  const out: number[] = []
+  const newHoles: number[] = []
+  for (let s = 0; s < bounds.length - 1; s++) {
+    const start = bounds[s]
+    const end = bounds[s + 1]
+    if (s > 0) {
+      newHoles.push(out.length / 2)
+    }
+    const segStart = out.length
+    for (let vi = start; vi < end; vi++) {
+      const x = points[vi * 2]
+      const y = points[vi * 2 + 1]
+      const m = out.length
+      if (m > segStart && Math.abs(x - out[m - 2]) < eps && Math.abs(y - out[m - 1]) < eps) {
+        continue
+      }
+      out.push(x, y)
+    }
+    // drop a trailing point coincident with the contour's first (zero-length closing edge)
+    if (out.length - segStart >= 4
+      && Math.abs(out[out.length - 2] - out[segStart]) < eps
+      && Math.abs(out[out.length - 1] - out[segStart + 1]) < eps) {
+      out.length -= 2
+    }
+  }
+  return { points: out, holes: newHoles }
+}
+
 export function fillTriangulate(
   pointArray: number[],
   options: FillTriangulateOptions = {},
@@ -33,6 +76,8 @@ export function fillTriangulate(
     verticesOffset = vertices.length / verticesStride,
     indicesOffset = indices.length,
   } = options
+
+  ;({ points: pointArray, holes } = dedupeContours(pointArray, holes, fillDedupeEps))
 
   const triangles = earcut(pointArray, holes, 2)
 

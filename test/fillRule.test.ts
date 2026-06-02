@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { Path2D } from '../src/index'
+import { Path2D, Transform2D } from '../src/index'
 
 function inTriangle(px: number, py: number, ax: number, ay: number, bx: number, by: number, cx: number, cy: number): boolean {
   const d = (by - cy) * (ax - cx) + (cx - bx) * (ay - cy)
@@ -68,6 +68,23 @@ describe('fillTriangulate fill rule (WebGL path)', () => {
     const eo = (() => { const p = new Path2D().addData(DONUT); p.style.fillRule = 'evenodd'; return p.fillTriangulate() })()
     expect(covered(nz, 50, 50)).toBe(false)
     expect(covered(eo, 50, 50)).toBe(false)
+  })
+
+  it('hole survives a normalize→rescale coordinate round-trip (seam dup vertices)', () => {
+    // scaling by 1/100 then 140 perturbs the geometry by fp noise; the arc-seam duplicate
+    // vertices then made earcut eat half the hole. Dedup before earcut keeps it intact.
+    const p = new Path2D().addData(DONUT)
+    p.style.fillRule = 'evenodd'
+    p.curves.forEach(c => c.applyTransform(new Transform2D().scale(1 / 100, 1 / 100)))
+    p.curves.forEach(c => c.applyTransform(new Transform2D().scale(140, 140)))
+    const r = p.fillTriangulate()
+    const c = 70 // centre after ×1.4 scale
+    expect(r.vertices.every(Number.isFinite)).toBe(true)
+    // the whole inner disk (r < ~28) must be empty, all around — not just on one side
+    for (const [dx, dy] of [[0, 0], [15, 0], [-15, 0], [0, 15], [0, -15], [10, 10], [-10, -10]]) {
+      expect(covered(r, c + dx, c + dy)).toBe(false)
+    }
+    expect(covered(r, c, c + 48)).toBe(true) // ring band still filled
   })
 
   it('nested donut (island in the hole) fills the island under evenodd', () => {
