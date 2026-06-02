@@ -49,6 +49,27 @@ describe('fillTriangulate fill rule (WebGL path)', () => {
     expect(covered(r, 50, 15)).toBe(true)
   })
 
+  it('same-winding nested rings: nonzero stays solid, evenodd holes (fillRule has effect)', () => {
+    // inner circle wound the SAME way as the outer (both sweep 0): under nonzero the centre has
+    // winding 2 → filled; under evenodd parity → hole. The two rules MUST differ here.
+    const SAME = 'M0 50 A50 50 0 1 0 100 50 A50 50 0 1 0 0 50 Z'
+      + ' M28 50 A22 22 0 1 0 72 50 A22 22 0 1 0 28 50 Z'
+    const nz = (() => { const p = new Path2D().addData(SAME); p.style.fillRule = 'nonzero'; return p.fillTriangulate() })()
+    const eo = (() => { const p = new Path2D().addData(SAME); p.style.fillRule = 'evenodd'; return p.fillTriangulate() })()
+    expect(covered(nz, 50, 50)).toBe(true) // nonzero → centre filled (winding 2)
+    expect(covered(eo, 50, 50)).toBe(false) // evenodd → centre is a hole
+    expect(nz.indices).not.toEqual(eo.indices) // the rules genuinely diverge
+  })
+
+  it('opposite-winding donut: both rules agree (and that is correct)', () => {
+    // the conventional SVG donut (outer/inner wound opposite) is a hole under BOTH rules,
+    // so identical tessellation is correct — not a sign the fill rule is ignored.
+    const nz = (() => { const p = new Path2D().addData(DONUT); p.style.fillRule = 'nonzero'; return p.fillTriangulate() })()
+    const eo = (() => { const p = new Path2D().addData(DONUT); p.style.fillRule = 'evenodd'; return p.fillTriangulate() })()
+    expect(covered(nz, 50, 50)).toBe(false)
+    expect(covered(eo, 50, 50)).toBe(false)
+  })
+
   it('nested donut (island in the hole) fills the island under evenodd', () => {
     // outer ring r40, hole r28, solid island r12 — all concentric at (50,50)
     const p = new Path2D()

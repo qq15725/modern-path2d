@@ -28,6 +28,19 @@ function distance(p1: number[], p2: number[]): number {
   return Math.sqrt(dx * dx + dy * dy)
 }
 
+/**
+ * Winding sign (+1 / -1 / 0) a point just inside this ring contributes, matching
+ * {@link windingNumber}'s convention (signed-area sign — verified: CCW → +1).
+ */
+function selfWindingSign(ring: number[]): number {
+  let a = 0
+  const n = ring.length
+  for (let i = 0, j = n - 2; i < n; j = i, i += 2) {
+    a += ring[j] * ring[i + 1] - ring[i] * ring[j + 1]
+  }
+  return Math.sign(a)
+}
+
 interface NonzeroFillRuleResult {
   index: number
   parentIndex?: number
@@ -173,7 +186,12 @@ export function nonzeroFillRule(paths: number[][]): NonzeroFillRuleResult[] {
       }
     }
 
-    if (_results.reduce((total, item) => total + item.winding, 0) !== 0) {
+    // Ring i is a hole only when the region just inside it has total winding 0 under the
+    // nonzero rule — i.e. the windings of its containers PLUS i's own orientation cancel.
+    // (The old test summed only the containers, so a same-winding nested ring was wrongly
+    // punched as a hole instead of staying solid.)
+    const containerWinding = _results.reduce((total, item) => total + item.winding, 0)
+    if (_results.length && containerWinding + selfWindingSign(paths[i]) === 0) {
       _results.sort((a, b) => a.dist - b.dist)
       results[i] = _results[0]
     }
