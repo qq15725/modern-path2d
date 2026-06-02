@@ -34,6 +34,13 @@ describe('fillTriangulate fill rule (WebGL path)', () => {
     expect(covered(r, 5, 5)).toBe(false) // corner — outside the outer circle (r≈63>50)
   })
 
+  it('options.fillRule overrides style.fillRule', () => {
+    const p = new Path2D().addData(DONUT) // style.fillRule left default (nonzero)
+    const r = p.fillTriangulate({ fillRule: 'evenodd' })
+    expect(covered(r, 50, 50)).toBe(false) // evenodd hole, driven purely by the option
+    expect(covered(r, 50, 15)).toBe(true)
+  })
+
   it('nonzero donut triangulation also holes (regression)', () => {
     const p = new Path2D().addData(DONUT)
     p.style.fillRule = 'nonzero'

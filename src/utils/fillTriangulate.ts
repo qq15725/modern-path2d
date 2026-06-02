@@ -1,4 +1,4 @@
-import type { Path2DStyle } from '../types'
+import type { FillRule, Path2DStyle } from '../types'
 import earcut from 'earcut'
 
 export interface FillTriangulateOptions {
@@ -8,6 +8,11 @@ export interface FillTriangulateOptions {
   verticesStride?: number
   verticesOffset?: number
   indicesOffset?: number
+  /**
+   * Fill rule for multi-sub-path grouping in `Path2D.fillTriangulate`. Takes precedence over
+   * `style.fillRule`. Ignored by the low-level single-ring `fillTriangulate()` function.
+   */
+  fillRule?: FillRule
   style?: Partial<Path2DStyle>
 }
 

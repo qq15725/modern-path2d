@@ -413,7 +413,8 @@ export class Path2D<T = any> extends CompositeCurve<CurvePath> {
 
     const indices = _options.indices ?? []
     const vertices = _options.vertices ?? []
-    const fillRule = _options.style!.fillRule ?? 'nonzero'
+    // Explicit `options.fillRule` wins, then `style.fillRule`, then nonzero (SVG/Canvas default).
+    const fillRule: FillRule = options?.fillRule ?? _options.style!.fillRule ?? 'nonzero'
     if (fillRule === 'nonzero') {
       const paths = this.curves
         .map(curve => curve.getFillVertices(_options))
