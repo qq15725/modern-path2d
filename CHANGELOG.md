@@ -1,3 +1,4 @@
+## [1.8.6](https://github.com/qq15725/modern-path2d/compare/v1.8.5...v1.8.6) (2026-06-29)
 ## [1.8.5](https://github.com/qq15725/modern-path2d/compare/v1.8.4...v1.8.5) (2026-06-02)
 
 

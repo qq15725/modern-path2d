@@ -42,13 +42,16 @@ export class Path2DSet<T = any> {
    * stroke" rule; the coordinate space of `point` must match the paths (no scaling assumed).
    *
    * Options: `stroke` (also test strokes, default `true`), `tolerance` (extra stroke hit slack
-   * in path units, default `0`), and `fillRule` (overrides each path's own fill rule).
+   * in path units, default `0`), `fillRule` (overrides each path's own fill rule), and
+   * `forceStroke` (default `false`) — test the stroke even when a path has no `style.stroke`.
+   * Use it when the outline is owned externally (e.g. an element-level outline) rather than
+   * declared on the path itself; otherwise an unstroked open path (a line) is never hit.
    */
   hitTest(
     point: Vector2Like,
-    options: { stroke?: boolean, tolerance?: number, fillRule?: FillRule } = {},
+    options: { stroke?: boolean, forceStroke?: boolean, tolerance?: number, fillRule?: FillRule } = {},
   ): Path2D<T> | undefined {
-    const { stroke = true, tolerance, fillRule } = options
+    const { stroke = true, forceStroke = false, tolerance, fillRule } = options
     for (let i = this.paths.length - 1; i >= 0; i--) {
       const path = this.paths[i]
       if (
@@ -59,7 +62,7 @@ export class Path2DSet<T = any> {
       }
       if (
         stroke
-        && (path.style.stroke ?? 'none') !== 'none'
+        && (forceStroke || (path.style.stroke ?? 'none') !== 'none')
         && path.isPointInStroke(point, { tolerance })
       ) {
         return path
