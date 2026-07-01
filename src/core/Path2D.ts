@@ -77,7 +77,7 @@ export class Path2D<T = any> extends CompositeCurve<CurvePath> {
 
   addPath(path: Path2D | CurvePath): this {
     const curvePaths = path instanceof Path2D ? path.curves : [path]
-    if (curvePaths.filter(curvePath => curvePath.curves.length).length === 0) {
+    if (!curvePaths.some(curvePath => curvePath.curves.length)) {
       return this
     }
     if (!this.currentCurve.curves.length) {
