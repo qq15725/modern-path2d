@@ -1,3 +1,9 @@
+## [1.8.7](https://github.com/qq15725/modern-path2d/compare/v1.8.6...v1.8.7) (2026-07-01)
+
+
+### Bug Fixes
+
+* clockwise full circle collapsing to a single point ([ec1bdf6](https://github.com/qq15725/modern-path2d/commit/ec1bdf6b9eac4268b00da9e8c6b4ae28104f597e))
 ## [1.8.6](https://github.com/qq15725/modern-path2d/compare/v1.8.5...v1.8.6) (2026-06-29)
 ## [1.8.5](https://github.com/qq15725/modern-path2d/compare/v1.8.4...v1.8.5) (2026-06-02)
 
