@@ -68,6 +68,11 @@ export class RoundCurve extends Curve {
     else if (!this.clockwise) {
       deltaAngle = deltaAngle === 0 ? -PI_2 : deltaAngle - PI_2
     }
+    // 顺时针整圈：起止点不同但 |Δ| 为 2π 的整数倍 → mod 后为 0。此处若保留 0，getPoint/采样/
+    // getMinMax 只会取起点（圆的包围盒塌成一点、整圆画不出，如 disc 列表标记消失）。补成整圈。
+    else if (deltaAngle === 0) {
+      deltaAngle = PI_2
+    }
     return deltaAngle
   }
 
