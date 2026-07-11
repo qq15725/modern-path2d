@@ -391,15 +391,17 @@ export class Path2D<T = any> extends CompositeCurve<CurvePath> {
   override strokeTriangulate(options?: StrokeTriangulateOptions): StrokeTriangulatedResult {
     const indices = options?.indices ?? []
     const vertices = options?.vertices ?? []
+    const uvs = options?.uvs
     this.curves.forEach((curve) => {
       curve.strokeTriangulate({
         ...options,
         indices,
         vertices,
+        uvs,
         style: { ...this.style },
       })
     })
-    return { indices, vertices }
+    return { indices, vertices, uvs }
   }
 
   override fillTriangulate(options?: FillTriangulateOptions): FillTriangulatedResult {

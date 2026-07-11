@@ -6,6 +6,16 @@ export type LineJoin = 'round' | 'bevel' | 'miter'
 export interface StrokeTriangulateOptions {
   vertices?: number[]
   indices?: number[]
+  /**
+   * When provided, receives one UV pair per generated vertex: u = cumulative
+   * arc length (in path units, unnormalized) along this subpath's centerline,
+   * v = position across the stroke width (0/1 at the two boundaries, 0.5 on
+   * the centerline — round join/cap fan centers). Enables along-the-path
+   * fragment effects (flow pulses, dashes, gradients) with consistent physical
+   * scale across paths of different lengths, and screen-space edge feathering,
+   * without re-triangulating.
+   */
+  uvs?: number[]
   lineStyle?: LineStyle
   flipAlignment?: boolean
   closed?: boolean
@@ -15,6 +25,7 @@ export interface StrokeTriangulateOptions {
 export interface StrokeTriangulatedResult {
   vertices: number[]
   indices: number[]
+  uvs?: number[]
 }
 
 export interface LineStyle {
@@ -129,6 +140,35 @@ export function strokeTriangulate(
 
   const verts = vertices
 
+  // Along-the-path UVs: cumulative arc length (path units) per source point
+  // (computed after dedupe + closed-shape midpoint insertion so indices line up
+  // with `points`). `fillUvs(u)` stamps every vertex pushed since the last call
+  // with that source point's arc length — join/cap fan vertices inherit their
+  // corner's u, which is exact for flow effects (the whole fan sits at one
+  // point of the centerline). v comes from vertex parity (the strip pushes
+  // strict inner/outer pairs) except inside `round()`, whose fans interleave
+  // centerline points — it writes its own uvs (center 0.5 / rim 0 or 1), so
+  // every round() call site must sync the lag via fillUvs first.
+  const uvs = options.uvs
+  let arc: number[] | undefined
+  if (uvs) {
+    arc = [0]
+    let acc = 0
+    for (let i = 2; i < points.length; i += 2) {
+      const dx = points[i] - points[i - 2]
+      const dy = points[i + 1] - points[i - 1]
+      acc += Math.sqrt(dx * dx + dy * dy)
+      arc.push(acc)
+    }
+  }
+  const fillUvs = (u: number): void => {
+    if (!uvs)
+      return
+    while (uvs.length < verts.length) {
+      uvs.push(u, (uvs.length >>> 1) & 1)
+    }
+  }
+
   const length = points.length / 2
   let indexCount = points.length
   const indexStart = verts.length / 2
@@ -174,6 +214,8 @@ export function strokeTriangulate(
         y0 + (perpY * outerWeight),
         verts,
         true,
+        uvs,
+        0,
       ) + 2
     }
     else if (style.cap === 'square') {
@@ -190,8 +232,10 @@ export function strokeTriangulate(
     x0 + (perpX * outerWeight),
     y0 + (perpY * outerWeight),
   )
+  fillUvs(0)
 
   for (let i = 1; i < length - 1; ++i) {
+    const cornerU = arc ? arc[i] : 0
     x0 = points[(i - 1) * 2]
     y0 = points[((i - 1) * 2) + 1]
 
@@ -246,6 +290,7 @@ export function strokeTriangulate(
       /* 180 degree corner? */
       if (dot >= 0) {
         if (style.join === 'round') {
+          fillUvs(cornerU)
           indexCount += round(
             x1,
             y1,
@@ -255,6 +300,8 @@ export function strokeTriangulate(
             y1 - (perp1y * innerWeight),
             verts,
             false,
+            uvs,
+            cornerU,
           ) + 4
         }
         else {
@@ -271,6 +318,7 @@ export function strokeTriangulate(
         )
       }
 
+      fillUvs(arc ? arc[i] : 0)
       continue
     }
 
@@ -318,6 +366,7 @@ export function strokeTriangulate(
           /* arc is outside */
           verts.push(imx, imy)
           verts.push(x1 + (perpX * outerWeight), y1 + (perpY * outerWeight))
+          fillUvs(cornerU)
 
           indexCount += round(
             x1,
@@ -328,6 +377,8 @@ export function strokeTriangulate(
             y1 + (perp1y * outerWeight),
             verts,
             true,
+            uvs,
+            cornerU,
           ) + 4
 
           verts.push(imx, imy)
@@ -337,6 +388,7 @@ export function strokeTriangulate(
           /* arc is inside */
           verts.push(x1 - (perpX * innerWeight), y1 - (perpY * innerWeight))
           verts.push(omx, omy)
+          fillUvs(cornerU)
 
           indexCount += round(
             x1,
@@ -347,6 +399,8 @@ export function strokeTriangulate(
             y1 - (perp1y * innerWeight),
             verts,
             false,
+            uvs,
+            cornerU,
           ) + 4
 
           verts.push(x1 - (perp1x * innerWeight), y1 - (perp1y * innerWeight))
@@ -363,6 +417,7 @@ export function strokeTriangulate(
       verts.push(x1 - (perpX * innerWeight), y1 - (perpY * innerWeight)) // first segment's inner vertex
       verts.push(x1 + (perpX * outerWeight), y1 + (perpY * outerWeight)) // first segment's outer vertex
       if (style.join === 'round') {
+        fillUvs(cornerU)
         if (clockwise) {
           /* arc is outside */
           indexCount += round(
@@ -374,6 +429,8 @@ export function strokeTriangulate(
             y1 + (perp1y * outerWeight),
             verts,
             true,
+            uvs,
+            cornerU,
           ) + 2
         }
         else {
@@ -387,6 +444,8 @@ export function strokeTriangulate(
             y1 - (perp1y * innerWeight),
             verts,
             false,
+            uvs,
+            cornerU,
           ) + 2
         }
       }
@@ -405,6 +464,8 @@ export function strokeTriangulate(
       verts.push(x1 + (perp1x * outerWeight), y1 + (perp1y * outerWeight)) // second segment's outer vertex
       indexCount += 2
     }
+
+    fillUvs(arc ? arc[i] : 0)
   }
 
   x0 = points[(length - 2) * 2]
@@ -427,6 +488,7 @@ export function strokeTriangulate(
 
   if (!closedShape) {
     if (style.cap === 'round') {
+      fillUvs(arc ? arc[length - 1] : 0)
       indexCount += round(
         x1 - (perpX * (innerWeight - outerWeight) * 0.5),
         y1 - (perpY * (innerWeight - outerWeight) * 0.5),
@@ -436,11 +498,17 @@ export function strokeTriangulate(
         y1 + (perpY * outerWeight),
         verts,
         false,
+        uvs,
+        arc ? arc[length - 1] : 0,
       ) + 2
     }
     else if (style.cap === 'square') {
       indexCount += square(x1, y1, perpX, perpY, innerWeight, outerWeight, false, verts)
     }
+  }
+
+  if (uvs && arc) {
+    fillUvs(arc[length - 1])
   }
 
   // const indices = graphicsGeometry.indices;
@@ -468,6 +536,7 @@ export function strokeTriangulate(
   return {
     vertices,
     indices,
+    uvs,
   }
 }
 
@@ -552,6 +621,8 @@ function round(
   ey: number,
   verts: number[],
   clockwise: boolean, /* if not cap, then clockwise is turn of joint, otherwise rotation from angle0 to angle1 */
+  uvs?: number[],
+  u = 0, /* arc-length u stamped on every fan vertex (the fan sits at one centerline point) */
 ): number {
   const cx2p0x = sx - cx
   const cy2p0y = sy - cy
@@ -570,25 +641,34 @@ function round(
   const segCount = ((15 * absAngleDiff * Math.sqrt(radius) / Math.PI) >> 0) + 1
   const angleInc = angleDiff / segCount
   startAngle += angleInc
+  // fan center (cx,cy) sits on the stroke centerline → v=0.5; rim points sit on
+  // the boundary → v=1 (outer arc, clockwise) or 0 (inner arc). Callers sync any
+  // lagging uvs before invoking, so pushing per pair here stays aligned.
   if (clockwise) {
     verts.push(cx, cy)
     verts.push(sx, sy)
+    uvs?.push(u, 0.5, u, 1)
     for (let i = 1, angle = startAngle; i < segCount; i++, angle += angleInc) {
       verts.push(cx, cy)
       verts.push(cx + ((Math.sin(angle) * radius)), cy + ((Math.cos(angle) * radius)))
+      uvs?.push(u, 0.5, u, 1)
     }
     verts.push(cx, cy)
     verts.push(ex, ey)
+    uvs?.push(u, 0.5, u, 1)
   }
   else {
     verts.push(sx, sy)
     verts.push(cx, cy)
+    uvs?.push(u, 0, u, 0.5)
     for (let i = 1, angle = startAngle; i < segCount; i++, angle += angleInc) {
       verts.push(cx + ((Math.sin(angle) * radius)), cy + ((Math.cos(angle) * radius)))
       verts.push(cx, cy)
+      uvs?.push(u, 0, u, 0.5)
     }
     verts.push(ex, ey)
     verts.push(cx, cy)
+    uvs?.push(u, 0, u, 0.5)
   }
   return segCount * 2
 }

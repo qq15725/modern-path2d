@@ -155,6 +155,67 @@ describe('stroke triangulation', () => {
     }
   })
 
+  it('emits one arc-length uv per vertex when uvs is passed', () => {
+    // open polyline with a 90° corner (exercises the join branch) + bezier curve
+    const p = new Path2D()
+    p.moveTo(0, 0)
+    p.lineTo(100, 0)
+    p.lineTo(100, 100)
+    p.bezierCurveTo(100, 200, 200, 200, 200, 100)
+    const vertices: number[] = []
+    const indices: number[] = []
+    const uvs: number[] = []
+    p.strokeTriangulate({
+      vertices,
+      indices,
+      uvs,
+      lineStyle: { width: 10, alignment: 0.5, join: 'round', cap: 'round', miterLimit: 10 },
+      closed: false,
+    })
+    // one uv pair per vertex pair
+    expect(uvs.length).toBe(vertices.length)
+    // u is cumulative arc length in path units (0 at the start, ≈ total length
+    // at the end); v is 0/1 at the boundaries and 0.5 on round join/cap fan
+    // centers (centerline)
+    let minU = Infinity
+    let maxU = -Infinity
+    let centerlineCount = 0
+    for (let i = 0; i < uvs.length; i += 2) {
+      minU = Math.min(minU, uvs[i])
+      maxU = Math.max(maxU, uvs[i])
+      const v = uvs[i + 1]
+      expect(v === 0 || v === 0.5 || v === 1).toBe(true)
+      if (v === 0.5)
+        centerlineCount++
+    }
+    // round joins/caps in this path must have produced centerline fan vertices
+    expect(centerlineCount).toBeGreaterThan(0)
+    const m = new PathMeasure(p)
+    const total = m.getLength()
+    expect(minU).toBe(0)
+    expect(maxU).toBeCloseTo(total, 0)
+    // u is non-decreasing along the vertex strip (per side)
+    for (let i = 4; i < uvs.length; i += 2) {
+      expect(uvs[i]).toBeGreaterThanOrEqual(uvs[i - 4] - 1e-9)
+    }
+    // the corner at (100,0) sits 100 units along the path: vertices near it
+    // must carry u ≈ 100
+    for (let i = 0; i < vertices.length; i += 2) {
+      if (Math.abs(vertices[i] - 100) < 6 && Math.abs(vertices[i + 1]) < 6) {
+        expect(uvs[i]).toBeCloseTo(100, 0)
+      }
+    }
+  })
+
+  it('omitting uvs changes nothing', () => {
+    const p = new Path2D()
+    p.moveTo(0, 0)
+    p.lineTo(100, 50)
+    const a = p.strokeTriangulate({ lineStyle: { width: 4, alignment: 0.5, join: 'miter', cap: 'butt', miterLimit: 10 } })
+    expect(a.uvs).toBeUndefined()
+    expect(a.vertices.length).toBeGreaterThan(0)
+  })
+
   it('explicit lineStyle still wins over derived style', () => {
     const p = new Path2D()
     p.arc(100, 100, 50, 0, Math.PI * 2, true)
