@@ -1,3 +1,9 @@
+## [1.8.8](https://github.com/qq15725/modern-path2d/compare/v1.8.7...v1.8.8) (2026-07-11)
+
+
+### Features
+
+* **stroke:** emit arc-length UVs from strokeTriangulate ([bf0881b](https://github.com/qq15725/modern-path2d/commit/bf0881b13f16856317915db9e67d5d7f8d8b9125))
 ## [1.8.7](https://github.com/qq15725/modern-path2d/compare/v1.8.6...v1.8.7) (2026-07-01)
 
 
